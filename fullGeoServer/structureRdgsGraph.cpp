@@ -124,7 +124,7 @@ void structureRdgsGraph::fillRdgsExecute(const std::map<std::string, st_rdgInfoD
         m_chImageReliefVectorData = false;
     }
 
-    if (fabs(rdgsWorkData.maxRelief - m_minRelief) > deltaParam && m_chImageReliefVectorData == false)
+    if (fabs(m_maxRelief - m_minRelief) > deltaParam && m_chImageReliefVectorData == false)
     {
         int maskColor = 0;
         for (int i = m_absRdgsStructInX; i <= m_absRdgsStructFnX; i++)

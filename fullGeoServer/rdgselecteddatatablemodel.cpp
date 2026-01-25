@@ -31,6 +31,8 @@ QVariant rdgSelectedDataTableModel::headerData(int section, Qt::Orientation orie
         if (section  == 1) return "trackId";
         if (section  == 2) return "impulseId";
         if (section  == 3) return "time delay ns";
+        if (section  == 4) return "latitude";
+        if (section  == 5) return "longitude";
     }
     else
     {

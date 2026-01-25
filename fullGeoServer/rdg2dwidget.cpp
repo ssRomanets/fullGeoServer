@@ -527,11 +527,7 @@ void rdg2dWidget::changeRdgRightDataAtShift()
 {
     executeTypeRdgSelectionInfo(
         m_rdgGlWidget->m_filterId, 2, m_rdgGlWidget->m_rdgHeight, m_rdgGlWidget->m_absRdgPixelsInX, m_rdgGlWidget->m_absRdgPixelsFnX,
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName] ,
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorMaxLog10RdgData[m_rdgGlWidget->m_filterId],
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorMinLog10RdgData[m_rdgGlWidget->m_filterId],
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorsRdgLog10PairXY[m_rdgGlWidget->m_filterId],
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorMapAutoLog10RdgPairXY[m_rdgGlWidget->m_filterId]
+        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName]
     );
 
     m_dataRdgWidget->activateWidgets(

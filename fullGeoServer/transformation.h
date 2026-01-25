@@ -166,13 +166,13 @@ inline std::tuple<std::string, int>  defTupleRdgs(
 
 inline void defLeftLatitude(const st_rdgInfoData& rdgInfoData, int i, double& leftLatitude)
 {
-    if (leftLatitude < 0.0)  leftLatitude  = rdgInfoData.vectorRdgData[i].latitude_degree;
+    if (leftLatitude < 0.0)                                               leftLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
     else if (rdgInfoData.vectorRdgData[i].latitude_degree < leftLatitude) leftLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
 }
 
 inline void defRightLatitude(const st_rdgInfoData& rdgInfoData, int i, double& rightLatitude)
 {
-    if (rightLatitude < 0.0) rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
+    if (rightLatitude < 0.0)                                               rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
     else if (rdgInfoData.vectorRdgData[i].latitude_degree > rightLatitude) rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
 }
 
@@ -462,11 +462,10 @@ inline double defRdgLog10(const st_rdgInfoData& rdgInfoData, int filterId, int i
 }
 
 inline void createVectorRdgLog10PairXY(
-    int filterId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, double maxLog10RdgData, double minLog10RdgData,
-    const st_rdgInfoData& rdgInfoData, std::vector<QPair<int, int> >& vectorRdgLog10PairXY
+    int filterId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, st_rdgInfoData& rdgInfoData
 )
 {
-    vectorRdgLog10PairXY.resize(0);
+    (rdgInfoData.vectorsRdgLog10PairXY[filterId]).resize(0);
 
     QPair<int, int> pairXY;
     double* pixelsDoubleData = new double [((absRdgPixelsFnX-absRdgPixelsInX)+3)*rdgHeight];
@@ -476,11 +475,13 @@ inline void createVectorRdgLog10PairXY(
     {
         for (int j=0; j < rdgHeight; j++)
         {
-            if ((i == absRdgPixelsInX) || (i == absRdgPixelsFnX + 2)) rdgLog10 = minLog10RdgData;
-            else rdgLog10 = defRdgLog10(rdgInfoData,filterId,i-1,j);
+            if ((i == absRdgPixelsInX) || (i == absRdgPixelsFnX + 2)) rdgLog10 = rdgInfoData.vectorMinLog10RdgData[filterId];
+            else                                                      rdgLog10 = defRdgLog10(rdgInfoData,filterId,i-1,j);
 
-            if ( (double)( rdgLog10 )/maxLog10RdgData > 0.3) pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.0;
-            else                                             pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.3;
+            if ( (double)( rdgLog10 )/rdgInfoData.vectorMaxLog10RdgData[filterId] > 0.3)
+                pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.0;
+            else
+                pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.3;
         }
     }
 
@@ -504,7 +505,7 @@ inline void createVectorRdgLog10PairXY(
                     {
                         pairXY.first  = i-1;
                         pairXY.second = j;
-                        vectorRdgLog10PairXY.push_back(pairXY);
+                        (rdgInfoData.vectorsRdgLog10PairXY[filterId]).push_back(pairXY);
                     }
                 }
             }
@@ -1060,9 +1061,7 @@ inline void moveOpengl(
 }
 
 inline void executeTypeRdgSelectionInfo(
-    int filterId, int selectionId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX,
-    st_rdgInfoData& rdgInfoData, double maxLog10RdgData, double minLog10RdgData,
-    std::vector<QPair<int, int> >& vectorRdgLog10PairXY, std::map<int, std::vector<QPair<int, int> > >&  mapAutoLog10RdgPairXY
+    int filterId, int selectionId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, st_rdgInfoData& rdgInfoData
 )
 {
     if (rdgInfoData.vectorRdgData.size()-1 <= absRdgPixelsInX) absRdgPixelsInX = rdgInfoData.vectorRdgData.size()-1;
@@ -1070,9 +1069,9 @@ inline void executeTypeRdgSelectionInfo(
 
     if (absRdgPixelsFnX > absRdgPixelsInX)
     {
-        createVectorRdgLog10PairXY(filterId, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, maxLog10RdgData, minLog10RdgData, rdgInfoData, vectorRdgLog10PairXY);
-        createMapRdgPairXY(vectorRdgLog10PairXY, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, mapAutoLog10RdgPairXY);
-        createMapRdgTypeRdgSelectionInfo(rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, filterId, selectionId, mapAutoLog10RdgPairXY, rdgInfoData);
+        createVectorRdgLog10PairXY(filterId, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, rdgInfoData);
+        createMapRdgPairXY(rdgInfoData.vectorsRdgLog10PairXY[filterId], rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, rdgInfoData.vectorMapAutoLog10RdgPairXY[filterId]);
+        createMapRdgTypeRdgSelectionInfo(rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, filterId, selectionId, rdgInfoData.vectorMapAutoLog10RdgPairXY[filterId], rdgInfoData);
     }
 }
 
@@ -1084,9 +1083,7 @@ inline void samplingAllLog10Rdgs(
     for (auto iter = rdgsNamesVectorPairs.begin(); iter != rdgsNamesVectorPairs.end(); iter++)
     {
         executeTypeRdgSelectionInfo(
-            filterId, 2, rdgsInfoDataMap[iter->first].quantImpulsesOfPacket, absRdgPixelsInX, absRdgPixelsFnX,
-            rdgsInfoDataMap[iter->first], rdgsInfoDataMap[iter->first].vectorMaxLog10RdgData[filterId], rdgsInfoDataMap[iter->first].vectorMinLog10RdgData[filterId],
-            rdgsInfoDataMap[iter->first].vectorsRdgLog10PairXY[filterId], rdgsInfoDataMap[iter->first].vectorMapAutoLog10RdgPairXY[filterId]
+            filterId, 2, rdgsInfoDataMap[iter->first].quantImpulsesOfPacket, absRdgPixelsInX, absRdgPixelsFnX, rdgsInfoDataMap[iter->first]
         );
     }
 }
