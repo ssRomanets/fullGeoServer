@@ -132,7 +132,7 @@ void rdg2dWidget::setHighPixelLevel(int highPixelLevel)
     m_rdgGlWidget->setHighPixelLevel(highPixelLevel);
 }
 
-void rdg2dWidget::outputNewImage(const std::string& fileName, int materialId, int filterId)
+void rdg2dWidget::outputNewImage(const std::string& fileName,int materialId, int filterId)
 {
     m_lowBrightLabel->setText("Яркость низкая "+QString::number(0));
     m_highBrightPixelSlider->setValue(m_rdgGlWidget->m_vectorTuplesColorsRdg.size()-1);
@@ -140,6 +140,7 @@ void rdg2dWidget::outputNewImage(const std::string& fileName, int materialId, in
 
     if (fileName != "" && m_accomplishment->m_thread->m_rdgsInfoDataMap[fileName].quantImpulsesOfPacket != 0)
     {
+        m_rdgGlWidget->m_materialId = materialId;
         m_rdgGlWidget->m_filterId = filterId;
         m_rdgGlWidget->m_lowPixelLevel  = 0;
         m_rdgGlWidget->m_highPixelLevel = m_rdgGlWidget->m_vectorTuplesColorsRdg.size()-1;
@@ -148,7 +149,7 @@ void rdg2dWidget::outputNewImage(const std::string& fileName, int materialId, in
         m_contrastLog10Slider->setValue(m_accomplishment->m_thread->m_rdgsInfoDataMap[fileName].contrastLog10RdgKoeff*percentsParam);
         setContrastLog10Level(m_accomplishment->m_thread->m_rdgsInfoDataMap[fileName].contrastLog10RdgKoeff*percentsParam);
 
-        rdgInput(fileName, materialId, 0, 0);
+        rdgInput(fileName, 0, 0);
     }
     else
     {
@@ -379,12 +380,10 @@ void rdg2dWidget::setupHdf5Rdgs(
     }
 }
 
-void rdg2dWidget::showNewRdg(const std::string& rdgName, int materialId)
+void rdg2dWidget::showNewRdg(const std::string& rdgName)
 {
-    m_materialId = materialId;
     setupRdgOpenglControls();
-
-    rdgInput(rdgName, m_materialId, 0, 0);
+    rdgInput(rdgName, 0, 0);
     m_contrastLog10Label->setText("Log10 Контраст "+QString::number(m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName].contrastLog10RdgKoeff));
     m_contrastLog10Slider->setValue(m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName].contrastLog10RdgKoeff);
     setContrastLog10Level(m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName].contrastLog10RdgKoeff);
@@ -434,10 +433,10 @@ void rdg2dWidget::slotFixPageRdgData(const std::string& rdgName)
     );
 }
 
-void rdg2dWidget::rdgInput(const std::string& rdgName, int materialId, int absRdgPixelsInX, int absRdgPixelsFnX)
+void rdg2dWidget::rdgInput(const std::string& rdgName, int absRdgPixelsInX, int absRdgPixelsFnX)
 {
     m_dataRdgWidget->setRdgName(rdgName);
-    m_rdgGlWidget->setupRdgProperties(rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName], materialId, absRdgPixelsInX, absRdgPixelsFnX);
+    m_rdgGlWidget->setupRdgProperties(rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName], absRdgPixelsInX, absRdgPixelsFnX);
 
     if (m_dataRdgWidget->m_trackRdgSlider->isHidden() == true && m_dataRdgWidget->m_pageIndex <= 1) m_dataRdgWidget->trackElementsVisible(true);
 
@@ -449,16 +448,16 @@ void rdg2dWidget::rdgInput(const std::string& rdgName, int materialId, int absRd
     m_dataRdgWidget->setupTrackRdgSliderData(m_rdgGlWidget->m_rdgPixelsInX, m_rdgGlWidget->m_rdgPixelsFnX);
 
     m_dataRdgWidget->activateWidgets(
-        rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName], materialId,
+        rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName],
         m_rdgGlWidget->m_rdgPixelsInX, m_rdgGlWidget->m_rdgPixelsInY, m_rdgGlWidget->m_rdgPixelsFnX, m_rdgGlWidget->m_rdgPixelsFnY
     );
 }
 
-void rdg2dWidget::slotFixDataRdgWidgets(std::string rdgName, int materialId)
+void rdg2dWidget::slotFixDataRdgWidgets(std::string rdgName)
 {
     m_dataRdgWidget->setupTrackRdgSliderData(m_rdgGlWidget->m_rdgPixelsInX, m_rdgGlWidget->m_rdgPixelsFnX);
     m_dataRdgWidget->activateWidgets(
-        rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName], materialId,
+        rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName],
         m_rdgGlWidget->m_rdgPixelsInX, m_rdgGlWidget->m_rdgPixelsInY, m_rdgGlWidget->m_rdgPixelsFnX, m_rdgGlWidget->m_rdgPixelsFnY
     );
 }
@@ -471,7 +470,7 @@ void rdg2dWidget::slotCreateMapRdgTypeRdgSelectionInfo(
     mapRdgPairXY.clear();
     createMapRdgPairXY(vectorRdgPairXY, rdgHeight, m_rdgGlWidget->m_absRdgPixelsInX, m_rdgGlWidget->m_absRdgPixelsFnX, mapRdgPairXY);
     createMapRdgTypeRdgSelectionInfo(
-        rdgHeight, m_rdgGlWidget->m_absRdgPixelsInX, m_rdgGlWidget->m_absRdgPixelsFnX, m_rdgGlWidget->m_filterId,
+        rdgHeight, m_rdgGlWidget->m_absRdgPixelsInX, m_rdgGlWidget->m_absRdgPixelsFnX, m_rdgGlWidget->m_materialId, m_rdgGlWidget->m_filterId,
         selectionId,  mapRdgPairXY, m_accomplishment->m_thread->m_rdgsInfoDataMap[rdgName]
     );
 }
@@ -526,16 +525,12 @@ void rdg2dWidget::saveRdg()
 void rdg2dWidget::changeRdgRightDataAtShift()
 {
     executeTypeRdgSelectionInfo(
-        m_rdgGlWidget->m_filterId, 2, m_rdgGlWidget->m_rdgHeight, m_rdgGlWidget->m_absRdgPixelsInX, m_rdgGlWidget->m_absRdgPixelsFnX,
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName] ,
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorMaxLog10RdgData[m_rdgGlWidget->m_filterId],
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorMinLog10RdgData[m_rdgGlWidget->m_filterId],
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorsRdgLog10PairXY[m_rdgGlWidget->m_filterId],
-        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName].vectorMapAutoLog10RdgPairXY[m_rdgGlWidget->m_filterId]
+        m_rdgGlWidget->m_materialId, m_rdgGlWidget->m_filterId, 2, m_rdgGlWidget->m_rdgHeight, m_rdgGlWidget->m_absRdgPixelsInX, m_rdgGlWidget->m_absRdgPixelsFnX,
+        m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName]
     );
 
     m_dataRdgWidget->activateWidgets(
-        m_rdgGlWidget->m_rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName], m_rdgGlWidget->m_materialId,
+        m_rdgGlWidget->m_rdgName, m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgGlWidget->m_rdgName],
         m_rdgGlWidget->m_rdgPixelsInX, m_rdgGlWidget->m_rdgPixelsInY, m_rdgGlWidget->m_rdgPixelsFnX, m_rdgGlWidget->m_rdgPixelsFnY
     );
 }
@@ -544,6 +539,6 @@ void rdg2dWidget::changeRdgImage(int absRdgPixelsInX, int absRdgPixelsFnX)
 {
     slotSetupScrollHRdgData(0, 0, 0);
     slotSetupScrollVRdgData(0, 0, 0);
-    rdgInput(m_rdgGlWidget->m_rdgName, m_rdgGlWidget->m_materialId, absRdgPixelsInX, absRdgPixelsFnX);
+    rdgInput(m_rdgGlWidget->m_rdgName, absRdgPixelsInX, absRdgPixelsFnX);
     changeRdgRightDataAtShift();
 }

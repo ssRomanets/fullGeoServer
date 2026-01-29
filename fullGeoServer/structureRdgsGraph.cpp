@@ -58,9 +58,9 @@ void structureRdgsGraph::fillRdgs(
     if (m_showFullRdgs != showFullRdgs) resetCutPointsRdgs = true;
     m_showFullRdgs = showFullRdgs;
 
+    m_materialId = materialId;
     m_filterId = filterId;
     m_selectionId = selectionId;
-    m_materialId = materialId;
 
     m_leftLatitude  = rdgsWorkData.leftLatitude;
     m_rightLatitude = rdgsWorkData.rightLatitude;
@@ -80,7 +80,8 @@ void structureRdgsGraph::fillRdgs(
     m_maxRelief      = rdgsWorkData.maxRelief;
     m_minRelief      = rdgsWorkData.minRelief;
 
-    defMaxSumImpulses(rdgsInfoDataMap, m_filterId, m_selectionId, m_maxSumImpulses, m_absRdgsStructInX, m_absRdgsStructFnX);
+    defMaxDeep(rdgsInfoDataMap, m_materialId, m_filterId, m_selectionId, m_maxDeep, m_absRdgsStructInX, m_absRdgsStructFnX);
+
     fillRdgsExecute(rdgsInfoDataMap, rdgsWorkData,  resetCutPointsRdgs);
 }
 
@@ -124,7 +125,7 @@ void structureRdgsGraph::fillRdgsExecute(const std::map<std::string, st_rdgInfoD
         m_chImageReliefVectorData = false;
     }
 
-    if (fabs(rdgsWorkData.maxRelief - m_minRelief) > deltaParam && m_chImageReliefVectorData == false)
+    if (fabs(m_maxRelief - m_minRelief) > deltaParam && m_chImageReliefVectorData == false)
     {
         int maskColor = 0;
         for (int i = m_absRdgsStructInX; i <= m_absRdgsStructFnX; i++)
@@ -147,7 +148,7 @@ void structureRdgsGraph::fillRdgsExecute(const std::map<std::string, st_rdgInfoD
     m_graph->axisZ()->setLabelFormat("%.3f");
 
     m_graph->axisX()->setRange(m_leftLatitude +m_deltaLatitude*m_absRdgsStructInX, m_leftLatitude + m_deltaLatitude*m_absRdgsStructFnX);
-    m_graph->axisY()->setRange(m_minRelief-m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId)), rdgsWorkData.maxRelief);
+    m_graph->axisY()->setRange(m_minRelief-m_maxDeep, rdgsWorkData.maxRelief);
     m_graph->axisZ()->setRange(m_lowLongitude, m_lowLongitude + m_deltaLongitude*(m_rdgsSurfHeight-1));
 
     outputCutInterfaceMarkers();
@@ -236,14 +237,14 @@ void structureRdgsGraph::fillAllRdgsProxy(const std::map<std::string, st_rdgInfo
                 {
                     if (nameRdg != "")
                     {
-                        depthScanOnTrackRdg = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_filterId, m_selectionId)*(nanokoef*spc/epsdData(m_materialId));
+                        depthScanOnTrackRdg = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
                     }
                 }
                 else
                 {
                     if (nameRdg != "")
                     {
-                        depthScanOnTrackRdg = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_filterId, m_selectionId)*(nanokoef*spc/epsdData(m_materialId));
+                        depthScanOnTrackRdg = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
                     }
                 }
 
@@ -251,7 +252,7 @@ void structureRdgsGraph::fillAllRdgsProxy(const std::map<std::string, st_rdgInfo
                 {
                     (*m_newRdgsRowVector[i])[j-m_absRdgsStructInX].setPosition(QVector3D(
                         m_leftLatitude+j*m_deltaLatitude,
-                        rdgsWorkData.vectorRdgsFnRelief[j][i] - m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId)),
+                        rdgsWorkData.vectorRdgsFnRelief[j][i] - m_maxDeep,
                         m_lowLongitude+i*m_deltaLongitude
                     ));
                     (*m_newRdgsLineSectionRowVector[i])[j-m_absRdgsStructInX].setPosition(QVector3D(
@@ -275,8 +276,8 @@ void structureRdgsGraph::fillAllRdgsProxy(const std::map<std::string, st_rdgInfo
                     else
                     {
                         double fullDepthScanOnTrackRdg = 0.0;
-                        if (nameRdg == "") fullDepthScanOnTrackRdg = m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId));
-                        else               fullDepthScanOnTrackRdg = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_filterId, m_selectionId)*(nanokoef*spc/epsdData(m_materialId));
+                        if (nameRdg == "") fullDepthScanOnTrackRdg = m_maxDeep;
+                        else               fullDepthScanOnTrackRdg = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_materialId, m_filterId, m_selectionId);
 
                         (*m_newRdgsRowVector[i])[j-m_absRdgsStructInX].setPosition(QVector3D(
                             m_leftLatitude+j*m_deltaLatitude,
@@ -287,7 +288,7 @@ void structureRdgsGraph::fillAllRdgsProxy(const std::map<std::string, st_rdgInfo
 
                     (*m_newRdgsLineSectionRowVector[i])[j-m_absRdgsStructInX].setPosition(QVector3D(
                         m_leftLatitude+j*m_deltaLatitude,
-                        rdgsWorkData.vectorRdgsFnRelief[j][i] - m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId)),
+                        rdgsWorkData.vectorRdgsFnRelief[j][i] - m_maxDeep,
                         m_lowLongitude+i*m_deltaLongitude
                     ));
                 }
@@ -320,14 +321,14 @@ void structureRdgsGraph::fillAllRdgsProxy(const std::map<std::string, st_rdgInfo
                 {
                     if (nameRdg != "")
                     {
-                        depthScanOnTrackRdg = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_filterId, m_selectionId)*(nanokoef*spc/epsdData(m_materialId));
+                        depthScanOnTrackRdg = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
                     }
                 }
                 else
                 {
                     if (nameRdg != "")
                     {
-                        depthScanOnTrackRdg = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_filterId, m_selectionId)*(nanokoef*spc/epsdData(m_materialId));
+                        depthScanOnTrackRdg = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
                     }
                 }
 
@@ -344,10 +345,10 @@ void structureRdgsGraph::fillAllRdgsProxy(const std::map<std::string, st_rdgInfo
                 {
                     double fullDepthScanOnTrackRdg = 0.0;
                     if (nameRdg == "")
-                        fullDepthScanOnTrackRdg = m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId));
+                        fullDepthScanOnTrackRdg = m_maxDeep;
                     else
                         fullDepthScanOnTrackRdg =
-                        defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_filterId, m_selectionId)*(nanokoef*spc/epsdData(m_materialId));
+                        defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_materialId, m_filterId, m_selectionId);
 
                     (*m_newRdgsRowVector[i])[j-m_absRdgsStructInX].setPosition(QVector3D(
                         m_leftLatitude+j*m_deltaLatitude,
@@ -490,7 +491,7 @@ void structureRdgsGraph::addMarker(int x, int y, int vecPosId)
 {
     QVector3D position = QVector3D(
         m_leftLatitude + x*m_deltaLatitude,
-        (m_minRelief-0.45f * m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId))),
+        (m_minRelief-0.45f * m_maxDeep),
         m_lowLongitude + y*m_deltaLongitude
     );
     QCustom3DItem *item = new QCustom3DItem(":/pipe.obj", position, QVector3D(0.005f, 1.2f, 0.005f), QQuaternion(), m_colorMarker);

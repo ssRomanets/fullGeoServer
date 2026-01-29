@@ -245,12 +245,14 @@ void rdgsTransGlWidget::paintEvent(QPaintEvent*)
                     p.drawText(715, 105+71*i, QString::number((m_quantImpulsesOfPacket + m_rdgsTransPixelsInY + i*(m_rdgsTransPixelsFnY-m_rdgsTransPixelsInY)/(NV-1))*m_time_step_ns, 'f', 2));
 
             //по палитре
-            if      (m_showLogRdgsTrans == false) p.drawText(765, 100, QString::fromStdString("mm"));
+            if      (m_showLogRdgsTrans == false) p.drawText(765, 100, QString::fromStdString("m"));
             else if (m_showLogRdgsTrans == true)  p.drawText(780, 100, QString::fromStdString(""));
 
-            p.drawText(800, 105, QString::number( m_maxImpulse, 'f', 2));
-            for (int i = 1; i < NV-1; i++ ) p.drawText(800, 105+71*i,  QString::number( m_maxImpulse + i*(m_minImpulse-m_maxImpulse)/(double)(NV-1) , 'f', 2));
-            p.drawText(800, 105+71*(NV-1), QString::number( m_minImpulse, 'f', 2));
+            double metricKoeff = m_showLogRdgsTrans ? 1.0 : rdgMetricKoeff;
+            p.drawText(800, 105, QString::number( metricKoeff*m_maxImpulse, 'f', 4));
+            for (int i = 1; i < NV-1; i++ )
+                p.drawText(800, 105+71*i,  QString::number(metricKoeff*(m_maxImpulse + i*(m_minImpulse-m_maxImpulse)/(double)(NV-1)) , 'f', 4));
+            p.drawText(800, 105+71*(NV-1), QString::number(metricKoeff*m_minImpulse, 'f', 4));
         }
     }
     p.end();
@@ -418,7 +420,7 @@ void rdgsTransGlWidget::representRdgsTransGlWidget(const std::map<std::string, s
                             for (int count2 = 0; count2 < m_quantImpulsesOfPacket; count2++)
                             {
                                 m_vectorRdgsTransResultImpulses[count1][count2] =
-                                (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]*(nanokoef*spc/epsdData(m_materialId));
+                                (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2];
                             }
                             if (leftBound  == 0) leftBound = count1;
                             if (rightBound == 0) rightBound = count1; else if (count1 > rightBound) rightBound = count1;
@@ -428,7 +430,7 @@ void rdgsTransGlWidget::representRdgsTransGlWidget(const std::map<std::string, s
                             for (int count2 = m_quantImpulsesOfPacket; count2 < (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId]).size(); count2++)
                             {
                                 m_vectorRdgsTransResultImpulses[count1][count2-m_quantImpulsesOfPacket] =
-                                (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]*(nanokoef*spc/epsdData(m_materialId));
+                                (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2];
                             }
                             if (leftBound  == 0) leftBound = count1;
                             if (rightBound == 0) rightBound = count1; else if (count1 > rightBound) rightBound = count1;
@@ -440,8 +442,12 @@ void rdgsTransGlWidget::representRdgsTransGlWidget(const std::map<std::string, s
                         {
                             for (int count2 = 0; count2 < m_quantImpulsesOfPacket; count2++)
                             {
-                                m_vectorRdgsTransResultImpulses[count1][count2] =
-                                log10(1 + (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]);
+                                if ((itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2] > 0.0)
+                                    m_vectorRdgsTransResultImpulses[count1][count2] =
+                                    log10(1 + (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]);
+                                else
+                                    m_vectorRdgsTransResultImpulses[count1][count2] = -1.0*
+                                    log10(1 + fabs((itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]));
                             }
                             if (leftBound  == 0) leftBound = count1;
                             if (rightBound == 0) rightBound = count1; else if (count1 > rightBound) rightBound = count1;
@@ -450,8 +456,12 @@ void rdgsTransGlWidget::representRdgsTransGlWidget(const std::map<std::string, s
                         {
                             for (int count2 = m_quantImpulsesOfPacket; count2 < (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId]).size(); count2++)
                             {
-                                m_vectorRdgsTransResultImpulses[count1][count2-m_quantImpulsesOfPacket] =
-                                log10(1 + (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]);
+                                if ((itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2] > 0.0)
+                                    m_vectorRdgsTransResultImpulses[count1][count2] =
+                                    log10(1 + (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]);
+                                else
+                                    m_vectorRdgsTransResultImpulses[count1][count2] = -1.0*
+                                    log10(1 + fabs((itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDoubleData[m_filterId])[count2]));
                             }
                             if (leftBound  == 0) leftBound = count1;
                             if (rightBound == 0) rightBound = count1; else if (count1 > rightBound) rightBound = count1;

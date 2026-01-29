@@ -70,7 +70,7 @@ void rdgGlWidget::resetRdgSelection(bool clearSelectRdgPoints, std::string rdgNa
     settingsRdgSelection(false, clearSelectRdgPoints, rdgName);
 }
 
-void rdgGlWidget::setupRdgProperties(const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int materialId, int absRdgPixelsInX, int absRdgPixelsFnX)
+void rdgGlWidget::setupRdgProperties(const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX)
 {
     if (m_rdgName != rdgName || m_rdgWidth != rdgInfoData.vectorRdgData.size() || m_rdgHeight != rdgInfoData.quantImpulsesOfPacket)
     {
@@ -96,8 +96,6 @@ void rdgGlWidget::setupRdgProperties(const std::string& rdgName, const st_rdgInf
             if (rdgInfoData.vectorRdgData[i].vectorMinImpulses[m_filterId] < m_maxRdg) m_minRdg = rdgInfoData.vectorRdgData[i].vectorMinImpulses[m_filterId];
         }
     }
-
-    m_materialId = materialId;
 
     m_absRdgPixelsInX = (absRdgPixelsInX == 0) ? 0 : absRdgPixelsInX;
     m_absRdgPixelsFnX = (absRdgPixelsFnX == 0) ? ((m_rdgWidth < limitRdgWidth) ? m_rdgWidth-1 : limitRdgWidth-1):absRdgPixelsFnX;
@@ -216,8 +214,11 @@ void rdgGlWidget::slotSetupRdgPixels(const st_rdgInfoData& rdgInfoData)
             for (int j = m_rdgPixelsInY; j <= m_rdgPixelsFnY; j++)
             {
                 rdgLog10 = defRdgLog10(rdgInfoData,m_filterId,i,j);
+
                 levelColor = (int)((m_vectorTuplesColorsRdg.size()-1)*((fabs(rdgLog10 - rdgInfoData.vectorMinLog10RdgData[m_filterId]))/(rdgInfoData.vectorMaxLog10RdgData[m_filterId] - rdgInfoData.vectorMinLog10RdgData[m_filterId])));
-                if ((levelColor >= m_lowPixelLevel  && levelColor <= m_highPixelLevel))   maskRdgVector[m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+(i-m_rdgPixelsInX)] = 1;
+
+                if ((levelColor >= m_lowPixelLevel  && levelColor <= m_highPixelLevel))
+                    maskRdgVector[m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+(i-m_rdgPixelsInX)] = 1;
             }
         }
 
@@ -229,11 +230,15 @@ void rdgGlWidget::slotSetupRdgPixels(const st_rdgInfoData& rdgInfoData)
             {
                 if (maskRdgVector[m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+(i-m_rdgPixelsInX)] == 1)
                 {
-                    if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)             m_minSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
-                    else if (m_minSmallLog10Rdg > defRdgLog10(rdgInfoData,m_filterId,i,j)) m_minSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
+                    if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
+                        m_minSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
+                    else if (m_minSmallLog10Rdg > defRdgLog10(rdgInfoData,m_filterId,i,j))
+                        m_minSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
 
-                    if (i == 0 && j == 0)                                       m_maxSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
-                    else if (m_maxSmallLog10Rdg < defRdgLog10(rdgInfoData,m_filterId,i,j)) m_maxSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
+                    if (i == 0 && j == 0)
+                        m_maxSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
+                    else if (m_maxSmallLog10Rdg < defRdgLog10(rdgInfoData,m_filterId,i,j))
+                        m_maxSmallLog10Rdg = defRdgLog10(rdgInfoData,m_filterId,i,j);
                 }
             }
         }
@@ -518,14 +523,14 @@ void rdgGlWidget::paintEvent(QPaintEvent* )
         p.drawText(750, 110+71*(NV-1), QString::number(m_rdgPixelsInY*m_time_step_ns + (m_rdgPixelsFnY-m_rdgPixelsInY)*m_time_step_ns, 'f', 2));
 
         //по палитре
-        if      (m_showLogRdg == false) p.drawText(800, 100, QString::fromStdString("mm"));
+        if      (m_showLogRdg == false) p.drawText(800, 100, QString::fromStdString("m"));
         else if (m_showLogRdg == true)  p.drawText(800, 100, QString::fromStdString(""));
 
         if (m_showLogRdg == false)
         {
-            p.drawText(835, 105, QString::number( (nanokoef*spc/epsdData(m_materialId))*m_maxSmallRdg, 'f', 2));
-            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number( (nanokoef*spc/epsdData(m_materialId))*(m_maxSmallRdg + i*(m_minSmallRdg-m_maxSmallRdg)/(double)(NV-1)) , 'f', 2));
-            p.drawText(835, 105+71*(NV-1), QString::number( (nanokoef*spc/epsdData(m_materialId))*m_minSmallRdg, 'f', 2));
+            p.drawText(835, 105, QString::number(rdgMetricKoeff*m_maxSmallRdg, 'f', 4));
+            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number(rdgMetricKoeff*(m_maxSmallRdg + i*(m_minSmallRdg-m_maxSmallRdg)/(double)(NV-1)), 'f', 4));
+            p.drawText(835, 105+71*(NV-1), QString::number(rdgMetricKoeff*m_minSmallRdg, 'f', 4));
         }
         else if (m_showLogRdg == true)
         {
@@ -547,7 +552,7 @@ void rdgGlWidget::slotSendOutRdgInfo(const st_rdgInfoData& rdgInfoData)
         QString::fromStdString(" refId ") + QString::number(m_pressY) +
         QString::fromStdString(" delay ns ") + QString::number(m_pressY*m_time_step_ns) +
         QString::fromStdString(" depth in ref ") +
-        QString::number((rdgInfoData.vectorRdgData[m_pressX].vectorsDoubleData[m_filterId])[m_pressY]*(nanokoef*spc/epsdData(m_materialId))) +
+        QString::number((rdgInfoData.vectorRdgData[m_pressX].vectorsDoubleData[m_filterId])[m_pressY]) +
         QString::fromStdString(" mm.");
     }
     else
@@ -670,7 +675,7 @@ void rdgGlWidget::slotChangeRdgPixelsFnY(int rdgPixelsFnY)
 void rdgGlWidget::fixRdg()
 {
     emit signalFixRdgPixels(m_rdgName);
-    emit signalFixDataRdgWidgets(m_rdgName, m_materialId);
+    emit signalFixDataRdgWidgets(m_rdgName);
 }
 
 void rdgGlWidget::setLowPixelLevel(int lowPixelLevel)

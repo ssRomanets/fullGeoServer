@@ -122,10 +122,10 @@ void dataRdgWidget::setupTrackRdgSliderData(int rdgPixelsInX, int rdgPixelsFnX)
 }
 
 void dataRdgWidget::activateWidgets(
-    std::string rdgName, const st_rdgInfoData& rdgInfoData, int materialId, int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY
+    std::string rdgName, const st_rdgInfoData& rdgInfoData, int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY
 )
 {
-    m_sectionRdgWidget->outputRdgSection(rdgName, rdgInfoData, m_trackRdgNumber, rdgPixelsInY, rdgPixelsFnY, m_tabWidget->currentIndex(), materialId);
-    m_tableRdgTrackDataWidget->outputRdgTrackDataTable( rdgInfoData, m_trackRdgNumber,  materialId, rdgPixelsInY, rdgPixelsFnY);
+    m_sectionRdgWidget->outputRdgSection(rdgName, rdgInfoData, m_trackRdgNumber, rdgPixelsInY, rdgPixelsFnY, m_tabWidget->currentIndex());
+    m_tableRdgTrackDataWidget->outputRdgTrackDataTable( rdgInfoData, m_trackRdgNumber,  rdgPixelsInY, rdgPixelsFnY);
     m_tableRdgLogAutoDataWidget->outputRdgLogAutoDataTable(rdgPixelsInX, rdgPixelsInY, rdgPixelsFnX, rdgPixelsFnY, rdgInfoData);
 }

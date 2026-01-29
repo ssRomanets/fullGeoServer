@@ -55,7 +55,7 @@ private:
     double m_fnPosX {0.0};
     double m_fnPosY {0.0};
 
-    double m_maxSumImpulses;
+    double m_maxDeep;
 
     bool m_highLowOnRdg{true};
 

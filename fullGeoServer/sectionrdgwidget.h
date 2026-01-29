@@ -28,7 +28,7 @@ public:
     void outputSectionChart(const QString& rdgsFileCurrent);
     void outputRdgSection(
         const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int trackRdgNumber,
-        int rdgPixelsInY, int rdgPixelsFnY, int pageRdgDataIndex, int materialId
+        int rdgPixelsInY, int rdgPixelsFnY, int pageRdgDataIndex
     );
 
     void removeRdgSection();
@@ -62,7 +62,6 @@ private:
     int m_rdgPixelsInY;
     int m_rdgPixelsFnY;
 
-    int m_materialId{0};
     std::string m_rdgName{""};
 
     QPointer<QValueAxis> m_axisX;

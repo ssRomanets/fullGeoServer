@@ -52,7 +52,7 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
             if (m_showLogRdg == false)
             {
                 if (m_normActCheckBox->checkState() == 0)
-                    m_rdgLineSeries->append((rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i]*(nanokoef*spc/epsdData(m_materialId)), i);
+                    m_rdgLineSeries->append((rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i], i);
                 else
                 {
                     m_rdgLineSeries->append(
@@ -62,21 +62,10 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
                 }
             }
             else
-            {
-                double rdgLog10 = 0.0;
-                if (
-                    (rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i] >
-                    rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]-rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId])
-                )
-                    rdgLog10 = log10(
-                        1 + (rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i]-
-                        rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]-rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId])
-                    );
-                else rdgLog10 = 0.0;
-
+            {               
+                double rdgLog10 = defRdgLog10(rdgInfoData,  m_filterId, m_trackRdgNumber,  i);
                 if (m_normActCheckBox->checkState() == 0)  m_rdgLineSeries->append(rdgLog10, i);
                 else   m_rdgLineSeries->append(fabs(rdgLog10 - rdgInfoData.vectorMinLog10RdgData[m_filterId])/(rdgInfoData.vectorMaxLog10RdgData[m_filterId] - rdgInfoData.vectorMinLog10RdgData[m_filterId]),i);
-
             }
         }
 
@@ -108,11 +97,15 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
                 if (m_showLogRdg == false)
                 {
                     m_axisX->setRange(
-                        rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId]*(nanokoef*spc/epsdData(m_materialId)),
-                        rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]*(nanokoef*spc/epsdData(m_materialId))
+                        rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId],
+                        rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]
                     );
                 }
-                else m_axisX->setRange( rdgInfoData.vectorMinLog10RdgData[m_filterId], rdgInfoData.vectorMaxLog10RdgData[m_filterId]);
+                else
+                    m_axisX->setRange(
+                        rdgInfoData.vectorMinLog10RdgData[m_filterId],
+                        rdgInfoData.vectorMaxLog10RdgData[m_filterId]
+                    );
             }
             else     m_axisX->setRange(0, 1);
             m_chart->legend()->hide();
@@ -132,11 +125,10 @@ void sectionRdgWidget::removeRdgSection()
 
 void sectionRdgWidget::outputRdgSection(
     const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int trackRdgNumber,
-    int rdgPixelsInY, int rdgPixelsFnY, int pageRdgDataIndex, int materialId
+    int rdgPixelsInY, int rdgPixelsFnY, int pageRdgDataIndex
 )
 {
     m_rdgName = rdgName;
-    m_materialId = materialId;
     if (m_normActCheckBox->isEnabled() == false)  m_normActCheckBox->setEnabled(true);
     if (pageRdgDataIndex == 0)  outputLineRdgSection(rdgInfoData, trackRdgNumber, rdgPixelsInY, rdgPixelsFnY);
 }

@@ -18,7 +18,7 @@ public:
     explicit tableRdgTrackDataWidget(QWidget* parent = nullptr);
     ~tableRdgTrackDataWidget();
 
-    void outputRdgTrackDataTable(const st_rdgInfoData& rdgInfoData, int trackRdgNumber, int materialId, int rdgPixelsInY,  int rdgPixelsFnY);
+    void outputRdgTrackDataTable(const st_rdgInfoData& rdgInfoData, int trackRdgNumber,  int rdgPixelsInY,  int rdgPixelsFnY);
 
     void showRdgTrackDataTable  (const st_rdgInfoData& rdgInfoData, int trackRdgNumber, int rdgPixelsInY,  int rdgPixelsFnY);
     void removeRdgTrackDataTable();
@@ -41,7 +41,6 @@ private:
     QPointer<QVBoxLayout> m_verLayout;
 
     bool m_showLogRdg{false};
-    int  m_materialId{0};
 };
 
 #endif // TABLERDGTRACKDATAWIDGET_H

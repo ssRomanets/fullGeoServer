@@ -44,7 +44,7 @@ struct st_rdgInitialData {
     //additional
     std::vector<double> vectorMinImpulses;
     std::vector<double> vectorMaxImpulses;
-    std::vector<std::vector<double> > vectorsSumImpulses;
+    std::vector<std::vector<double> > vectorsDeeps;
 };
 
 struct st_rdgInfoData {

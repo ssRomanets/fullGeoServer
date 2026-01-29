@@ -26,7 +26,7 @@ public:
 
     void setupTrackRdgSliderData(int rdgPixelsInX, int rdgPixelsFnX);
     void activateWidgets(
-        std::string rdgName, const st_rdgInfoData& rdgInfoData, int materialId,  int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY
+        std::string rdgName, const st_rdgInfoData& rdgInfoData, int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY
     );
 
     QPointer<QTabWidget> m_tabWidget;

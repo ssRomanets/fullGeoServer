@@ -27,9 +27,9 @@ public:
     void setupCsvRdgs(const QStringList& filesRdgNamesCsv, std::vector<std::pair<std::string, std::string>>& rdgsNamesVectorPairs);
     void setupHdf5Rdgs(const QStringList& infoRdgsHdf5Names, std::vector<std::pair<std::string, std::string>>& rdgsNamesVectorPairs);
 
-    void outputNewImage(const std::string& fileName, int materialId, int filterId);
+    void outputNewImage(const std::string& fileName,int materialId, int filterId);
     void setShowLogRdg(bool showLogRdg);
-    void showNewRdg(const std::string& rdgName, int materialId);
+    void showNewRdg(const std::string& rdgName);
 
     void setLogRdgMouseSelection(bool logRdgMouseSelection);
     void settingsRdgSelection(bool logRdgAutoSelection, bool clearSelectRdgPoints, std::string rdgName);
@@ -67,7 +67,7 @@ public slots:
 
     void slotCreateMapRdgTypeRdgSelectionInfo(int typeRdgSelection,  int rdgHeight, std::string rdgName, const std::vector<QPair<int, int> >& vectorRdgPairXY);
 
-    void slotFixDataRdgWidgets(std::string rdgName, int materialId);
+    void slotFixDataRdgWidgets(std::string rdgName);
     void accomplishmentThreadTerminate();
 
     void slotSetupScrollHRdgData(int minScrollHRdgData, int scrollHRdgData, int maxScrollHRdgData);
@@ -82,7 +82,6 @@ signals:
     void signalActivateRdg(int rdgId);
 
 public:
-    int m_materialId{0};
     QPointer<Accomplishment> m_accomplishment;
     QPointer<rdgGlWidget>    m_rdgGlWidget;
     QPointer<QScrollBar>     m_scrollHRdgBar;
@@ -90,7 +89,7 @@ public:
     QPointer<dataRdgWidget>  m_dataRdgWidget;
 
 private:
-    void rdgInput(const std::string& rdgName, int materialId, int absRdgPixelsInX, int absRdgPixelsFnX);
+    void rdgInput(const std::string& rdgName, int absRdgPixelsInX, int absRdgPixelsFnX);
     void setEnabledOpenGlControls(boolean enabled);
     void setupInitPixelSlidersData();
     void setupRdgOpenglControls();

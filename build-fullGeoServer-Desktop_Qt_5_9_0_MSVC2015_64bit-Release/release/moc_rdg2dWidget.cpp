@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_rdg2dWidget_t {
-    QByteArrayData data[48];
-    char stringdata0[888];
+    QByteArrayData data[47];
+    char stringdata0[877];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -69,16 +69,15 @@ QT_MOC_LITERAL(34, 620, 9), // "rdgHeight"
 QT_MOC_LITERAL(35, 630, 28), // "std::vector<QPair<int,int> >"
 QT_MOC_LITERAL(36, 659, 15), // "vectorRdgPairXY"
 QT_MOC_LITERAL(37, 675, 21), // "slotFixDataRdgWidgets"
-QT_MOC_LITERAL(38, 697, 10), // "materialId"
-QT_MOC_LITERAL(39, 708, 29), // "accomplishmentThreadTerminate"
-QT_MOC_LITERAL(40, 738, 23), // "slotSetupScrollHRdgData"
-QT_MOC_LITERAL(41, 762, 17), // "minScrollHRdgData"
-QT_MOC_LITERAL(42, 780, 14), // "scrollHRdgData"
-QT_MOC_LITERAL(43, 795, 17), // "maxScrollHRdgData"
-QT_MOC_LITERAL(44, 813, 23), // "slotSetupScrollVRdgData"
-QT_MOC_LITERAL(45, 837, 17), // "minScrollVRdgData"
-QT_MOC_LITERAL(46, 855, 14), // "scrollVRdgData"
-QT_MOC_LITERAL(47, 870, 17) // "maxScrollVRdgData"
+QT_MOC_LITERAL(38, 697, 29), // "accomplishmentThreadTerminate"
+QT_MOC_LITERAL(39, 727, 23), // "slotSetupScrollHRdgData"
+QT_MOC_LITERAL(40, 751, 17), // "minScrollHRdgData"
+QT_MOC_LITERAL(41, 769, 14), // "scrollHRdgData"
+QT_MOC_LITERAL(42, 784, 17), // "maxScrollHRdgData"
+QT_MOC_LITERAL(43, 802, 23), // "slotSetupScrollVRdgData"
+QT_MOC_LITERAL(44, 826, 17), // "minScrollVRdgData"
+QT_MOC_LITERAL(45, 844, 14), // "scrollVRdgData"
+QT_MOC_LITERAL(46, 859, 17) // "maxScrollVRdgData"
 
     },
     "rdg2dWidget\0signalActivateAccompThread\0"
@@ -101,7 +100,7 @@ QT_MOC_LITERAL(47, 870, 17) // "maxScrollVRdgData"
     "typeRdgSelection\0rdgHeight\0"
     "std::vector<QPair<int,int> >\0"
     "vectorRdgPairXY\0slotFixDataRdgWidgets\0"
-    "materialId\0accomplishmentThreadTerminate\0"
+    "accomplishmentThreadTerminate\0"
     "slotSetupScrollHRdgData\0minScrollHRdgData\0"
     "scrollHRdgData\0maxScrollHRdgData\0"
     "slotSetupScrollVRdgData\0minScrollVRdgData\0"
@@ -143,10 +142,10 @@ static const uint qt_meta_data_rdg2dWidget[] = {
       30,    1,  171,    2, 0x0a /* Public */,
       31,    1,  174,    2, 0x0a /* Public */,
       32,    4,  177,    2, 0x0a /* Public */,
-      37,    2,  186,    2, 0x0a /* Public */,
-      39,    0,  191,    2, 0x0a /* Public */,
-      40,    3,  192,    2, 0x0a /* Public */,
-      44,    3,  199,    2, 0x0a /* Public */,
+      37,    1,  186,    2, 0x0a /* Public */,
+      38,    0,  189,    2, 0x0a /* Public */,
+      39,    3,  190,    2, 0x0a /* Public */,
+      43,    3,  197,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, 0x80000000 | 3, 0x80000000 | 5,    4,    6,
@@ -169,10 +168,10 @@ static const uint qt_meta_data_rdg2dWidget[] = {
     QMetaType::Void, 0x80000000 | 25,   26,
     QMetaType::Void, 0x80000000 | 25,   26,
     QMetaType::Void, QMetaType::Int, QMetaType::Int, 0x80000000 | 25, 0x80000000 | 35,   33,   34,   26,   36,
-    QMetaType::Void, 0x80000000 | 25, QMetaType::Int,   26,   38,
+    QMetaType::Void, 0x80000000 | 25,   26,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   41,   42,   43,
-    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   45,   46,   47,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   40,   41,   42,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   44,   45,   46,
 
        0        // eod
 };
@@ -201,7 +200,7 @@ void rdg2dWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 15: _t->slotFixRdgSection((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
         case 16: _t->slotFixPageRdgData((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
         case 17: _t->slotCreateMapRdgTypeRdgSelectionInfo((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< std::string(*)>(_a[3])),(*reinterpret_cast< const std::vector<QPair<int,int> >(*)>(_a[4]))); break;
-        case 18: _t->slotFixDataRdgWidgets((*reinterpret_cast< std::string(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 18: _t->slotFixDataRdgWidgets((*reinterpret_cast< std::string(*)>(_a[1]))); break;
         case 19: _t->accomplishmentThreadTerminate(); break;
         case 20: _t->slotSetupScrollHRdgData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 21: _t->slotSetupScrollVRdgData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;

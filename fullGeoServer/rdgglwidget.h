@@ -67,7 +67,7 @@ public:
     void setShowInitRdgSelection(bool showInitRdgSelection);
     void resetRdgSelection(bool clearSelectRdgPoints, std::string rdgName);
 
-    void setupRdgProperties(const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int materialId, int absRdgPixelsInX, int absRdgPixelsFnX);
+    void setupRdgProperties(const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX);
 
     void setLowPixelLevel(int lowPixelLevel);
     void setHighPixelLevel(int highPixelLevel);
@@ -89,7 +89,7 @@ signals:
         int selectionId, int rdgHeight, std::string rdgName, const std::vector<QPair<int, int> >& vectorRdgPairXY
     );
 
-    void signalFixDataRdgWidgets(std::string rdgName, int materialId);
+    void signalFixDataRdgWidgets(std::string rdgName);
 
     void signalSetupScrollHRdgData(int minScrollHRdgData, int scrollHRdgData, int maxScrollHRdgdata);
     void signalSetupScrollVRdgData(int minScrollVRdgData, int scrollVRdgData, int maxScrollVRdgdata);

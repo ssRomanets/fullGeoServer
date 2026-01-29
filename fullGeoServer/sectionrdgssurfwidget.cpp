@@ -38,7 +38,7 @@ void sectionRdgsSurfWidget::setRdgsSurfSectionMap(
     m_quantImpulsesOfPacket = quantImpulsesOfPacket;
     m_filterId = filterId;
     m_selectionId = selectionId;
-    defMaxSumImpulses(rdgsInfoDataMap, filterId, selectionId, m_maxSumImpulses, absRdgsStructInX, absRdgsStructFnX);
+    defMaxDeep(rdgsInfoDataMap, materialId, filterId, selectionId, m_maxDeep, absRdgsStructInX, absRdgsStructFnX);
 }
 
 void sectionRdgsSurfWidget::outputRdgsSurfSection(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, const st_rdgsWorkData& rdgsWorkData)
@@ -102,40 +102,40 @@ void sectionRdgsSurfWidget::outputRdgsSurfSection(const std::map<std::string, st
 
                     if (m_highLowOnRdg)
                     {
-                        if (nameRdg1 != "") depth1 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                        if (nameRdg2 != "") depth2 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg2, kRdg2, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                        if (nameRdg3 != "") depth3 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg3, kRdg3, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                        if (nameRdg4 != "") depth4 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg4, kRdg4, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
+                        if (nameRdg1 != "") depth1 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg2 != "") depth2 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg2, kRdg2, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg3 != "") depth3 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg3, kRdg3, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg4 != "") depth4 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg4, kRdg4, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
 
                         depth =(
-                            fabs((x3-x)*(y3-y))*(rdgsWorkData.vectorRdgsFnRelief[x1][y1] - depth1*(nanokoef*spc/epsdData(m_materialId))) +
-                            fabs((x1-x)*(y1-y))*(rdgsWorkData.vectorRdgsFnRelief[x3][y3] - depth3*(nanokoef*spc/epsdData(m_materialId))) +
-                            fabs((x2-x)*(y2-y))*(rdgsWorkData.vectorRdgsFnRelief[x4][y4] - depth4*(nanokoef*spc/epsdData(m_materialId))) +
-                            fabs((x4-x)*(y4-y))*(rdgsWorkData.vectorRdgsFnRelief[x2][y2] - depth2*(nanokoef*spc/epsdData(m_materialId)))
+                            fabs((x3-x)*(y3-y))*(rdgsWorkData.vectorRdgsFnRelief[x1][y1] - depth1) +
+                            fabs((x1-x)*(y1-y))*(rdgsWorkData.vectorRdgsFnRelief[x3][y3] - depth3) +
+                            fabs((x2-x)*(y2-y))*(rdgsWorkData.vectorRdgsFnRelief[x4][y4] - depth4) +
+                            fabs((x4-x)*(y4-y))*(rdgsWorkData.vectorRdgsFnRelief[x2][y2] - depth2)
                         );
                     }
                     else
                     {
-                        if (nameRdg1 != "") depth1 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                        if (nameRdg2 != "") depth2 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg2, kRdg2, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                        if (nameRdg3 != "") depth3 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg3, kRdg3, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                        if (nameRdg4 != "") depth4 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg4, kRdg4, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
+                        if (nameRdg1 != "") depth1 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg2 != "") depth2 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg2, kRdg2, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg3 != "") depth3 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg3, kRdg3, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg4 != "") depth4 = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg4, kRdg4, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
 
-                        double fullDepth1 = m_maxSumImpulses;
-                        double fullDepth2 = m_maxSumImpulses;
-                        double fullDepth3 = m_maxSumImpulses;
-                        double fullDepth4 = m_maxSumImpulses;
+                        double fullDepth1 = m_maxDeep;
+                        double fullDepth2 = m_maxDeep;
+                        double fullDepth3 = m_maxDeep;
+                        double fullDepth4 = m_maxDeep;
 
-                        if (nameRdg1 != "") fullDepth1 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_filterId, m_selectionId);
-                        if (nameRdg2 != "") fullDepth2 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg2, kRdg2, m_filterId, m_selectionId);
-                        if (nameRdg3 != "") fullDepth3 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg3, kRdg3, m_filterId, m_selectionId);
-                        if (nameRdg4 != "") fullDepth4 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg4, kRdg4, m_filterId, m_selectionId);
+                        if (nameRdg1 != "") fullDepth1 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg2 != "") fullDepth2 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg2, kRdg2, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg3 != "") fullDepth3 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg3, kRdg3, m_materialId, m_filterId, m_selectionId);
+                        if (nameRdg4 != "") fullDepth4 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg4, kRdg4, m_materialId, m_filterId, m_selectionId);
 
                         depth =(
-                            fabs((x3-x)*(y3-y))*(rdgsWorkData.vectorRdgsFnRelief[x1][y1] - (fullDepth1 - depth1)*(nanokoef*spc/epsdData(m_materialId))) +
-                            fabs((x1-x)*(y1-y))*(rdgsWorkData.vectorRdgsFnRelief[x3][y3] - (fullDepth3 - depth3)*(nanokoef*spc/epsdData(m_materialId))) +
-                            fabs((x2-x)*(y2-y))*(rdgsWorkData.vectorRdgsFnRelief[x4][y4] - (fullDepth4 - depth4)*(nanokoef*spc/epsdData(m_materialId))) +
-                            fabs((x4-x)*(y4-y))*(rdgsWorkData.vectorRdgsFnRelief[x2][y2] - (fullDepth2 - depth2)*(nanokoef*spc/epsdData(m_materialId)))
+                            fabs((x3-x)*(y3-y))*(rdgsWorkData.vectorRdgsFnRelief[x1][y1] - (fullDepth1 - depth1)) +
+                            fabs((x1-x)*(y1-y))*(rdgsWorkData.vectorRdgsFnRelief[x3][y3] - (fullDepth3 - depth3)) +
+                            fabs((x2-x)*(y2-y))*(rdgsWorkData.vectorRdgsFnRelief[x4][y4] - (fullDepth4 - depth4)) +
+                            fabs((x4-x)*(y4-y))*(rdgsWorkData.vectorRdgsFnRelief[x2][y2] - (fullDepth2 - depth2))
                         );
                     }
 
@@ -154,15 +154,15 @@ void sectionRdgsSurfWidget::outputRdgsSurfSection(const std::map<std::string, st
                 double depth1  = 0.0;
                 if (m_highLowOnRdg)
                 {
-                    if (nameRdg1 != "") depth1 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                    depth = rdgsWorkData.vectorRdgsFnRelief[x1][y1] - depth1*(nanokoef*spc/epsdData(m_materialId));
+                    if (nameRdg1 != "") depth1 = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                    depth = rdgsWorkData.vectorRdgsFnRelief[x1][y1] - depth1;
                 }
                 else
                 {
-                    if (nameRdg1 != "") depth1     = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
-                    double fullDepth1 = m_maxSumImpulses;
-                    if (nameRdg1 != "") fullDepth1 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_filterId, m_selectionId);
-                    depth = rdgsWorkData.vectorRdgsFnRelief[x1][y1] - (fullDepth1 - depth1)*(nanokoef*spc/epsdData(m_materialId));
+                    if (nameRdg1 != "") depth1     = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
+                    double fullDepth1 = m_maxDeep;
+                    if (nameRdg1 != "") fullDepth1 = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg1, kRdg1, m_materialId, m_filterId, m_selectionId);
+                    depth = rdgsWorkData.vectorRdgsFnRelief[x1][y1] - (fullDepth1 - depth1);
                 }
                 vectorSectRdgsCoordXY.push_back(count);
                 vectorSectRdgsCoordXY.push_back(depth);

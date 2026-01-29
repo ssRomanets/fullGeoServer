@@ -126,7 +126,7 @@ private:
     double m_deltaLatitude  {0.0};
     double m_deltaLongitude {0.0};
 
-    double m_maxSumImpulses {0.0};
+    double m_maxDeep {0.0};
 
     int m_filterId{0};
     int m_selectionId {0};

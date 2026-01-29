@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_rdgGlWidget_t {
-    QByteArrayData data[41];
-    char stringdata0[721];
+    QByteArrayData data[40];
+    char stringdata0[710];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -57,21 +57,20 @@ QT_MOC_LITERAL(22, 363, 9), // "rdgHeight"
 QT_MOC_LITERAL(23, 373, 28), // "std::vector<QPair<int,int> >"
 QT_MOC_LITERAL(24, 402, 15), // "vectorRdgPairXY"
 QT_MOC_LITERAL(25, 418, 23), // "signalFixDataRdgWidgets"
-QT_MOC_LITERAL(26, 442, 10), // "materialId"
-QT_MOC_LITERAL(27, 453, 25), // "signalSetupScrollHRdgData"
-QT_MOC_LITERAL(28, 479, 17), // "minScrollHRdgData"
-QT_MOC_LITERAL(29, 497, 14), // "scrollHRdgData"
-QT_MOC_LITERAL(30, 512, 17), // "maxScrollHRdgdata"
-QT_MOC_LITERAL(31, 530, 25), // "signalSetupScrollVRdgData"
-QT_MOC_LITERAL(32, 556, 17), // "minScrollVRdgData"
-QT_MOC_LITERAL(33, 574, 14), // "scrollVRdgData"
-QT_MOC_LITERAL(34, 589, 17), // "maxScrollVRdgdata"
-QT_MOC_LITERAL(35, 607, 18), // "slotSetupRdgPixels"
-QT_MOC_LITERAL(36, 626, 18), // "slotSendOutRdgInfo"
-QT_MOC_LITERAL(37, 645, 14), // "remarkTrackRdg"
-QT_MOC_LITERAL(38, 660, 14), // "trackRdgNumber"
-QT_MOC_LITERAL(39, 675, 22), // "slotChangeRdgPixelsFnX"
-QT_MOC_LITERAL(40, 698, 22) // "slotChangeRdgPixelsFnY"
+QT_MOC_LITERAL(26, 442, 25), // "signalSetupScrollHRdgData"
+QT_MOC_LITERAL(27, 468, 17), // "minScrollHRdgData"
+QT_MOC_LITERAL(28, 486, 14), // "scrollHRdgData"
+QT_MOC_LITERAL(29, 501, 17), // "maxScrollHRdgdata"
+QT_MOC_LITERAL(30, 519, 25), // "signalSetupScrollVRdgData"
+QT_MOC_LITERAL(31, 545, 17), // "minScrollVRdgData"
+QT_MOC_LITERAL(32, 563, 14), // "scrollVRdgData"
+QT_MOC_LITERAL(33, 578, 17), // "maxScrollVRdgdata"
+QT_MOC_LITERAL(34, 596, 18), // "slotSetupRdgPixels"
+QT_MOC_LITERAL(35, 615, 18), // "slotSendOutRdgInfo"
+QT_MOC_LITERAL(36, 634, 14), // "remarkTrackRdg"
+QT_MOC_LITERAL(37, 649, 14), // "trackRdgNumber"
+QT_MOC_LITERAL(38, 664, 22), // "slotChangeRdgPixelsFnX"
+QT_MOC_LITERAL(39, 687, 22) // "slotChangeRdgPixelsFnY"
 
     },
     "rdgGlWidget\0sendVectorRdgPairXY\0\0"
@@ -86,14 +85,13 @@ QT_MOC_LITERAL(40, 698, 22) // "slotChangeRdgPixelsFnY"
     "selectionId\0rdgHeight\0"
     "std::vector<QPair<int,int> >\0"
     "vectorRdgPairXY\0signalFixDataRdgWidgets\0"
-    "materialId\0signalSetupScrollHRdgData\0"
-    "minScrollHRdgData\0scrollHRdgData\0"
-    "maxScrollHRdgdata\0signalSetupScrollVRdgData\0"
-    "minScrollVRdgData\0scrollVRdgData\0"
-    "maxScrollVRdgdata\0slotSetupRdgPixels\0"
-    "slotSendOutRdgInfo\0remarkTrackRdg\0"
-    "trackRdgNumber\0slotChangeRdgPixelsFnX\0"
-    "slotChangeRdgPixelsFnY"
+    "signalSetupScrollHRdgData\0minScrollHRdgData\0"
+    "scrollHRdgData\0maxScrollHRdgdata\0"
+    "signalSetupScrollVRdgData\0minScrollVRdgData\0"
+    "scrollVRdgData\0maxScrollVRdgdata\0"
+    "slotSetupRdgPixels\0slotSendOutRdgInfo\0"
+    "remarkTrackRdg\0trackRdgNumber\0"
+    "slotChangeRdgPixelsFnX\0slotChangeRdgPixelsFnY"
 };
 #undef QT_MOC_LITERAL
 
@@ -118,16 +116,16 @@ static const uint qt_meta_data_rdgGlWidget[] = {
       16,    1,  119,    2, 0x06 /* Public */,
       19,    1,  122,    2, 0x06 /* Public */,
       20,    4,  125,    2, 0x06 /* Public */,
-      25,    2,  134,    2, 0x06 /* Public */,
-      27,    3,  139,    2, 0x06 /* Public */,
-      31,    3,  146,    2, 0x06 /* Public */,
+      25,    1,  134,    2, 0x06 /* Public */,
+      26,    3,  137,    2, 0x06 /* Public */,
+      30,    3,  144,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      35,    1,  153,    2, 0x0a /* Public */,
-      36,    1,  156,    2, 0x0a /* Public */,
-      37,    1,  159,    2, 0x0a /* Public */,
-      39,    1,  162,    2, 0x0a /* Public */,
-      40,    1,  165,    2, 0x0a /* Public */,
+      34,    1,  151,    2, 0x0a /* Public */,
+      35,    1,  154,    2, 0x0a /* Public */,
+      36,    1,  157,    2, 0x0a /* Public */,
+      38,    1,  160,    2, 0x0a /* Public */,
+      39,    1,  163,    2, 0x0a /* Public */,
 
  // signals: parameters
     QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int, QMetaType::Int, QMetaType::Int, 0x80000000 | 8,    3,    4,    5,    6,    7,    9,
@@ -137,14 +135,14 @@ static const uint qt_meta_data_rdgGlWidget[] = {
     QMetaType::Void, 0x80000000 | 17,   18,
     QMetaType::Void, 0x80000000 | 17,   18,
     QMetaType::Void, QMetaType::Int, QMetaType::Int, 0x80000000 | 17, 0x80000000 | 23,   21,   22,   18,   24,
-    QMetaType::Void, 0x80000000 | 17, QMetaType::Int,   18,   26,
-    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   28,   29,   30,
-    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   32,   33,   34,
+    QMetaType::Void, 0x80000000 | 17,   18,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   27,   28,   29,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int, QMetaType::Int,   31,   32,   33,
 
  // slots: parameters
     QMetaType::Void, 0x80000000 | 8,    9,
     QMetaType::Void, 0x80000000 | 8,    9,
-    QMetaType::Void, QMetaType::Int,   38,
+    QMetaType::Void, QMetaType::Int,   37,
     QMetaType::Void, QMetaType::Int,    5,
     QMetaType::Void, QMetaType::Int,    6,
 
@@ -164,7 +162,7 @@ void rdgGlWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
         case 4: _t->signalFixRdgPixels((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
         case 5: _t->signalFixRdgInfo((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
         case 6: _t->signalCreateMapRdgTypeRdgSelectionInfo((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< std::string(*)>(_a[3])),(*reinterpret_cast< const std::vector<QPair<int,int> >(*)>(_a[4]))); break;
-        case 7: _t->signalFixDataRdgWidgets((*reinterpret_cast< std::string(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 7: _t->signalFixDataRdgWidgets((*reinterpret_cast< std::string(*)>(_a[1]))); break;
         case 8: _t->signalSetupScrollHRdgData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 9: _t->signalSetupScrollVRdgData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2])),(*reinterpret_cast< int(*)>(_a[3]))); break;
         case 10: _t->slotSetupRdgPixels((*reinterpret_cast< const st_rdgInfoData(*)>(_a[1]))); break;
@@ -227,7 +225,7 @@ void rdgGlWidget::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id,
             }
         }
         {
-            typedef void (rdgGlWidget::*_t)(std::string , int );
+            typedef void (rdgGlWidget::*_t)(std::string );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&rdgGlWidget::signalFixDataRdgWidgets)) {
                 *result = 7;
                 return;
@@ -337,9 +335,9 @@ void rdgGlWidget::signalCreateMapRdgTypeRdgSelectionInfo(int _t1, int _t2, std::
 }
 
 // SIGNAL 7
-void rdgGlWidget::signalFixDataRdgWidgets(std::string _t1, int _t2)
+void rdgGlWidget::signalFixDataRdgWidgets(std::string _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 7, _a);
 }
 

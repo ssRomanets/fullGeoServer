@@ -69,7 +69,7 @@ private:
     int m_rdgsSurfWidth  {0};
     int m_rdgsSurfHeight {0};
 
-    double m_maxSumImpulses {0.0};
+    double m_maxDeep {0.0};
 
     double m_maxRelief {0.0};
     double m_minRelief {0.0};

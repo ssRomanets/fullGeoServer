@@ -24,9 +24,9 @@
 
 #include <QOpenGLFunctions_3_3_Core>
 
-
 #define countSelectors 3
-#define countFilters 2
+#define countFilters   2
+#define countMaterials 13
 
 #define nanokoef 0.000000001
 #define spc        300000000
@@ -42,6 +42,20 @@
 #define tFilterPM      10.00
 #define deltaTFilterPM  0.20
 #define kFilterPM       5.00
+
+#define rdgMetricKoeff 0.000001
+
+inline double epsdData(int materialId)
+{
+    double epsdData[13] {81, 81, 2.6, 25, 2.5, 19, 2.4, 15, 8, 7, 7, 6, 8};
+    return epsdData[materialId];
+}
+
+inline double gammaData(int materialId)
+{
+    double gammaData[13] {0.18, 330, 0.14, 2.3, 0.11, 7.9, 0.28, 20, 5.6, 0.62, 45, 24, 14};
+    return gammaData[materialId];
+}
 
 inline void createVectorRdgsPoints(const st_rdgInfoData& rdgInfoData, int i, double deltaLatitude, double deltaLongitude, double* rdgsPoints, int& dimRdgs)
 {
@@ -166,13 +180,13 @@ inline std::tuple<std::string, int>  defTupleRdgs(
 
 inline void defLeftLatitude(const st_rdgInfoData& rdgInfoData, int i, double& leftLatitude)
 {
-    if (leftLatitude < 0.0)  leftLatitude  = rdgInfoData.vectorRdgData[i].latitude_degree;
+    if (leftLatitude < 0.0)                                               leftLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
     else if (rdgInfoData.vectorRdgData[i].latitude_degree < leftLatitude) leftLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
 }
 
 inline void defRightLatitude(const st_rdgInfoData& rdgInfoData, int i, double& rightLatitude)
 {
-    if (rightLatitude < 0.0) rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
+    if (rightLatitude < 0.0)                                               rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
     else if (rdgInfoData.vectorRdgData[i].latitude_degree > rightLatitude) rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
 }
 
@@ -243,18 +257,19 @@ inline void devMainParameters(
 }
 
 
-inline void defMaxSumImpulses(
-    const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int filterId, int selectionId, double& maxSumImpulses, int absRdgsInX,int absRdgsFnX
+inline void defMaxDeep(
+    const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int materialId, int filterId, int selectionId, double& maxDeep, int absRdgsInX,int absRdgsFnX
 )
 {
-    maxSumImpulses = 0.0;
+    maxDeep = 0.0;
     for (auto rdgsMapIter = rdgsInfoDataMap.begin(); rdgsMapIter != rdgsInfoDataMap.end(); rdgsMapIter++)
     {
         for (int i = absRdgsInX; i <= (rdgsMapIter->second.vectorRdgData.size() - 1 >= absRdgsFnX ? absRdgsFnX : rdgsMapIter->second.vectorRdgData.size() - 1); i++)
         {
-            int size = (rdgsMapIter->second.vectorRdgData[i]).vectorsSumImpulses[countSelectors*filterId+selectionId].size();
-            if (rdgsMapIter->second.vectorRdgData[i].vectorsSumImpulses[countSelectors*filterId+selectionId][size-1] > maxSumImpulses)
-                maxSumImpulses = rdgsMapIter->second.vectorRdgData[i].vectorsSumImpulses[countSelectors*filterId+selectionId][size-1];
+            int size = (rdgsMapIter->second.vectorRdgData[i]).vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size();
+
+            if (rdgsMapIter->second.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][size-1] > maxDeep)
+                maxDeep = rdgsMapIter->second.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId + selectionId][size-1];
         }
     }
 }
@@ -427,46 +442,37 @@ inline void addLineToPixelsData(int inX, int inY, int fnX, int fnY, std::vector<
 inline double defRdgLog10(const st_rdgInfoData& rdgInfoData, int filterId, int i, int j)
 {
     double result = 0.0;
-    if (rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId] >= 0.0 && rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId] >= 0.0)
-    {
-        if (
-            (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >
-            rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId]-rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId])
-        )
-            result = log10(
-                1 + (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] -
-                rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId]-rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId])
-            );
-    }
-    else if (rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId] >= 0.0 && rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId] < 0.0)
-    {
-        if (
-            (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >=0 &&
-            (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >= rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId]
-        )
-            result = log10(
-                1 + (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] -
-                rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId])
-            );
 
-        if (
-            (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] < 0 &&
-            fabs((rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j]) >= fabs(rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId])
-        )
-            result = -1.0*log10(
-                1 + fabs((rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j]) -
-                fabs(rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId])
-            );
+    if (
+        (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >=0 &&
+        (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >= rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId]
+    )
+        result = log10(
+            1 + (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] -
+            rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId])
+        );
+
+    if (
+        (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] < 0 &&
+        fabs((rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j]) >= fabs(rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId])
+    )
+    {
+        result = -1.0*log10(
+            1 + fabs(
+                (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] -
+                rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId]
+            )
+        );
+
     }
     return result;
 }
 
 inline void createVectorRdgLog10PairXY(
-    int filterId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, double maxLog10RdgData, double minLog10RdgData,
-    const st_rdgInfoData& rdgInfoData, std::vector<QPair<int, int> >& vectorRdgLog10PairXY
+    int filterId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, st_rdgInfoData& rdgInfoData
 )
 {
-    vectorRdgLog10PairXY.resize(0);
+    (rdgInfoData.vectorsRdgLog10PairXY[filterId]).resize(0);
 
     QPair<int, int> pairXY;
     double* pixelsDoubleData = new double [((absRdgPixelsFnX-absRdgPixelsInX)+3)*rdgHeight];
@@ -476,11 +482,16 @@ inline void createVectorRdgLog10PairXY(
     {
         for (int j=0; j < rdgHeight; j++)
         {
-            if ((i == absRdgPixelsInX) || (i == absRdgPixelsFnX + 2)) rdgLog10 = minLog10RdgData;
-            else rdgLog10 = defRdgLog10(rdgInfoData,filterId,i-1,j);
+            if ((i == absRdgPixelsInX) || (i == absRdgPixelsFnX + 2)) rdgLog10 = rdgInfoData.vectorMinLog10RdgData[filterId];
+            else                                                      rdgLog10 = defRdgLog10(rdgInfoData,filterId,i-1,j);
 
-            if ( (double)( rdgLog10 )/maxLog10RdgData > 0.3) pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.0;
-            else                                             pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.3;
+            if (
+                (double)(rdgLog10 - rdgInfoData.vectorMinLog10RdgData[filterId])/
+                (rdgInfoData.vectorMaxLog10RdgData[filterId] - rdgInfoData.vectorMinLog10RdgData[filterId]) > 0.3
+            )
+                pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.0;
+            else
+                pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.3;
         }
     }
 
@@ -504,7 +515,7 @@ inline void createVectorRdgLog10PairXY(
                     {
                         pairXY.first  = i-1;
                         pairXY.second = j;
-                        vectorRdgLog10PairXY.push_back(pairXY);
+                        (rdgInfoData.vectorsRdgLog10PairXY[filterId]).push_back(pairXY);
                     }
                 }
             }
@@ -579,46 +590,46 @@ inline void outputMapRdgSelectArea(
     }
 }
 
-inline double defDepthScanUpLowRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int quantImpulsesOfPacket, int filterId, int selectionId )
+inline double defDepthScanUpLowRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int quantImpulsesOfPacket, int materialId, int filterId, int selectionId )
 {
     double result = 0.0;
     auto itRdgsInfoDataMap = rdgsInfoDataMap.find(nameRdg);
     if (itRdgsInfoDataMap != rdgsInfoDataMap.end())
     {
-        if (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId][itRdgsInfoDataMap
-                                      ->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId].size()-1];
+        if (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
+            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itRdgsInfoDataMap
+                                      ->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1];
         else
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId][quantImpulsesOfPacket];
+            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][quantImpulsesOfPacket];
     }
     return result;
 }
 
-inline double defDepthScanLowUpRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int quantImpulsesOfPacket, int filterId, int selectionId)
+inline double defDepthScanLowUpRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int quantImpulsesOfPacket, int materialId, int filterId, int selectionId)
 {
     double result = 0.0;
     auto itRdgsInfoDataMap = rdgsInfoDataMap.find(nameRdg);
     if (itRdgsInfoDataMap != rdgsInfoDataMap.end())
     {
-        if (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
+        if (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
             result = 0.0;
         else
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId][itRdgsInfoDataMap
-                                      ->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId].size()-1] -
-            itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId][quantImpulsesOfPacket];
+            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itRdgsInfoDataMap
+                                      ->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1] -
+            itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][quantImpulsesOfPacket];
     }
     return result;
 }
 
-inline double defFullDepthScanLowUpRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int filterId, int selectionId)
+inline double defFullDepthScanLowUpRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int materialId, int filterId, int selectionId)
 {
     double result = 0.0;
     auto itRdgsInfoDataMap = rdgsInfoDataMap.find(nameRdg);
     if (itRdgsInfoDataMap != rdgsInfoDataMap.end())
     {
         if (itRdgsInfoDataMap->first == nameRdg)
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId][itRdgsInfoDataMap
-                                      ->second.vectorRdgData[kRdg].vectorsSumImpulses[countSelectors*filterId+selectionId].size()-1];
+            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itRdgsInfoDataMap
+                                      ->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1];
     }
     return result;
 }
@@ -768,7 +779,7 @@ inline void  createMaskMapAllXY(
 }
 
 inline void createMapRdgTypeRdgSelectionInfo(
-    int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, int filterId, int selectionId,
+    int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, int materialId, int filterId, int selectionId,
     const std::map<int, std::vector<QPair<int, int> > >&  mapAutoLog10RdgPairXY, st_rdgInfoData& rdgInfoData
 )
 {
@@ -776,7 +787,8 @@ inline void createMapRdgTypeRdgSelectionInfo(
     {
         for (int j=0; j < rdgHeight; j++)
         {
-            rdgInfoData.vectorRdgData[i].vectorsSumImpulses[countSelectors*filterId+selectionId][j] = rdgInfoData.vectorRdgData[i].vectorsSumImpulses[countSelectors*filterId][j];
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][j] =
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId            ][j];
         }
     }
 
@@ -802,13 +814,15 @@ inline void createMapRdgTypeRdgSelectionInfo(
                             YIn = mapIter2->second[0];
                             YFn = mapIter2->second[count1+1];
 
-                            sumImpIn = rdgInfoData.vectorRdgData[X].vectorsSumImpulses[countSelectors*filterId+0][YIn];
-                            sumImpFn = rdgInfoData.vectorRdgData[X].vectorsSumImpulses[countSelectors*filterId+0][YFn];
+                            sumImpIn = rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][YIn];
+                            sumImpFn = rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][YFn];
 
                             for (int count2 = YIn; count2<=YFn; count2++)
                             {
-                                if (count2 < (YIn+YFn)/2.0) rdgInfoData.vectorRdgData[X].vectorsSumImpulses[countSelectors*filterId+selectionId][count2] = sumImpIn;
-                                else                        rdgInfoData.vectorRdgData[X].vectorsSumImpulses[countSelectors*filterId+selectionId][count2] = sumImpFn;
+                                if (count2 < (YIn+YFn)/2.0)
+                                    rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][count2] = sumImpIn;
+                                else
+                                    rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][count2] = sumImpFn;
                             }
                         }
                     }
@@ -855,12 +869,6 @@ inline void loadRdgAutoSelection(QString loadRdgAutoSelectionDataFile, std::map<
             count++;
         }
     }
-}
-
-inline double epsdData(int materialId)
-{
-    double epsdData[13] {25, 81, 81, 2.6, 2.5, 19, 2.4, 15, 8, 7, 7, 6, 8};
-    return epsdData[materialId];
 }
 
 inline double convertDoubleEndianness(double value, bool isBigEndianSource) {
@@ -1060,9 +1068,7 @@ inline void moveOpengl(
 }
 
 inline void executeTypeRdgSelectionInfo(
-    int filterId, int selectionId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX,
-    st_rdgInfoData& rdgInfoData, double maxLog10RdgData, double minLog10RdgData,
-    std::vector<QPair<int, int> >& vectorRdgLog10PairXY, std::map<int, std::vector<QPair<int, int> > >&  mapAutoLog10RdgPairXY
+    int materialId, int filterId, int selectionId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, st_rdgInfoData& rdgInfoData
 )
 {
     if (rdgInfoData.vectorRdgData.size()-1 <= absRdgPixelsInX) absRdgPixelsInX = rdgInfoData.vectorRdgData.size()-1;
@@ -1070,23 +1076,21 @@ inline void executeTypeRdgSelectionInfo(
 
     if (absRdgPixelsFnX > absRdgPixelsInX)
     {
-        createVectorRdgLog10PairXY(filterId, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, maxLog10RdgData, minLog10RdgData, rdgInfoData, vectorRdgLog10PairXY);
-        createMapRdgPairXY(vectorRdgLog10PairXY, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, mapAutoLog10RdgPairXY);
-        createMapRdgTypeRdgSelectionInfo(rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, filterId, selectionId, mapAutoLog10RdgPairXY, rdgInfoData);
+        createVectorRdgLog10PairXY(filterId, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, rdgInfoData);
+        createMapRdgPairXY(rdgInfoData.vectorsRdgLog10PairXY[filterId], rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, rdgInfoData.vectorMapAutoLog10RdgPairXY[filterId]);
+        createMapRdgTypeRdgSelectionInfo(rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, materialId, filterId, selectionId, rdgInfoData.vectorMapAutoLog10RdgPairXY[filterId], rdgInfoData);
     }
 }
 
 inline void samplingAllLog10Rdgs(
-    int filterId, std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,
+    int materialId, int filterId, std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,
     std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int absRdgPixelsInX, int absRdgPixelsFnX
 )
 {
     for (auto iter = rdgsNamesVectorPairs.begin(); iter != rdgsNamesVectorPairs.end(); iter++)
     {
         executeTypeRdgSelectionInfo(
-            filterId, 2, rdgsInfoDataMap[iter->first].quantImpulsesOfPacket, absRdgPixelsInX, absRdgPixelsFnX,
-            rdgsInfoDataMap[iter->first], rdgsInfoDataMap[iter->first].vectorMaxLog10RdgData[filterId], rdgsInfoDataMap[iter->first].vectorMinLog10RdgData[filterId],
-            rdgsInfoDataMap[iter->first].vectorsRdgLog10PairXY[filterId], rdgsInfoDataMap[iter->first].vectorMapAutoLog10RdgPairXY[filterId]
+            materialId, filterId, 2, rdgsInfoDataMap[iter->first].quantImpulsesOfPacket, absRdgPixelsInX, absRdgPixelsFnX, rdgsInfoDataMap[iter->first]
         );
     }
 }
@@ -1112,12 +1116,12 @@ inline void allocateMainRdgContainers(st_rdgInfoData& rdgInfoDataMap, int vector
 {
     (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorMinImpulses).resize(countFilters);
     (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorMaxImpulses).resize(countFilters);
-    (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorsSumImpulses).resize(countSelectors*countFilters);
+    (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorsDeeps).resize(countSelectors*countFilters*countMaterials);
     (rdgInfoDataMap.vectorsRdgLog10PairXY).resize(countFilters);
     (rdgInfoDataMap.vectorMapAutoLog10RdgPairXY).resize(countFilters);
 }
 
-inline void createAdditionRdgData(st_rdgInfoData& rdgInfoDataMap, int count1, int quantImpulsesOfPacket, int filterId)
+inline void createRdgDataMinMaxImpulses(st_rdgInfoData& rdgInfoDataMap, int count1, int quantImpulsesOfPacket, int filterId)
 {
     rdgInfoDataMap.vectorRdgData[count1].vectorMinImpulses[filterId] = *std::min_element(
         rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].begin(),
@@ -1128,22 +1132,31 @@ inline void createAdditionRdgData(st_rdgInfoData& rdgInfoDataMap, int count1, in
         rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].begin(),
         rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].end()
     );
+}
 
-    rdgInfoDataMap.vectorRdgData[count1].vectorsSumImpulses[countSelectors*filterId+0].resize(quantImpulsesOfPacket);
+inline void createRdgDataDeeps(st_rdgInfoData& rdgInfoDataMap, int count1, int quantImpulsesOfPacket, int filterId, int materialId)
+{
+    rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId + 0].resize(quantImpulsesOfPacket);
 
-    double sumImpulses = 0;
+    double fixJDeep = 0;
+    double sumDeeps = 0;
+    double sumIntens = 0;
     for (int j=0; j < quantImpulsesOfPacket; j++)
     {
-        sumImpulses += rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId][j];
-        rdgInfoDataMap.vectorRdgData[count1].vectorsSumImpulses[countSelectors*filterId+0][j] = sumImpulses;
+        if (j == 0)    sumIntens  = fabs(rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId][j]*rdgMetricKoeff);
+        else           sumIntens += fabs(rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId][j]*rdgMetricKoeff);
+
+        fixJDeep = 0.5*spc*nanokoef*rdgInfoDataMap.vectorRdgData[count1].time_step_ns/sqrt(epsdData(materialId)*exp(gammaData(materialId)*sumIntens));
+        sumDeeps += fixJDeep;
+        rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][j] = sumDeeps;
     }
 
     for (int count = 1; count <=2; count++)
     {
-        rdgInfoDataMap.vectorRdgData[count1].vectorsSumImpulses[countSelectors*filterId+count].resize(quantImpulsesOfPacket);
+        rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+count].resize(quantImpulsesOfPacket);
     }
-    rdgInfoDataMap.vectorRdgData[count1].vectorsSumImpulses[countSelectors*filterId+1] =
-    rdgInfoDataMap.vectorRdgData[count1].vectorsSumImpulses[countSelectors*filterId+0];
+    rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+1] =
+    rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0];
 }
 
 inline void defAdditionalRdgMainData(std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int quantImpulsesOfPacket)
@@ -1164,16 +1177,20 @@ inline void defAdditionalRdgMainData(std::map<std::string, st_rdgInfoData>& rdgs
                 {
                     if (i == 0)
                     {
-                        mapIter1->second.vectorMaxLog10RdgData[count] = log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]);
-                        mapIter1->second.vectorMinLog10RdgData[count] = log10(1 + mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]);
+                        mapIter1->second.vectorMaxLog10RdgData[count] =
+                                log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]);
+                        mapIter1->second.vectorMinLog10RdgData[count] =
+                                -1.0*log10(1 + fabs(mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]));
                     }
                     else
                     {
                         if (log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]) > mapIter1->second.vectorMaxLog10RdgData[count])
-                            mapIter1->second.vectorMaxLog10RdgData[count] = log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]);
+                            mapIter1->second.vectorMaxLog10RdgData[count] =
+                                    log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]);
 
-                        if (log10(1 + mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]) < mapIter1->second.vectorMinLog10RdgData[count])
-                            mapIter1->second.vectorMinLog10RdgData[count] = log10(1 + mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]);
+                        if (-1.0*log10(1 + fabs(mapIter1->second.vectorRdgData[i].vectorMinImpulses[count])) < mapIter1->second.vectorMinLog10RdgData[count])
+                            mapIter1->second.vectorMinLog10RdgData[count] =
+                                    -1.0*log10(1 + fabs(mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]));
                     }
                 }
             }

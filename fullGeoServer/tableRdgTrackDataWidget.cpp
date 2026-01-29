@@ -15,9 +15,8 @@ tableRdgTrackDataWidget::tableRdgTrackDataWidget(QWidget* parent): QWidget(paren
 
 tableRdgTrackDataWidget::~tableRdgTrackDataWidget(){}
 
-void tableRdgTrackDataWidget::outputRdgTrackDataTable(const st_rdgInfoData& rdgInfoData, int trackRdgNumber, int materialId, int rdgPixelsInY, int rdgPixelsFnY)
+void tableRdgTrackDataWidget::outputRdgTrackDataTable(const st_rdgInfoData& rdgInfoData, int trackRdgNumber, int rdgPixelsInY, int rdgPixelsFnY)
 {
-    m_materialId = materialId;
     showRdgTrackDataTable(rdgInfoData, trackRdgNumber, rdgPixelsInY,  rdgPixelsFnY);
 }
 
@@ -39,7 +38,7 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
         if ( lastRowCount > 0) m_rdgTrackDataModel->m_data.clear();
 
         m_rdgTrackDataModel->m_showLogRdg = m_showLogRdg;
-        m_rdgTrackDataModel->m_columnCount = 3;
+        m_rdgTrackDataModel->m_columnCount = 5;
         m_rdgTrackDataModel->m_rowCount = rdgPixelsFnY - rdgPixelsInY + 1;
 
         for (int i = rdgPixelsInY; i <= rdgPixelsFnY; i++) {
@@ -48,7 +47,7 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
 
             dataVec[0] = QString::number(trackRdgNumber);
             dataVec[1] = QString::number(i*rdgInfoData.vectorRdgData[trackRdgNumber].time_step_ns);
-            if (m_showLogRdg == false)   dataVec[2] = QString::number((rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]*(nanokoef*spc/epsdData(m_materialId)));
+            if (m_showLogRdg == false)   dataVec[2] = QString::number((rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]);
             else
             {
                 double rdgLog10 = 0.0;
@@ -69,6 +68,8 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
 
                 dataVec[2] = QString::number(rdgLog10);
             }
+            dataVec[3] = QString::number(rdgInfoData.vectorRdgData[trackRdgNumber].latitude_degree);
+            dataVec[4] = QString::number(rdgInfoData.vectorRdgData[trackRdgNumber].longitude_degree);
 
             m_rdgTrackDataModel->m_data.append(dataVec);
         }

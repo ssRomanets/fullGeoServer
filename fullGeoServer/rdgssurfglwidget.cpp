@@ -34,6 +34,9 @@ void rdgsSurfGlWidget::setupRdgsSurfProperties(
 )
 {
     m_materialId = materialId;
+    m_filterId    = filterId;
+    m_selectionId = selectionId;
+
     m_highLowOnRdg = highLowOnRdg;
 
     if (m_showFullRdgs != showFullRdgs) resetSectPoints2dRdgs = true;
@@ -53,15 +56,12 @@ void rdgsSurfGlWidget::setupRdgsSurfProperties(
     m_deltaLatitude  = rdgsWorkData.deltaLatitude;
     m_deltaLongitude = rdgsWorkData.deltaLongitude;
 
-    m_filterId    = filterId;
-    m_selectionId = selectionId;
-
     m_wheelActive = false;
 
     m_absRdgsStructInX = absRdgsStructInX;
     m_absRdgsStructFnX = (absRdgsStructFnX >= m_rdgsSurfWidth-1) ? m_rdgsSurfWidth-1 : absRdgsStructFnX;
 
-    defMaxSumImpulses(rdgsInfoDataMap, m_filterId, m_selectionId, m_maxSumImpulses, m_absRdgsStructInX, m_absRdgsStructFnX);
+    defMaxDeep(rdgsInfoDataMap, m_materialId, m_filterId, m_selectionId, m_maxDeep, m_absRdgsStructInX, m_absRdgsStructFnX);
 
     m_rdgsSurfPixelsWidth  = m_absRdgsStructFnX-m_absRdgsStructInX+1;
     m_rdgsSurfPixelsHeight = m_rdgsSurfHeight;
@@ -119,52 +119,52 @@ void rdgsSurfGlWidget::setupRdgsSurfPixels(const std::map<std::string, st_rdgInf
 
             if (m_highLowOnRdg)
             {
-                if (nameRdg != "") depthScanOnTrackRdg = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
+                if (nameRdg != "") depthScanOnTrackRdg = defDepthScanUpLowRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
                 levelColor = (int)((m_vectorTuplesColorsRdgsSurf.size()-1)*((
-                    rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId))
-                )/(rdgsWorkData.maxRelief - rdgsWorkData.minRelief + m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId)))));
+                    rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg)
+                )/(rdgsWorkData.maxRelief - rdgsWorkData.minRelief + m_maxDeep)));
                 if (i == m_rdgsSurfPixelsInX && j == m_rdgsSurfPixelsInY)
                 {
-                    m_minHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId)));
-                    m_maxHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId)));
+                    m_minHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg));
+                    m_maxHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg));
                 }
                 else
                 {
-                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId))) < m_minHeightResultRelief)
-                        m_minHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId)));
+                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg)) < m_minHeightResultRelief)
+                        m_minHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg));
 
-                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId))) > m_maxHeightResultRelief)
-                        m_maxHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxSumImpulses - depthScanOnTrackRdg)*(nanokoef*spc/epsdData(m_materialId)));
+                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg)) > m_maxHeightResultRelief)
+                        m_maxHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j] - rdgsWorkData.minRelief + (m_maxDeep - depthScanOnTrackRdg));
                 }
             }
             else
             {
-                if (nameRdg != "") depthScanOnTrackRdg = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_filterId, m_selectionId);
+                if (nameRdg != "") depthScanOnTrackRdg = defDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_quantImpulsesOfPacket, m_materialId, m_filterId, m_selectionId);
                 double fullDepthScanOnTrackRdg = 0.0;
-                if (nameRdg == "") fullDepthScanOnTrackRdg = m_maxSumImpulses;
-                else               fullDepthScanOnTrackRdg = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_filterId, m_selectionId);
+                if (nameRdg == "") fullDepthScanOnTrackRdg = m_maxDeep;
+                else               fullDepthScanOnTrackRdg = defFullDepthScanLowUpRdg(rdgsInfoDataMap, nameRdg, kRdg, m_materialId, m_filterId, m_selectionId);
 
                 levelColor = (int)((m_vectorTuplesColorsRdgsSurf.size()-1)*((
                     rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief +
-                    (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId))
-                )/(rdgsWorkData.maxRelief - rdgsWorkData.minRelief + m_maxSumImpulses*(nanokoef*spc/epsdData(m_materialId)))));
+                    (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))
+                )/(rdgsWorkData.maxRelief - rdgsWorkData.minRelief + m_maxDeep)));
 
                 if (i == m_rdgsSurfPixelsInX && j == m_rdgsSurfPixelsInY)
                 {
                     m_minHeightResultRelief =
                             (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief +
-                            (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId)));
+                            (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg)));
                     m_maxHeightResultRelief =
                             (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief +
-                            (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId)));
+                            (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg)));
                 }
                 else
                 {
-                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId))) < m_minHeightResultRelief)
-                        m_minHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId)));
+                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))) < m_minHeightResultRelief)
+                        m_minHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg)));
 
-                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId))) > m_maxHeightResultRelief)
-                        m_maxHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxSumImpulses - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))*(nanokoef*spc/epsdData(m_materialId)));
+                    if ((-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg))) > m_maxHeightResultRelief)
+                        m_maxHeightResultRelief = (-1.0)*(rdgsWorkData.vectorRdgsFnRelief[i][j]  - rdgsWorkData.minRelief + (m_maxDeep - (fullDepthScanOnTrackRdg - depthScanOnTrackRdg)));
                 }
             }
 

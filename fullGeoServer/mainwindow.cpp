@@ -46,10 +46,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_mainLayout->addWidget(m_stackedWidget);
 
     m_materialComboBox = new QComboBox(this);
-    m_materialComboBox->addItem("Песчанная почва влажная");
     m_materialComboBox->addItem("Пресная вода");
     m_materialComboBox->addItem("Морская вода");
     m_materialComboBox->addItem("Песчанная почва сухая");
+    m_materialComboBox->addItem("Песчанная почва влажная");
     m_materialComboBox->addItem("Суглинок сухой");
     m_materialComboBox->addItem("Суглинок влажный");
     m_materialComboBox->addItem("Глинистая почва сухая");
@@ -59,6 +59,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_materialComboBox->addItem("Гранитный сланец влажный");
     m_materialComboBox->addItem("Песчаник влажный");
     m_materialComboBox->addItem("Известняк влажный");
+    
     m_materialComboBox->setCurrentIndex(m_materialId);
     m_materialComboBox->setFixedHeight(20);
     m_materialComboBox->setFixedWidth(200);
@@ -511,7 +512,7 @@ void MainWindow::setupRdgCurrentName()
 
 void MainWindow::setupRdgControls()
 {
-    m_rdg2dWidget->showNewRdg(m_rdgCurrentName, m_materialId);
+    m_rdg2dWidget->showNewRdg(m_rdgCurrentName);
     m_materialComboBox->setVisible(true);
     if (m_stackedWidget->currentIndex() == 0)
     {
@@ -650,7 +651,7 @@ void MainWindow::scrollHRdgsLengthBarResetDataAtRdgsImages()
             openScrollHRdgsLengthBar(true);
         else
             samplingAllLog10Rdgs(
-                m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
+                m_materialId, m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
                 0, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfWidth-1
             );
     }
@@ -660,7 +661,7 @@ void MainWindow::scrollHRdgsLengthBarResetDataAtRdgsImages()
             openScrollHRdgsLengthBar(true);
         else
             samplingAllLog10Rdgs(
-                m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
+                m_materialId, m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
                 0, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfMinWidth-1
             );
     }
@@ -1522,7 +1523,7 @@ void MainWindow::moveOnAnyRdgsImage(int scrollHRdgsLengthBarPos)
         {
             //обработка логарифмического образа по всем радарограммам (она обязательна)
             samplingAllLog10Rdgs(
-                m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
+                m_materialId, m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
                 scrollHRdgsLengthBarPos-limitRdgWidth+1, scrollHRdgsLengthBarPos
             );
 

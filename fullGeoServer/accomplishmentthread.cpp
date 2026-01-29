@@ -116,24 +116,31 @@ void accomplishmentThread::run()
                                 for (int k = 0; k <= countFilters-1; k++)
                                 {
                                     m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData[k].
-                                    push_back(fabs(correctDoubleValue(m_dataTrzList[count], m_parserDataTrzVectors[count][i].second, i, 9+8*j)/(double)(k+1)));
+                                    push_back(correctDoubleValue(m_dataTrzList[count], m_parserDataTrzVectors[count][i].second, i, 9+8*j)/(double)(k+1));
                                 }
                             }
 
                         }
                     }
 
-                    emit sendProgressData(count, m_dataTrzList.size()+1);
+                    emit sendProgressData(count, m_dataTrzList.size()+2+countMaterials);
                 }
 
-                //Занимаемся фильтрами
+                //Занимаемся фильтрами и веществами
                 tracingOfDefiningRdgFilterData(rdgNamesVector);
+                emit sendProgressData(m_dataTrzList.size(), m_dataTrzList.size()+2+countMaterials);
+                
+                for (int count = 0; count <= countMaterials-1; count++)
+                {
+                    tracingOfDefiningRdgMaterialData(rdgNamesVector, count);
+                    emit sendProgressData(m_dataTrzList.size() + count + 1, m_dataTrzList.size()+2+countMaterials);
+                }
 
                 defAdditionalRdgMainData(m_rdgsInfoDataMap, quantImpulsesOfPacket);
-                emit sendProgressData(m_dataTrzList.size(), m_dataTrzList.size()+1);
+                emit sendProgressData(m_dataTrzList.size()+1+countMaterials, m_dataTrzList.size()+2+countMaterials);
 
                 correctRdgData(m_rdgsInfoDataMap, m_st_rdgsWorkData, m_rdgsNamesVectorPairs, m_fullFileNameTrzVector[count]);
-                emit sendProgressData(m_dataTrzList.size()+1, m_dataTrzList.size()+1);
+                emit sendProgressData(m_dataTrzList.size()+2+countMaterials, m_dataTrzList.size()+2+countMaterials);
             }
 
             emit signalEndAccThread(m_rdgsNamesVectorPairs, RdgFileFormat::Trz);
@@ -230,10 +237,10 @@ void accomplishmentThread::run()
                                         m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[count2].vectorsDoubleData.resize(countFilters);
 
                                         for (int k = 0; k <= countFilters-1; k++)
-                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[count2].vectorsDoubleData[k].push_back(fabs((line.split(";").at(count3)).toInt()/(double)(k+1)));
+                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[count2].vectorsDoubleData[k].push_back((line.split(";").at(count3)).toInt()/(double)(k+1));
                                     }
 
-                                    emit sendProgressData(count2+1, m_dataPropsCsvList[count].split('\n').size()+4);
+                                    emit sendProgressData(count2+1, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
                                     count2++;
                                 }
                             }
@@ -243,14 +250,21 @@ void accomplishmentThread::run()
                     /////////////////////////////
                     std::string rdgFilesFullData = m_fullFileNameDataCsvVector[count] + "&&&&" + m_fullFileNamePropsCsvVector[count];
 
-                    //Занимаемся фильтрами
+                    //Занимаемся фильтрами и материалами
                     tracingOfDefiningRdgFilterData(rdgNamesVector);
+                    emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+3, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
+                    
+                    for (int count1 = 0; count1 <= countMaterials-1; count1++)
+                    {
+                        tracingOfDefiningRdgMaterialData(rdgNamesVector, count1);
+                        emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+4+count1, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
+                    }
 
                     defAdditionalRdgMainData(m_rdgsInfoDataMap, quantImpulsesOfPacket);
-                    emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+3, m_dataPropsCsvList[count].split('\n').size()+4);
+                    emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+4+countMaterials, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
 
                     correctRdgData(m_rdgsInfoDataMap, m_st_rdgsWorkData, m_rdgsNamesVectorPairs, rdgFilesFullData);
-                    emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+4, m_dataPropsCsvList[count].split('\n').size()+4);
+                    emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+5+countMaterials, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
                 }
             }
 
@@ -307,7 +321,7 @@ void accomplishmentThread::run()
                                         m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData.resize(countFilters);
 
                                         for (int k = 0; k <= countFilters-1; k++)
-                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData[k].push_back(fabs(flat_data[i])/(double)(k+1));
+                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData[k].push_back(flat_data[i]/(double)(k+1));
                                     }
 
                                     //Чтение данных и атрибутов
@@ -349,7 +363,7 @@ void accomplishmentThread::run()
                                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[j].vectorsDoubleData.resize(countFilters);
 
                                             for (int k = 0; k <= countFilters-1; k++)
-                                                m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[j].vectorsDoubleData[k].push_back(fabs(flat_data[i * dims[1] + j])/(double)(k+1));
+                                                m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[j].vectorsDoubleData[k].push_back(flat_data[i * dims[1] + j]/(double)(k+1));
                                         }
                                     }
 
@@ -394,19 +408,25 @@ void accomplishmentThread::run()
                         error.printErrorStack();
                     }
                 }
-                emit sendProgressData(0, m_filesRdgNamesHdf5Vectors[count].size()+1);
+                emit sendProgressData(0, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
 
                 if (rdgInfoDataKey != "")
                 {
                     //Занимаемся фильтрами
                     tracingOfDefiningRdgFilterData(rdgNamesVector);
+                    emit sendProgressData( m_filesRdgNamesHdf5Vectors[count].size(), m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+
+                    for (int count1 = 0; count1 <= countMaterials-1; count1++)
+                    {
+                        tracingOfDefiningRdgMaterialData(rdgNamesVector, count1);
+                        emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+2+count1+1, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+                    }
 
                     defAdditionalRdgMainData(m_rdgsInfoDataMap,  quantImpulsesOfPacket);
-
-                    emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size(), m_filesRdgNamesHdf5Vectors[count].size()+1);
+                    emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+2+countMaterials, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
 
                     correctRdgData(m_rdgsInfoDataMap, m_st_rdgsWorkData, m_rdgsNamesVectorPairs, m_fullFileNameHdf5Vector[count]);
-                    emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+1, m_filesRdgNamesHdf5Vectors[count].size()+1);
+                    emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
                 }
             }
 
@@ -749,19 +769,34 @@ void accomplishmentThread::clearWorkData()
 
 void accomplishmentThread::tracingOfDefiningRdgFilterData(const std::vector<std::string>& rdgNamesVector)
 {
-    int rdgId = -1;
     for (auto iter = m_rdgsInfoDataMap.begin(); iter != m_rdgsInfoDataMap.end(); iter++)
     {
-        rdgId++;
         auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), iter->first) };
         if (findingRdg == end(rdgNamesVector))
         {
             definingRdgFilterData(m_rdgsInfoDataMap[iter->first], 1);
+
             for (int count = 0; count <= m_rdgsInfoDataMap[iter->first].vectorRdgData.size()-1; count++)
             {
                 allocateMainRdgContainers(m_rdgsInfoDataMap[iter->first], count);
                 for (int k = 0; k <= countFilters-1; k++)
-                    createAdditionRdgData(m_rdgsInfoDataMap[iter->first], count, m_rdgsInfoDataMap[iter->first].vectorRdgData[count].vectorsDoubleData[k].size(), k);
+                    createRdgDataMinMaxImpulses(m_rdgsInfoDataMap[iter->first], count, m_rdgsInfoDataMap[iter->first].vectorRdgData[count].vectorsDoubleData[k].size(), k);
+            }
+        }
+    }
+}
+
+void accomplishmentThread::tracingOfDefiningRdgMaterialData(const std::vector<std::string>& rdgNamesVector, int materialId)
+{
+    for (auto iter = m_rdgsInfoDataMap.begin(); iter != m_rdgsInfoDataMap.end(); iter++)
+    {
+        auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), iter->first) };
+        if (findingRdg == end(rdgNamesVector))
+        {
+            for (int count = 0; count <= m_rdgsInfoDataMap[iter->first].vectorRdgData.size()-1; count++)
+            {
+                for (int k = 0; k <= countFilters-1; k++)
+                    createRdgDataDeeps(m_rdgsInfoDataMap[iter->first], count, m_rdgsInfoDataMap[iter->first].vectorRdgData[count].vectorsDoubleData[k].size(), k, materialId);
             }
         }
     }

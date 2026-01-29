@@ -15,6 +15,7 @@ public:
     void run();
     void clearWorkData();
     void tracingOfDefiningRdgFilterData(const std::vector<std::string>& rdgNamesVector);
+    void tracingOfDefiningRdgMaterialData(const std::vector<std::string>& rdgNamesVector, int materialId);
 
 public:
     std::map<std::string, st_rdgInfoData> m_rdgsInfoDataMap;

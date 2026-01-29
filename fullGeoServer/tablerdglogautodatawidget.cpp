@@ -36,7 +36,7 @@ void tableRdgLogAutoDataWidget::showRdgLogAutoDataMainModel(int rdgPixelsInX, in
        if (m_rdgLogAutoDataModel->m_data.size() > 0) lastRowCount = m_rdgLogAutoDataModel->m_data.size();
        if ( lastRowCount > 0) m_rdgLogAutoDataModel->m_data.clear();
 
-       m_rdgLogAutoDataModel->m_columnCount = 4;
+       m_rdgLogAutoDataModel->m_columnCount = 6;
 
        m_time_step_ns = rdgInfoData.vectorRdgData[0].time_step_ns;
 
@@ -53,6 +53,8 @@ void tableRdgLogAutoDataWidget::showRdgLogAutoDataMainModel(int rdgPixelsInX, in
                    dataVec[1] = QString::number(itMap->second[i].first);
                    dataVec[2] = QString::number(itMap->second[i].second);
                    dataVec[3] = QString::number(itMap->second[i].second*rdgInfoData.vectorRdgData[itMap->second[i].first].time_step_ns);
+                   dataVec[4] = QString::number(rdgInfoData.vectorRdgData[itMap->second[i].first].latitude_degree);
+                   dataVec[5] = QString::number(rdgInfoData.vectorRdgData[itMap->second[i].first].longitude_degree);
                    m_rdgLogAutoDataModel->m_data.append(dataVec);
                }
            }
@@ -97,5 +99,5 @@ void tableRdgLogAutoDataWidget::receiveLoadMapRdgPairXY(int rdgPixelsInX, int rd
 
 void tableRdgLogAutoDataWidget::saveRdgAutoSelectionData(QString saveRdgAutoSelectionDataFile)
 {
-   if (m_mapRdgPairXY.size() > 0)      saveRdgAutoSelection(m_mapRdgPairXY, m_time_step_ns, saveRdgAutoSelectionDataFile);
+   if (m_mapRdgPairXY.size() > 0) saveRdgAutoSelection(m_mapRdgPairXY, m_time_step_ns, saveRdgAutoSelectionDataFile);
 }
