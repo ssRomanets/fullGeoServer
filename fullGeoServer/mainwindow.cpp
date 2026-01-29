@@ -1249,6 +1249,8 @@ void MainWindow::materialIdChanged(int materialId)
 {
     m_materialId = materialId;
 
+    scrollHRdgsLengthBarResetDataAtRdgsImages();
+
     if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != "")  showRdgImage(false);
     else if (m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap.size()>1)
         outputRdgsData(
@@ -1415,7 +1417,7 @@ void MainWindow::changeRdg(int rdgId)
     m_rdgCurrentName = m_rdgsNamesVectorPairs[rdgId].first;
 
     showRdgImage(true);
-//    openScrollHRdgsLengthBar(true);
+    openScrollHRdgsLengthBar(true);
 }
 
 void MainWindow::leftChangeRdg()
