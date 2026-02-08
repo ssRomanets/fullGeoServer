@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_mainLayout->addWidget(m_stackedWidget);
 
     m_materialComboBox = new QComboBox(this);
+    m_materialComboBox->addItem("Лед");
     m_materialComboBox->addItem("Пресная вода");
     m_materialComboBox->addItem("Морская вода");
     m_materialComboBox->addItem("Песчанная почва сухая");
@@ -1452,7 +1453,7 @@ void MainWindow::openScrollHRdgsLengthBar(bool visible)
                 int rdgWidth = m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgCurrentName].vectorRdgData.size();
 
                 if (rdgWidth > limitRdgWidth)
-                {
+                 {
                     m_scrollHRdgsLengthBar->setVisible(visible);
                     setupScrollHRdgsLengthBarData(limitRdgWidth-1, limitRdgWidth-1 , rdgWidth-1);
                 }

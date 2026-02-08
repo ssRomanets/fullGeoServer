@@ -73,7 +73,7 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
         {
             if (m_showLogRdg == false)
             {
-                if (m_normActCheckBox->checkState() == 0) m_axisX->setTitleText("Яркость сканирования по каждому треку mm");
+                if (m_normActCheckBox->checkState() == 0) m_axisX->setTitleText("Яркость сканирования по каждому треку mkm");
                 else                                      m_axisX->setTitleText("Нормированная яркость сканирования по каждому треку");
             }
             else

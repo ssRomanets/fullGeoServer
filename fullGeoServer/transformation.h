@@ -26,7 +26,7 @@
 
 #define countSelectors 3
 #define countFilters   2
-#define countMaterials 13
+#define countMaterials 14
 
 #define nanokoef 0.000000001
 #define spc        300000000
@@ -47,13 +47,13 @@
 
 inline double epsdData(int materialId)
 {
-    double epsdData[13] {81, 81, 2.6, 25, 2.5, 19, 2.4, 15, 8, 7, 7, 6, 8};
+    double epsdData[14] {3.2, 81, 81, 2.6, 25, 2.5, 19, 2.4, 15, 8, 7, 7, 6, 8};
     return epsdData[materialId];
 }
 
 inline double gammaData(int materialId)
 {
-    double gammaData[13] {0.18, 330, 0.14, 2.3, 0.11, 7.9, 0.28, 20, 5.6, 0.62, 45, 24, 14};
+    double gammaData[14] {0.1, 0.18, 330, 0.14, 2.3, 0.11, 7.9, 0.28, 20, 5.6, 0.62, 45, 24, 14};
     return gammaData[materialId];
 }
 
