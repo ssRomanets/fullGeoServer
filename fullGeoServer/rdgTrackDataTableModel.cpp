@@ -29,7 +29,7 @@ QVariant rdgTrackDataTableModel::headerData(int section, Qt::Orientation orienta
     {
         if (section  == 0) return "track number";
         if (section  == 1) return "time delay ns";
-        if (section  == 2) if (m_showLogRdg == false) return "Глубина в mm"; else return "Глубина log";
+        if (section  == 2) if (m_showLogRdg == false) return "Глубина в m"; else return "Глубина log";
         if (section  == 3) return "latitude";
         if (section  == 4) return "longitude";
     }

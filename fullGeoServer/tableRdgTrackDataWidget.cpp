@@ -44,10 +44,10 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
         for (int i = rdgPixelsInY; i <= rdgPixelsFnY; i++) {
             QVector<QString> dataVec;
             dataVec.resize(m_rdgTrackDataModel->m_columnCount);
-
             dataVec[0] = QString::number(trackRdgNumber);
             dataVec[1] = QString::number(i*rdgInfoData.vectorRdgData[trackRdgNumber].time_step_ns);
-            if (m_showLogRdg == false)   dataVec[2] = QString::number((rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]);
+
+            if (m_showLogRdg == false) dataVec[2] = QString::number(rdgMetricKoeff*(rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]);
             else
             {
                 double rdgLog10 = 0.0;
@@ -68,9 +68,9 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
 
                 dataVec[2] = QString::number(rdgLog10);
             }
+
             dataVec[3] = QString::number(rdgInfoData.vectorRdgData[trackRdgNumber].latitude_degree);
             dataVec[4] = QString::number(rdgInfoData.vectorRdgData[trackRdgNumber].longitude_degree);
-
             m_rdgTrackDataModel->m_data.append(dataVec);
         }
 

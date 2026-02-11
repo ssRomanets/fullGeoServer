@@ -52,7 +52,7 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
             if (m_showLogRdg == false)
             {
                 if (m_normActCheckBox->checkState() == 0)
-                    m_rdgLineSeries->append((rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i], i);
+                    m_rdgLineSeries->append(rdgMetricKoeff*(rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i], i);
                 else
                 {
                     m_rdgLineSeries->append(
@@ -73,7 +73,7 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
         {
             if (m_showLogRdg == false)
             {
-                if (m_normActCheckBox->checkState() == 0) m_axisX->setTitleText("Яркость сканирования по каждому треку mkm");
+                if (m_normActCheckBox->checkState() == 0) m_axisX->setTitleText("Яркость сканирования по каждому треку m");
                 else                                      m_axisX->setTitleText("Нормированная яркость сканирования по каждому треку");
             }
             else
@@ -97,8 +97,8 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
                 if (m_showLogRdg == false)
                 {
                     m_axisX->setRange(
-                        rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId],
-                        rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]
+                        rdgMetricKoeff*rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId],
+                        rdgMetricKoeff*rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]
                     );
                 }
                 else
