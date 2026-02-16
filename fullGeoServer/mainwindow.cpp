@@ -65,6 +65,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_materialComboBox->setFixedHeight(20);
     m_materialComboBox->setFixedWidth(200);
 
+    m_labelHRdgsLengthBar  = new QLabel("Проход по длинной радарограмме ");
     m_scrollHRdgsLengthBar = new QScrollBar(Qt::Horizontal);
     m_scrollHRdgsLengthBar->setFocusPolicy(Qt::StrongFocus);
     m_scrollHRdgsLengthBar->setFixedHeight(20);
@@ -76,6 +77,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_rdgQuantImpulsesSlider->setSingleStep(1);
     m_rdgQuantImpulsesSlider->setTickPosition(QSlider::TicksRight);
 
+    m_rdgsTransitLabel  = new QLabel("Переход по радарограммам ");
     m_rdgsTransitSlider = new QSlider(Qt::Horizontal);
     m_rdgsTransitSlider->setSingleStep(1);
     m_rdgsTransitSlider->setTickPosition(QSlider::TicksRight);
@@ -89,11 +91,13 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 
     m_lowLayout  = new QHBoxLayout;
     m_lowLayout->addWidget(m_materialComboBox);
+    m_lowLayout->addWidget(m_labelHRdgsLengthBar);
     m_lowLayout->addWidget(m_scrollHRdgsLengthBar);
 
     m_lowLayout->addWidget(m_rdgQuantImpulsesLabel);
     m_lowLayout->addWidget(m_rdgQuantImpulsesSlider);
 
+    m_lowLayout->addWidget(m_rdgsTransitLabel);
     m_lowLayout->addWidget(m_leftRdgsTransitButton);
     m_lowLayout->addWidget(m_rdgsTransitSlider);
     m_lowLayout->addWidget(m_rightRdgsTransitButton);
@@ -146,8 +150,8 @@ void MainWindow::setupLastRdgs()
 
     readLastNamesRdgsFromSettings(m_filesRdgNamesTrz, m_trzNumAntennasVector, m_filesRdgNamesCsv, m_infoRdgsHdf5Names);
 
-    if      (m_trzNumAntennasVector.size() > 0) m_rdg2dWidget->setupTrzRdgs(m_filesRdgNamesTrz, m_trzNumAntennasVector, m_rdgsNamesVectorPairs);
-    else if (m_filesRdgNamesCsv.size()     > 0) m_rdg2dWidget->setupCsvRdgs(m_filesRdgNamesCsv, m_rdgsNamesVectorPairs);
+    if      (m_trzNumAntennasVector.size() > 0) m_rdg2dWidget->setupTrzRdgs (m_filesRdgNamesTrz, m_trzNumAntennasVector, m_rdgsNamesVectorPairs);
+    else if (m_filesRdgNamesCsv.size()     > 0) m_rdg2dWidget->setupCsvRdgs (m_filesRdgNamesCsv, m_rdgsNamesVectorPairs);
     else if (m_infoRdgsHdf5Names.size()    > 0) m_rdg2dWidget->setupHdf5Rdgs(m_infoRdgsHdf5Names, m_rdgsNamesVectorPairs);
 }
 
@@ -900,7 +904,7 @@ void MainWindow::closeEvent(QCloseEvent *event)
 void MainWindow::showRdgImage(bool changeRdg)
 {
     if (changeRdg == true) resetRdgSelection(false);
-    m_rdg2dWidget->outputNewImage(m_rdgCurrentName, m_materialId, m_filterId);
+    m_rdg2dWidget->outputNewImage(m_rdgCurrentName, m_materialId, m_filterId, m_selectionId);
 }
 
 void MainWindow::setCloseSection2dAction()
@@ -1149,8 +1153,7 @@ void MainWindow::setInitRdg()
     m_rdgs3dWidget->setShowLogRdgsTrans(false);
     if      (m_stackedWidget->currentIndex() == 0) showRdgImage(false);
     else if (m_stackedWidget->currentIndex() == 2) m_rdgs3dWidget->representRdgsTransGlWidget(
-        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
-        m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData
+        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData
     );
 }
 
@@ -1160,8 +1163,7 @@ void MainWindow::setLogRdg()
     m_rdgs3dWidget->setShowLogRdgsTrans(true);
     if (m_stackedWidget->currentIndex() == 0) showRdgImage(false);
     else if (m_stackedWidget->currentIndex() == 2) m_rdgs3dWidget->representRdgsTransGlWidget(
-        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
-        m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData
+        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData
     );
 }
 
@@ -1229,6 +1231,7 @@ void MainWindow::impulsesRdgControlsVisible(bool visible)
 
 void MainWindow::rdgsTransitControlsVisible(bool visible)
 {
+    m_rdgsTransitLabel->setVisible(visible);
     m_rdgsTransitSlider->setVisible(visible);
     m_leftRdgsTransitButton->setVisible(visible);
     m_rightRdgsTransitButton->setVisible(visible);
@@ -1250,14 +1253,16 @@ void MainWindow::materialIdChanged(int materialId)
 {
     m_materialId = materialId;
 
-    scrollHRdgsLengthBarResetDataAtRdgsImages();
 
     if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != "")  showRdgImage(false);
-    else if (m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap.size()>1)
+    else if (m_stackedWidget->currentIndex() > 0 && m_recentRdgsFileActsVector.size() > 1)
+    {
+        scrollHRdgsLengthBarResetDataAtRdgsImages();
         outputRdgsData(
             m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
             m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
         );
+    }
 }
 
 void MainWindow::includeFilterOnRdg()
@@ -1265,11 +1270,7 @@ void MainWindow::includeFilterOnRdg()
     if (m_includeFilterOnRdgAction->isChecked()) m_filterId = 1;
     else                                         m_filterId = 0;
 
-    if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != "")
-    {
-        openScrollHRdgsLengthBar(true);
-        showRdgImage(false);
-    }
+    if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != "")    showRdgImage(false);
     else if (m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap.size()>1)
     {
         scrollHRdgsLengthBarResetDataAtRdgsImages();
@@ -1308,10 +1309,16 @@ void MainWindow::useSelectionOnRdg()
             m_useAutoSelectionAct->setChecked(true);
         }
 
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
-            m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
-        );
+        if (m_stackedWidget->currentIndex() == 0)
+            m_rdg2dWidget->outputNewImage(m_rdgCurrentName, m_materialId, m_filterId, m_selectionId);
+        else
+        {
+            outputRdgsData(
+                m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+                m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
+            );
+        }
+
         statusBar()->showMessage(action->data().toString());
     }
 }
@@ -1441,11 +1448,14 @@ void MainWindow::rightChangeRdg()
 
 void MainWindow::openScrollHRdgsLengthBar(bool visible)
 {
-    m_scrollHRdgsLengthBar->setVisible(false);
-
-    if (visible == false) m_scrollHRdgsLengthBar->setVisible(visible);
+    if (visible == false)
+    {
+        m_labelHRdgsLengthBar->setVisible(visible);
+        m_scrollHRdgsLengthBar->setVisible(visible);
+    }
     else if (m_rdgCurrentName != "")
     {
+        bool changeScrollHRdgsLength = false;
         switch (m_stackedWidget->currentIndex())
         {
             case 0:
@@ -1453,7 +1463,9 @@ void MainWindow::openScrollHRdgsLengthBar(bool visible)
                 int rdgWidth = m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgCurrentName].vectorRdgData.size();
 
                 if (rdgWidth > limitRdgWidth)
-                 {
+                {
+                    changeScrollHRdgsLength = true;
+                    m_labelHRdgsLengthBar->setVisible(visible);
                     m_scrollHRdgsLengthBar->setVisible(visible);
                     setupScrollHRdgsLengthBarData(limitRdgWidth-1, limitRdgWidth-1 , rdgWidth-1);
                 }
@@ -1467,16 +1479,26 @@ void MainWindow::openScrollHRdgsLengthBar(bool visible)
 
                 if (m_showFullRdgsAction->isChecked() && (rdgsSurfWidth > limitRdgWidth))
                 {
+                    changeScrollHRdgsLength = true;
+                    m_labelHRdgsLengthBar->setVisible(visible);
                     m_scrollHRdgsLengthBar->setVisible(visible);
                     setupScrollHRdgsLengthBarData(limitRdgWidth-1,limitRdgWidth-1, rdgsSurfWidth-1);
                 }
                 else if (rdgsSurfWidthMin > limitRdgWidth)
                 {
+                    changeScrollHRdgsLength = true;
+                    m_labelHRdgsLengthBar->setVisible(visible);
                     m_scrollHRdgsLengthBar->setVisible(visible);
                     setupScrollHRdgsLengthBarData(limitRdgWidth-1,limitRdgWidth-1, rdgsSurfWidthMin-1);
                 }
                 break;
             }
+        }
+
+        if (changeScrollHRdgsLength == false)
+        {
+            m_labelHRdgsLengthBar->setVisible(false);
+            m_scrollHRdgsLengthBar->setVisible(false);
         }
     }
 }
@@ -1542,7 +1564,6 @@ void MainWindow::moveOnAnyRdgsImage(int scrollHRdgsLengthBarPos)
                     m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnRdg,  m_showFullRdgs, true,
                      m_materialId, scrollHRdgsLengthBarPos-limitRdgWidth+1, scrollHRdgsLengthBarPos
                 );
-
             break;
         }
     }

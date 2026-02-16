@@ -27,7 +27,7 @@ public:
     void setupCsvRdgs(const QStringList& filesRdgNamesCsv, std::vector<std::pair<std::string, std::string>>& rdgsNamesVectorPairs);
     void setupHdf5Rdgs(const QStringList& infoRdgsHdf5Names, std::vector<std::pair<std::string, std::string>>& rdgsNamesVectorPairs);
 
-    void outputNewImage(const std::string& fileName,int materialId, int filterId);
+    void outputNewImage(const std::string& fileName, int materialId, int filterId, int selectionId);
     void setShowLogRdg(bool showLogRdg);
     void showNewRdg(const std::string& rdgName);
 

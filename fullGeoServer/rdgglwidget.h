@@ -21,8 +21,8 @@ public:
 
     QPainter m_painter;
 
-    int m_materialId {0};
-    int m_filterId   {0};
+    int m_materialId     {0};
+    int m_filterId       {0};
     std::string m_rdgName {""};
 
     int m_lowPixelLevel;
@@ -67,7 +67,9 @@ public:
     void setShowInitRdgSelection(bool showInitRdgSelection);
     void resetRdgSelection(bool clearSelectRdgPoints, std::string rdgName);
 
-    void setupRdgProperties(const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX);
+    void setupRdgProperties(
+        const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX
+    );
 
     void setLowPixelLevel(int lowPixelLevel);
     void setHighPixelLevel(int highPixelLevel);

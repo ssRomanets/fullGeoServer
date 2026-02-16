@@ -55,7 +55,10 @@ SOURCES += \
     structureRdgsGraph.cpp \
     structureRdgsWidget.cpp \
     correctRdgsSurfDialog.cpp \
-    colorsPaletteDialog.cpp
+    colorsPaletteDialog.cpp \
+    sectionDeepRdgWidget.cpp \
+    deepRdgTrackDataTableModel.cpp \
+    tableDeepRdgTrackDataWidget.cpp
 
 HEADERS += \
         mainwindow.h \
@@ -82,7 +85,10 @@ HEADERS += \
     structureRdgsGraph.h \
     structureRdgsWidget.h \
     correctRdgsSurfDialog.h \
-    colorsPaletteDialog.h
+    colorsPaletteDialog.h \
+    sectionDeepRdgWidget.h \
+    deepRdgTrackDataTableModel.h \
+    tableDeepRdgTrackDataWidget.h
 
 RESOURCES += \
     item.qrc

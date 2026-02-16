@@ -36,10 +36,10 @@ void sectionRdgWidget::setTitle(const QString& titleSection)
     m_titleSection = titleSection;
 }
 
-void sectionRdgWidget::outputSectionChart(const QString& trzFileCurrent)
+void sectionRdgWidget::outputSectionChart(const QString& fileCurrent)
 {
    m_contentWidget->createDefaultChartView(m_chart);
-   m_chart->setTitle(m_titleSection+" "+trzFileCurrent);
+   m_chart->setTitle(m_titleSection+" "+fileCurrent);
 }
 
 void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
@@ -124,13 +124,12 @@ void sectionRdgWidget::removeRdgSection()
 }
 
 void sectionRdgWidget::outputRdgSection(
-    const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int trackRdgNumber,
-    int rdgPixelsInY, int rdgPixelsFnY, int pageRdgDataIndex
+    const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int trackRdgNumber,  int rdgPixelsInY, int rdgPixelsFnY
 )
 {
     m_rdgName = rdgName;
     if (m_normActCheckBox->isEnabled() == false)  m_normActCheckBox->setEnabled(true);
-    if (pageRdgDataIndex == 0)  outputLineRdgSection(rdgInfoData, trackRdgNumber, rdgPixelsInY, rdgPixelsFnY);
+    outputLineRdgSection(rdgInfoData, trackRdgNumber, rdgPixelsInY, rdgPixelsFnY);
 }
 
 void sectionRdgWidget::outputLineRdgSection(const st_rdgInfoData& rdgInfoData, int trackRdgNumber, int rdgPixelsInY, int rdgPixelsFnY)

@@ -9,8 +9,10 @@
 #include <QHBoxLayout>
 
 #include "sectionRdgWidget.h"
+#include "sectionDeepRdgWidget.h"
 #include "tableRdgTrackDataWidget.h"
 #include "tableRdgLogAutoDataWidget.h"
+#include "tableDeepRdgTrackDataWidget.h"
 
 class dataRdgWidget : public QWidget
 {
@@ -29,14 +31,21 @@ public:
         std::string rdgName, const st_rdgInfoData& rdgInfoData, int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY
     );
 
+    int m_filterId    {0};
+    int m_materialId  {0};
+    int m_selectionId {0};
+
     QPointer<QTabWidget> m_tabWidget;
     QPointer<QLabel>     m_numTrackRdgLabel;
     QPointer<QSlider>    m_trackRdgSlider;
 
     QPointer<QHBoxLayout> m_horLayout;
 
-    QPointer<sectionRdgWidget>          m_sectionRdgWidget;
-    QPointer<tableRdgTrackDataWidget>   m_tableRdgTrackDataWidget;
+    QPointer<sectionRdgWidget>            m_sectionRdgWidget;
+    QPointer<tableRdgTrackDataWidget>     m_tableRdgTrackDataWidget;
+    QPointer<sectionDeepRdgWidget>        m_sectionDeepRdgWidget;
+    QPointer<tableDeepRdgTrackDataWidget> m_tableDeepRdgTrackDataWidget;
+
     QPointer<tableRdgLogAutoDataWidget> m_tableRdgLogAutoDataWidget;
 
     int m_pageIndex{0};

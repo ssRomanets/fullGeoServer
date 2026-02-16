@@ -226,12 +226,14 @@ private:
 
     QPointer<QHBoxLayout>    m_lowLayout;
 
+    QPointer<QLabel>         m_labelHRdgsLengthBar;
     QPointer<QScrollBar>     m_scrollHRdgsLengthBar;
 
     QPointer<QComboBox>      m_materialComboBox;
     QPointer<QLabel>         m_rdgQuantImpulsesLabel;
     QPointer<QSlider>        m_rdgQuantImpulsesSlider;
 
+    QPointer<QLabel>         m_rdgsTransitLabel;
     QPointer<QSlider>        m_rdgsTransitSlider;
     QPointer<QPushButton>    m_leftRdgsTransitButton;
     QPointer<QPushButton>    m_rightRdgsTransitButton;

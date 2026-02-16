@@ -77,8 +77,11 @@ rdg2dWidget::rdg2dWidget(QWidget* parent): QWidget(parent)
     connect(m_highBrightPixelSlider,  &QSlider::valueChanged, this, &rdg2dWidget::setHighPixelLevel);
     connect(m_contrastLog10Slider,    &QSlider::valueChanged, this, &rdg2dWidget::setContrastLog10Level);
 
-    connect(m_dataRdgWidget->m_sectionRdgWidget,               &sectionRdgWidget::fixTrackIndex, m_rdgGlWidget, &rdgGlWidget::remarkTrackRdg);
-    connect(m_dataRdgWidget->m_tableRdgTrackDataWidget, &tableRdgTrackDataWidget::fixTrackIndex, m_rdgGlWidget, &rdgGlWidget::remarkTrackRdg);
+    connect(m_dataRdgWidget->m_sectionRdgWidget,                       &sectionRdgWidget::fixTrackIndex, m_rdgGlWidget, &rdgGlWidget::remarkTrackRdg);
+    connect(m_dataRdgWidget->m_tableRdgTrackDataWidget,         &tableRdgTrackDataWidget::fixTrackIndex, m_rdgGlWidget, &rdgGlWidget::remarkTrackRdg);
+
+    connect(m_dataRdgWidget->m_sectionDeepRdgWidget,               &sectionDeepRdgWidget::fixTrackIndex, m_rdgGlWidget, &rdgGlWidget::remarkTrackRdg);
+    connect(m_dataRdgWidget->m_tableDeepRdgTrackDataWidget, &tableDeepRdgTrackDataWidget::fixTrackIndex, m_rdgGlWidget, &rdgGlWidget::remarkTrackRdg);
 
     connect(m_rdgGlWidget, &rdgGlWidget::sendVectorRdgPairXY,           m_dataRdgWidget, &dataRdgWidget::receiveVectorRdgPairXY);
     connect(m_rdgGlWidget, &rdgGlWidget::sendLoadMapRdgPairXY,          m_dataRdgWidget, &dataRdgWidget::receiveLoadMapRdgPairXY);
@@ -132,16 +135,21 @@ void rdg2dWidget::setHighPixelLevel(int highPixelLevel)
     m_rdgGlWidget->setHighPixelLevel(highPixelLevel);
 }
 
-void rdg2dWidget::outputNewImage(const std::string& fileName,int materialId, int filterId)
+void rdg2dWidget::outputNewImage(const std::string& fileName, int materialId, int filterId, int selectionId)
 {
     m_lowBrightLabel->setText("Яркость низкая "+QString::number(0));
     m_highBrightPixelSlider->setValue(m_rdgGlWidget->m_vectorTuplesColorsRdg.size()-1);
     m_highBrightLabel->setText("Яркость высокая "+QString::number(m_rdgGlWidget->m_vectorTuplesColorsRdg.size()-1));
 
+    m_dataRdgWidget->m_materialId  = materialId;
+    m_dataRdgWidget->m_filterId    = filterId;
+    m_dataRdgWidget->m_selectionId = selectionId;
+
     if (fileName != "" && m_accomplishment->m_thread->m_rdgsInfoDataMap[fileName].quantImpulsesOfPacket != 0)
     {
-        m_rdgGlWidget->m_materialId = materialId;
         m_rdgGlWidget->m_filterId = filterId;
+        m_rdgGlWidget->m_materialId = materialId;
+
         m_rdgGlWidget->m_lowPixelLevel  = 0;
         m_rdgGlWidget->m_highPixelLevel = m_rdgGlWidget->m_vectorTuplesColorsRdg.size()-1;
 
@@ -154,6 +162,7 @@ void rdg2dWidget::outputNewImage(const std::string& fileName,int materialId, int
     else
     {
         m_dataRdgWidget->m_sectionRdgWidget->removeRdgSection();
+        m_dataRdgWidget->m_sectionDeepRdgWidget->removeDeepRdgSection();
 
         m_rdgGlWidget->m_rdgPixelsWidth  = 0;
         m_rdgGlWidget->m_rdgPixelsHeight = 0;
@@ -166,12 +175,10 @@ void rdg2dWidget::outputNewImage(const std::string& fileName,int materialId, int
 
         m_rdgGlWidget->update();
 
-        m_dataRdgWidget->m_tableRdgTrackDataWidget->removeRdgTrackDataTable();
-        m_dataRdgWidget->m_tableRdgLogAutoDataWidget->removeRdgLogAutoDataTable();
+        m_dataRdgWidget->m_tableRdgTrackDataWidget    ->removeRdgTrackDataTable();
+        m_dataRdgWidget->m_tableDeepRdgTrackDataWidget->removeDeepRdgTrackDataTable();
+        m_dataRdgWidget->m_tableRdgLogAutoDataWidget  ->removeRdgLogAutoDataTable();
     }
-
-    slotSetupScrollHRdgData(0, 0, 0);
-    slotSetupScrollVRdgData(0, 0, 0);
 }
 
 void rdg2dWidget::setShowLogRdg(bool showLogRdg)
@@ -318,11 +325,9 @@ void rdg2dWidget::setupHdf5Rdgs(
         if ((infoRdgsHdf5Names.at(count).split(".out")).size() > 1 || (infoRdgsHdf5Names.at(count).split(".hdf5")).size() > 1)
         {
             paperRdgName = "";
-            for (int count1 = 0; count1 <= (infoRdgsHdf5Names.at(count).split("/")).size()-2; count1++)
-                paperRdgName += (infoRdgsHdf5Names.at(count).split("/")).at(count1);
+            for (int count1 = 0; count1 <= (infoRdgsHdf5Names.at(count).split("/")).size()-2; count1++)  paperRdgName += (infoRdgsHdf5Names.at(count).split("/")).at(count1);
 
-            if (pairHdf5RdgFiles.first == ""  )
-                pairHdf5RdgFiles.first = paperRdgName.toStdString();
+            if (pairHdf5RdgFiles.first == ""  )  pairHdf5RdgFiles.first = paperRdgName.toStdString();
 
             if (pairHdf5RdgFiles.first != "" && pairHdf5RdgFiles.first != paperRdgName.toStdString())
             {
@@ -357,7 +362,6 @@ void rdg2dWidget::setupHdf5Rdgs(
             filesRdgNamesHdf5VectorPair.push_back(pairHdf5RdgFiles);
         }
     }
-
 
     if (filesRdgNamesHdf5VectorPair.size() > 0)
     {
@@ -444,6 +448,9 @@ void rdg2dWidget::rdgInput(const std::string& rdgName, int absRdgPixelsInX, int 
     m_dataRdgWidget->m_sectionRdgWidget->outputSectionChart(QString::fromStdString(rdgName));
     m_dataRdgWidget->m_sectionRdgWidget->m_filterId = m_rdgGlWidget->m_filterId;
     m_dataRdgWidget->m_tableRdgTrackDataWidget->m_filterId = m_rdgGlWidget->m_filterId;
+
+    m_dataRdgWidget->m_sectionDeepRdgWidget->setTitle("глубина по rdg (m)");
+    m_dataRdgWidget->m_sectionDeepRdgWidget->outputSectionChart(QString::fromStdString(rdgName));
 
     m_dataRdgWidget->setupTrackRdgSliderData(m_rdgGlWidget->m_rdgPixelsInX, m_rdgGlWidget->m_rdgPixelsFnX);
 
@@ -539,6 +546,7 @@ void rdg2dWidget::changeRdgImage(int absRdgPixelsInX, int absRdgPixelsFnX)
 {
     slotSetupScrollHRdgData(0, 0, 0);
     slotSetupScrollVRdgData(0, 0, 0);
+
     rdgInput(m_rdgGlWidget->m_rdgName, absRdgPixelsInX, absRdgPixelsFnX);
     changeRdgRightDataAtShift();
 }

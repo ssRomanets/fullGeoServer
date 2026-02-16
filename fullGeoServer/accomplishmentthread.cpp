@@ -15,6 +15,7 @@
 accomplishmentThread::accomplishmentThread(QObject* parent)
 {
     m_executeParserData = false;
+    m_rdgsInfoDataMap.clear();
 }
 
 accomplishmentThread::~accomplishmentThread(){}
@@ -71,6 +72,7 @@ void accomplishmentThread::run()
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 22);
                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_step_ns       =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 30);
+
                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].freq_step_GHz      =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 38);
                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].freq_begin_GHz     =

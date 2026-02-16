@@ -25,10 +25,10 @@ public:
     ~sectionRdgWidget();
 
     void setTitle(const QString& titleSection);
-    void outputSectionChart(const QString& rdgsFileCurrent);
+    void outputSectionChart(const QString& fileCurrent);
+
     void outputRdgSection(
-        const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int trackRdgNumber,
-        int rdgPixelsInY, int rdgPixelsFnY, int pageRdgDataIndex
+        const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int trackRdgNumber, int rdgPixelsInY, int rdgPixelsFnY
     );
 
     void removeRdgSection();

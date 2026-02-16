@@ -51,20 +51,10 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
             else
             {
                 double rdgLog10 = 0.0;
-                if (
-                    (rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i] >
-                    rdgInfoData.contrastLog10RdgKoeff*(
-                        rdgInfoData.vectorRdgData[trackRdgNumber].vectorMaxImpulses[m_filterId]-
-                        rdgInfoData.vectorRdgData[trackRdgNumber].vectorMinImpulses[m_filterId]
-                    )
-                )
-                    rdgLog10 = log10(
-                        1 + (rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]-
-                        rdgInfoData.contrastLog10RdgKoeff*(
-                            rdgInfoData.vectorRdgData[trackRdgNumber].vectorMaxImpulses[m_filterId]-
-                            rdgInfoData.vectorRdgData[trackRdgNumber].vectorMinImpulses[m_filterId]
-                        )
-                    );
+                if (rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId][i] > 0.0)
+                    rdgLog10 =      log10(1 +     (rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]);
+                else
+                    rdgLog10 = -1.0*log10(1 + fabs((rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]));
 
                 dataVec[2] = QString::number(rdgLog10);
             }

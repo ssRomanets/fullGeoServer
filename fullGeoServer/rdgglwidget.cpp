@@ -70,7 +70,9 @@ void rdgGlWidget::resetRdgSelection(bool clearSelectRdgPoints, std::string rdgNa
     settingsRdgSelection(false, clearSelectRdgPoints, rdgName);
 }
 
-void rdgGlWidget::setupRdgProperties(const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX)
+void rdgGlWidget::setupRdgProperties(
+    const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX
+)
 {
     if (m_rdgName != rdgName || m_rdgWidth != rdgInfoData.vectorRdgData.size() || m_rdgHeight != rdgInfoData.quantImpulsesOfPacket)
     {
@@ -84,6 +86,24 @@ void rdgGlWidget::setupRdgProperties(const std::string& rdgName, const st_rdgInf
         m_rdgHeight = rdgInfoData.quantImpulsesOfPacket;
 
         m_time_step_ns = rdgInfoData.vectorRdgData[0].time_step_ns;
+
+        m_absRdgPixelsInX = (absRdgPixelsInX == 0) ? 0 : absRdgPixelsInX;
+        m_absRdgPixelsFnX = (absRdgPixelsFnX == 0) ? ((m_rdgWidth < limitRdgWidth) ? m_rdgWidth-1 : limitRdgWidth-1):absRdgPixelsFnX;
+
+        m_rdgPixelsInX    = m_absRdgPixelsInX;
+        m_rdgPixelsInY    = 0;
+
+        m_rdgPixelsFnX    = m_absRdgPixelsFnX;
+        m_rdgPixelsFnY    = m_rdgHeight-1;
+
+        m_rdgPixelsWidth  = m_absRdgPixelsFnX-m_absRdgPixelsInX+1;
+        m_rdgPixelsHeight = m_rdgHeight;
+
+        m_rdgPixelsCentX  = (m_rdgPixelsInX + m_rdgPixelsFnX)/2;
+        m_rdgPixelsCentY  = (m_rdgPixelsInY + m_rdgPixelsFnY)/2;
+
+        emit signalSetupScrollHRdgData(0, 0, 0);
+        emit signalSetupScrollVRdgData(0, 0, 0);
     }
 
     if (m_showLogRdg == false)
@@ -96,21 +116,6 @@ void rdgGlWidget::setupRdgProperties(const std::string& rdgName, const st_rdgInf
             if (rdgInfoData.vectorRdgData[i].vectorMinImpulses[m_filterId] < m_maxRdg) m_minRdg = rdgInfoData.vectorRdgData[i].vectorMinImpulses[m_filterId];
         }
     }
-
-    m_absRdgPixelsInX = (absRdgPixelsInX == 0) ? 0 : absRdgPixelsInX;
-    m_absRdgPixelsFnX = (absRdgPixelsFnX == 0) ? ((m_rdgWidth < limitRdgWidth) ? m_rdgWidth-1 : limitRdgWidth-1):absRdgPixelsFnX;
-
-    m_rdgPixelsInX    = m_absRdgPixelsInX;
-    m_rdgPixelsInY    = 0;
-
-    m_rdgPixelsFnX    = m_absRdgPixelsFnX;
-    m_rdgPixelsFnY    = m_rdgHeight-1;
-
-    m_rdgPixelsWidth  = m_absRdgPixelsFnX-m_absRdgPixelsInX+1;
-    m_rdgPixelsHeight = m_rdgHeight;
-
-    m_rdgPixelsCentX  = (m_rdgPixelsInX + m_rdgPixelsFnX)/2;
-    m_rdgPixelsCentY  = (m_rdgPixelsInY + m_rdgPixelsFnY)/2;
 
     emit signalFixRdgPixels(m_rdgName);
 }
@@ -523,14 +528,14 @@ void rdgGlWidget::paintEvent(QPaintEvent* )
         p.drawText(750, 110+71*(NV-1), QString::number(m_rdgPixelsInY*m_time_step_ns + (m_rdgPixelsFnY-m_rdgPixelsInY)*m_time_step_ns, 'f', 2));
 
         //по палитре
-        if      (m_showLogRdg == false) p.drawText(800, 100, QString::fromStdString("m"));
-        else if (m_showLogRdg == true)  p.drawText(800, 100, QString::fromStdString(""));
+        if      (m_showLogRdg == false) p.drawText(800, 100, QString::fromStdString("imp"));
+        else if (m_showLogRdg == true)  p.drawText(800, 100, QString::fromStdString("log imp"));
 
         if (m_showLogRdg == false)
         {
-            p.drawText(835, 105, QString::number(rdgMetricKoeff*m_maxSmallRdg, 'f', 4));
-            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number(rdgMetricKoeff*(m_maxSmallRdg + i*(m_minSmallRdg-m_maxSmallRdg)/(double)(NV-1)), 'f', 4));
-            p.drawText(835, 105+71*(NV-1), QString::number(rdgMetricKoeff*m_minSmallRdg, 'f', 4));
+            p.drawText(835, 105, QString::number(rdgMetricKoeff*m_maxSmallRdg, 'f', 6));
+            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number(rdgMetricKoeff*(m_maxSmallRdg + i*(m_minSmallRdg-m_maxSmallRdg)/(double)(NV-1)), 'f', 6));
+            p.drawText(835, 105+71*(NV-1), QString::number(rdgMetricKoeff*m_minSmallRdg, 'f', 6));
         }
         else if (m_showLogRdg == true)
         {
