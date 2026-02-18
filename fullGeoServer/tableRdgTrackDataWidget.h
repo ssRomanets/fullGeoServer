@@ -27,6 +27,7 @@ public:
 
 public:
     int  m_filterId{0};
+    int  m_materialId{0};
 
 signals:
     void fixTrackIndex(const int& trackRdgNumber);

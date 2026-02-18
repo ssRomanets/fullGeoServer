@@ -1505,4 +1505,31 @@ inline void definingRdgFilterData(st_rdgInfoData& rdgInfoData, int filterId)
     while(level < tFilterPM);
 }
 
+inline void defMaxRdgMinRdg(const st_rdgInfoData& rdgInfoData, int materialId, int filterId, int i, int j, double& maxRdg, double& minRdg)
+{
+    if (j == 0)
+    {
+        if (rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] > maxRdg)
+            maxRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j];
+        if (rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] < minRdg)
+            minRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j];
+    }
+    else
+    {
+        if (
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1] > maxRdg
+        )
+            maxRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1];
+
+        if (
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1]  < minRdg
+        )
+            minRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
+            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1];
+    }
+}
+
 #endif // TRANSFORMATION_H

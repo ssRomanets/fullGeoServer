@@ -447,7 +447,10 @@ void rdg2dWidget::rdgInput(const std::string& rdgName, int absRdgPixelsInX, int 
     m_dataRdgWidget->m_sectionRdgWidget->setTitle("сечение по rdg");
     m_dataRdgWidget->m_sectionRdgWidget->outputSectionChart(QString::fromStdString(rdgName));
     m_dataRdgWidget->m_sectionRdgWidget->m_filterId = m_rdgGlWidget->m_filterId;
+    m_dataRdgWidget->m_sectionRdgWidget->m_materialId = m_rdgGlWidget->m_materialId;
+
     m_dataRdgWidget->m_tableRdgTrackDataWidget->m_filterId = m_rdgGlWidget->m_filterId;
+    m_dataRdgWidget->m_tableRdgTrackDataWidget->m_materialId = m_rdgGlWidget->m_materialId;
 
     m_dataRdgWidget->m_sectionDeepRdgWidget->setTitle("глубина по rdg (m)");
     m_dataRdgWidget->m_sectionDeepRdgWidget->outputSectionChart(QString::fromStdString(rdgName));

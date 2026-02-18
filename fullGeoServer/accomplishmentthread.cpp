@@ -86,6 +86,19 @@ void accomplishmentThread::run()
                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].longitude_degree   =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 70);
 
+//                            if (m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1 >= 1)
+//                            {
+//                                std::cout<<
+//                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].latitude_degree -
+//                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-2].latitude_degree
+//                                <<" "
+//                                <<
+//                                   m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].longitude_degree -
+//                                   m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-2].longitude_degree
+//                                <<" "
+//                                <<m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-2<<" "<<m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1<< std::endl;
+//                            }
+
                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_hours         =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 78));  // время час
                             m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_minutes       =

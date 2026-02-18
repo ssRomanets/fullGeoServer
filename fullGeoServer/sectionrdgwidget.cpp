@@ -47,25 +47,50 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
     if (rdgInfoData.vectorRdgData.size() > 0)
     {
         m_rdgLineSeries->clear();
+
+        double maxRdg = rdgInfoData.vectorRdgData[0].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][0];
+        double minRdg = rdgInfoData.vectorRdgData[0].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][0];
+
+        for (int i = m_rdgPixelsInY; i <= m_rdgPixelsFnY; i++)  defMaxRdgMinRdg(rdgInfoData, m_materialId, m_filterId, m_trackRdgNumber, i, maxRdg , minRdg);
+
+
         for (int i = m_rdgPixelsInY; i <= m_rdgPixelsFnY; i++)
         {
             if (m_showLogRdg == false)
             {
-                if (m_normActCheckBox->checkState() == 0)
-                    m_rdgLineSeries->append(rdgMetricKoeff*(rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i], i);
+                if (i == 0)
+                {
+                    if (m_normActCheckBox->checkState() == 0)
+                        m_rdgLineSeries->append(i, rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i]);
+                    else
+                    {
+                        m_rdgLineSeries->append(i,
+                            (rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i] - minRdg)/
+                            (maxRdg - minRdg)
+                        );
+                    }
+                }
                 else
                 {
-                    m_rdgLineSeries->append(
-                        ((rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDoubleData[m_filterId])[i] - rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId])/
-                         (rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]     - rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId]), i
-                    );
+                    if (m_normActCheckBox->checkState() == 0)
+                        m_rdgLineSeries->append(i,
+                            rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i] -
+                            rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i-1]
+                        );
+                    else
+                    {
+                        m_rdgLineSeries->append(i, (
+                            rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i] -
+                            rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i-1] - minRdg
+                        )/(maxRdg - minRdg));
+                    }\
                 }
             }
             else
             {               
                 double rdgLog10 = defRdgLog10(rdgInfoData,  m_filterId, m_trackRdgNumber,  i);
-                if (m_normActCheckBox->checkState() == 0)  m_rdgLineSeries->append(rdgLog10, i);
-                else   m_rdgLineSeries->append(fabs(rdgLog10 - rdgInfoData.vectorMinLog10RdgData[m_filterId])/(rdgInfoData.vectorMaxLog10RdgData[m_filterId] - rdgInfoData.vectorMinLog10RdgData[m_filterId]),i);
+                if (m_normActCheckBox->checkState() == 0)  m_rdgLineSeries->append(i, rdgLog10);
+                else   m_rdgLineSeries->append(i, fabs(rdgLog10 - rdgInfoData.vectorMinLog10RdgData[m_filterId])/(rdgInfoData.vectorMaxLog10RdgData[m_filterId] - rdgInfoData.vectorMinLog10RdgData[m_filterId]));
             }
         }
 
@@ -73,15 +98,15 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
         {
             if (m_showLogRdg == false)
             {
-                if (m_normActCheckBox->checkState() == 0) m_axisX->setTitleText("Яркость сканирования по каждому треку m");
-                else                                      m_axisX->setTitleText("Нормированная яркость сканирования по каждому треку");
+                if (m_normActCheckBox->checkState() == 0) m_axisY->setTitleText("Глубина сканирования по каждому импульсу m");
+                else                                      m_axisY->setTitleText("Нормированная глубина сканирования по каждому импульсу");
             }
             else
             {
-                if (m_normActCheckBox->checkState() == 0) m_axisX->setTitleText("Логарифмическая яркость сканирования по каждому треку");
-                else                                      m_axisX->setTitleText("Нормированная логарифмическая яркость сканирования по каждому треку");
+                if (m_normActCheckBox->checkState() == 0) m_axisY->setTitleText("Логарифмическая яркость сканирования по каждому треку");
+                else                                      m_axisY->setTitleText("Нормированная логарифмическая яркость сканирования по каждому треку");
             }
-            m_axisY->setTitleText("импульс радарограммы");
+            m_axisX->setTitleText("импульс радарограммы");
 
             if (m_chart->series().size()==0)
             {
@@ -89,25 +114,15 @@ void sectionRdgWidget::createRdgSection(const st_rdgInfoData& rdgInfoData)
                 m_chart->setAxisX(m_axisX, m_rdgLineSeries);
                 m_chart->setAxisY(m_axisY, m_rdgLineSeries);
             }
-            m_axisY->setReverse(true);
-            m_axisY->setRange(m_rdgPixelsInY, m_rdgPixelsFnY);
+            //m_axisY->setReverse(true);
+            m_axisX->setRange(m_rdgPixelsInY, m_rdgPixelsFnY);
 
             if (m_normActCheckBox->checkState() == 0)
             {
-                if (m_showLogRdg == false)
-                {
-                    m_axisX->setRange(
-                        rdgMetricKoeff*rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMinImpulses[m_filterId],
-                        rdgMetricKoeff*rdgInfoData.vectorRdgData[m_trackRdgNumber].vectorMaxImpulses[m_filterId]
-                    );
-                }
-                else
-                    m_axisX->setRange(
-                        rdgInfoData.vectorMinLog10RdgData[m_filterId],
-                        rdgInfoData.vectorMaxLog10RdgData[m_filterId]
-                    );
+                if (m_showLogRdg == false) m_axisY->setRange(minRdg, maxRdg);
+                else                       m_axisY->setRange(rdgInfoData.vectorMinLog10RdgData[m_filterId], rdgInfoData.vectorMaxLog10RdgData[m_filterId]);
             }
-            else     m_axisX->setRange(0, 1);
+            else     m_axisY->setRange(0, 1);
             m_chart->legend()->hide();
         }
     }

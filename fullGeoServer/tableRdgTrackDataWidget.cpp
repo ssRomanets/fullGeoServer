@@ -47,7 +47,16 @@ void tableRdgTrackDataWidget::showRdgTrackDataMainModel(const st_rdgInfoData& rd
             dataVec[0] = QString::number(trackRdgNumber);
             dataVec[1] = QString::number(i*rdgInfoData.vectorRdgData[trackRdgNumber].time_step_ns);
 
-            if (m_showLogRdg == false) dataVec[2] = QString::number(rdgMetricKoeff*(rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDoubleData[m_filterId])[i]);
+            if (m_showLogRdg == false)
+            {
+                if (i == 0)
+                    dataVec[2] = QString::number(rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i]);
+                else
+                    dataVec[2] = QString::number(
+                        rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i] -
+                        rdgInfoData.vectorRdgData[trackRdgNumber].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][i-1]
+                    );
+            }
             else
             {
                 double rdgLog10 = 0.0;

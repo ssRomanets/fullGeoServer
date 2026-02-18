@@ -74,7 +74,10 @@ void rdgGlWidget::setupRdgProperties(
     const std::string& rdgName, const st_rdgInfoData& rdgInfoData, int absRdgPixelsInX, int absRdgPixelsFnX
 )
 {
-    if (m_rdgName != rdgName || m_rdgWidth != rdgInfoData.vectorRdgData.size() || m_rdgHeight != rdgInfoData.quantImpulsesOfPacket)
+    if (
+        m_rdgName != rdgName || m_rdgWidth != rdgInfoData.vectorRdgData.size() || m_rdgHeight != rdgInfoData.quantImpulsesOfPacket ||
+        (m_absRdgPixelsInX != absRdgPixelsInX || m_absRdgPixelsFnX != absRdgPixelsFnX)
+    )
     {
         m_rdgName = rdgName;
         m_trackRdgNumber = 0;
@@ -108,12 +111,15 @@ void rdgGlWidget::setupRdgProperties(
 
     if (m_showLogRdg == false)
     {
-        m_maxRdg = rdgInfoData.vectorRdgData[0].vectorMaxImpulses[m_filterId];
-        m_minRdg = rdgInfoData.vectorRdgData[0].vectorMinImpulses[m_filterId];
-        for (int i=1; i<m_rdgWidth; i++)
+        m_maxRdg = rdgInfoData.vectorRdgData[0].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][0];
+        m_minRdg = rdgInfoData.vectorRdgData[0].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][0];
+
+        for (int i=0; i<m_rdgWidth; i++)
         {
-            if (rdgInfoData.vectorRdgData[i].vectorMaxImpulses[m_filterId] > m_maxRdg) m_maxRdg = rdgInfoData.vectorRdgData[i].vectorMaxImpulses[m_filterId];
-            if (rdgInfoData.vectorRdgData[i].vectorMinImpulses[m_filterId] < m_maxRdg) m_minRdg = rdgInfoData.vectorRdgData[i].vectorMinImpulses[m_filterId];
+            for (int j=0; j<m_rdgHeight; j++)
+            {
+                defMaxRdgMinRdg(rdgInfoData, m_materialId, m_filterId, i, j, m_maxRdg, m_minRdg);
+            }
         }
     }
 
@@ -165,7 +171,20 @@ void rdgGlWidget::slotSetupRdgPixels(const st_rdgInfoData& rdgInfoData)
         {
             for (int j = m_rdgPixelsInY; j <= m_rdgPixelsFnY; j++)
             {
-                levelColor = (int)((m_vectorTuplesColorsRdg.size()-1)*(((rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j] - m_minRdg)/(m_maxRdg - m_minRdg)));
+                if (j == 0)
+                    levelColor =
+                    (int)((m_vectorTuplesColorsRdg.size()-1)*
+                    ((
+                         rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j] - m_minRdg
+                    )/(m_maxRdg - m_minRdg)));
+                else
+                    levelColor =
+                    (int)((m_vectorTuplesColorsRdg.size()-1)*
+                    ((
+                         rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]   -
+                         rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1] - m_minRdg
+                    )/(m_maxRdg - m_minRdg)));
+
                 if ((levelColor >= m_lowPixelLevel  && levelColor <= m_highPixelLevel))
                     maskRdgVector[m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+(i-m_rdgPixelsInX)] = 1;
             }
@@ -179,15 +198,36 @@ void rdgGlWidget::slotSetupRdgPixels(const st_rdgInfoData& rdgInfoData)
             {
                 if (maskRdgVector[m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+(i-m_rdgPixelsInX)] == 1)
                 {
-                    if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
-                        m_minSmallRdg = (rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j];
-                    else if (m_minSmallRdg > (rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j])
-                        m_minSmallRdg = (rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j];
+                    if (j == 0)
+                    {
+                        if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
+                            m_minSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j];
+                        else if (m_minSmallRdg > rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j] )
+                            m_minSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j];
 
-                    if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
-                        m_maxSmallRdg = (rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j];
-                    else if (m_maxSmallRdg < (rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j])
-                        m_maxSmallRdg = (rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j];
+                        if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
+                            m_maxSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j];
+                        else if (m_maxSmallRdg < rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j])
+                            m_maxSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j];
+                    }
+                    else
+                    {
+                        if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
+                            m_minSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]-
+                                            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1];
+                        else if (m_minSmallRdg > rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]-
+                                                 rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1])
+                            m_minSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]-
+                                            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1];
+
+                        if (i == m_rdgPixelsInX && j == m_rdgPixelsInY)
+                            m_maxSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]-
+                                            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1];
+                        else if (m_maxSmallRdg < rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]-
+                                                 rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1])
+                            m_maxSmallRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j]-
+                                            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1];
+                    }
                 }
             }
         }
@@ -200,7 +240,15 @@ void rdgGlWidget::slotSetupRdgPixels(const st_rdgInfoData& rdgInfoData)
                 {
                     if (maskRdgVector[m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+(i-m_rdgPixelsInX)] == 1)
                     {
-                        levelColor = (int)((m_vectorTuplesColorsRdg.size()-1)*(((rdgInfoData.vectorRdgData[i].vectorsDoubleData[m_filterId])[j] - m_minSmallRdg)/(m_maxSmallRdg - m_minSmallRdg)));
+                        if (j == 0)
+                            levelColor = (int)((m_vectorTuplesColorsRdg.size()-1)*
+                            ((rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j] - m_minSmallRdg)/(m_maxSmallRdg - m_minSmallRdg)));
+                        else
+                            levelColor = (int)((m_vectorTuplesColorsRdg.size()-1)*
+                            ((
+                                 rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j  ] -
+                                 rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*m_materialId + countSelectors*m_filterId][j-1] - m_minSmallRdg)/(m_maxSmallRdg - m_minSmallRdg)
+                            ));
 
                         m_rdgPixels[4*m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+4*(i-m_rdgPixelsInX)+0] = std::get<0>(m_vectorTuplesColorsRdg[m_vectorTuplesColorsRdg.size()-1-levelColor]);
                         m_rdgPixels[4*m_rdgPixelsWidth*(m_rdgPixelsHeight-1-(j-m_rdgPixelsInY))+4*(i-m_rdgPixelsInX)+1] = std::get<1>(m_vectorTuplesColorsRdg[m_vectorTuplesColorsRdg.size()-1-levelColor]);
@@ -528,19 +576,19 @@ void rdgGlWidget::paintEvent(QPaintEvent* )
         p.drawText(750, 110+71*(NV-1), QString::number(m_rdgPixelsInY*m_time_step_ns + (m_rdgPixelsFnY-m_rdgPixelsInY)*m_time_step_ns, 'f', 2));
 
         //по палитре
-        if      (m_showLogRdg == false) p.drawText(800, 100, QString::fromStdString("imp"));
-        else if (m_showLogRdg == true)  p.drawText(800, 100, QString::fromStdString("log imp"));
+        if      (m_showLogRdg == false) p.drawText(780, 100, QString::fromStdString("deep m"));
+        else if (m_showLogRdg == true)  p.drawText(780, 100, QString::fromStdString("log imp"));
 
         if (m_showLogRdg == false)
         {
-            p.drawText(835, 105, QString::number(rdgMetricKoeff*m_maxSmallRdg, 'f', 6));
-            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number(rdgMetricKoeff*(m_maxSmallRdg + i*(m_minSmallRdg-m_maxSmallRdg)/(double)(NV-1)), 'f', 6));
-            p.drawText(835, 105+71*(NV-1), QString::number(rdgMetricKoeff*m_minSmallRdg, 'f', 6));
+            p.drawText(835, 105, QString::number(m_maxSmallRdg, 'f', 6));
+            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number(m_maxSmallRdg + i*(m_minSmallRdg-m_maxSmallRdg)/(double)(NV-1), 'f', 6));
+            p.drawText(835, 105+71*(NV-1), QString::number(m_minSmallRdg, 'f', 6));
         }
         else if (m_showLogRdg == true)
         {
             p.drawText(835, 105, QString::number(m_maxSmallLog10Rdg, 'f', 2));
-            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number( (m_maxSmallLog10Rdg + i*(m_minSmallLog10Rdg-m_maxSmallLog10Rdg)/(double)(NV-1)) , 'f', 2));
+            for (int i = 1; i < NV-1; i++ ) p.drawText(835, 105+71*i,  QString::number(m_maxSmallLog10Rdg + i*(m_minSmallLog10Rdg-m_maxSmallLog10Rdg)/(double)(NV-1), 'f', 2));
             p.drawText(835, 105+71*(NV-1), QString::number( m_minSmallLog10Rdg, 'f', 2));
         }
     }
