@@ -2,7 +2,7 @@
 #define ACCOMPLISHMENTTHREAD_H
 
 #include <QThread>
-#include <rdgsData.h>
+#include <bscansData.h>
 
 class accomplishmentThread  : public QThread
 {
@@ -14,11 +14,11 @@ public:
 
     void run();
     void clearWorkData();
-    void tracingOfDefiningRdgFilterData(const std::vector<std::string>& rdgNamesVector);
-    void tracingOfDefiningRdgMaterialData(const std::vector<std::string>& rdgNamesVector, int materialId);
+    void tracingOfDefiningBscanFilterData(const std::vector<std::string>& bscanNamesVector);
+    void tracingOfDefiningBscanMaterialData(const std::vector<std::string>& bscanNamesVector, int materialId);
 
 public:
-    std::map<std::string, st_rdgInfoData> m_rdgsInfoDataMap;
+    std::map<std::string, st_bscanInfoData> m_bscansInfoDataMap;
 
     //массив данных по данному файлу trz format
     QList<QByteArray> m_dataTrzList;
@@ -38,29 +38,29 @@ public:
 
     //HDDF5
     std::vector<std::string> m_fullFileNameHdf5Vector;
-    std::vector<std::vector<std::string>> m_filesRdgNamesHdf5Vectors;
+    std::vector<std::vector<std::string>> m_filesBscanNamesHdf5Vectors;
 
     //
-    std::vector<std::pair<std::string, std::string>> m_rdgsNamesVectorPairs;
-    st_rdgsWorkData m_st_rdgsWorkData;
+    std::vector<std::pair<std::string, std::string>> m_bscansNamesVectorPairs;
+    st_bscansWorkData m_st_bscansWorkData;
 
     bool m_executeParserData;
-    bool m_defRdgsFnRelief;
-    std::string m_nameDeleteRdg{""};
-    bool m_executeDeleteRdg;
+    bool m_defBscansFnRelief;
+    std::string m_nameDeleteBscan{""};
+    bool m_executeDeleteBscan;
     bool m_trzDataSampling {false};
     bool m_csvDataSampling {false};
     bool m_hdf5DataSampling {false};
 
 signals:
-    void signalEndAccThread (std::vector<std::pair<std::string, std::string>> rdgsNamesVector, RdgFileFormat rdgFileFormat);
+    void signalEndAccThread (std::vector<std::pair<std::string, std::string>> bscansNamesVector, BscanFileFormat bscanFileFormat);
 
     void sendProgressData(int progressPos, int progressMax);
 
-    void sendSurfRdgsWorkData();
-    void sendRdgsZData();
+    void sendSurfBscansWorkData();
+    void sendBscansZData();
 
-    void sendProgressRdgsWorkData(int progressPos, int progressMax);
+    void sendProgressBscansWorkData(int progressPos, int progressMax);
 };
 
 #endif // ACCOMPLISHMENTTHREAD_H+

@@ -22,7 +22,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_accomplishmentThread_t {
     QByteArrayData data[13];
-    char stringdata0[235];
+    char stringdata0[247];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,23 +35,23 @@ QT_MOC_LITERAL(0, 0, 20), // "accomplishmentThread"
 QT_MOC_LITERAL(1, 21, 18), // "signalEndAccThread"
 QT_MOC_LITERAL(2, 40, 0), // ""
 QT_MOC_LITERAL(3, 41, 48), // "std::vector<std::pair<std::st..."
-QT_MOC_LITERAL(4, 90, 15), // "rdgsNamesVector"
-QT_MOC_LITERAL(5, 106, 13), // "RdgFileFormat"
-QT_MOC_LITERAL(6, 120, 13), // "rdgFileFormat"
-QT_MOC_LITERAL(7, 134, 16), // "sendProgressData"
-QT_MOC_LITERAL(8, 151, 11), // "progressPos"
-QT_MOC_LITERAL(9, 163, 11), // "progressMax"
-QT_MOC_LITERAL(10, 175, 20), // "sendSurfRdgsWorkData"
-QT_MOC_LITERAL(11, 196, 13), // "sendRdgsZData"
-QT_MOC_LITERAL(12, 210, 24) // "sendProgressRdgsWorkData"
+QT_MOC_LITERAL(4, 90, 17), // "bscansNamesVector"
+QT_MOC_LITERAL(5, 108, 15), // "BscanFileFormat"
+QT_MOC_LITERAL(6, 124, 15), // "bscanFileFormat"
+QT_MOC_LITERAL(7, 140, 16), // "sendProgressData"
+QT_MOC_LITERAL(8, 157, 11), // "progressPos"
+QT_MOC_LITERAL(9, 169, 11), // "progressMax"
+QT_MOC_LITERAL(10, 181, 22), // "sendSurfBscansWorkData"
+QT_MOC_LITERAL(11, 204, 15), // "sendBscansZData"
+QT_MOC_LITERAL(12, 220, 26) // "sendProgressBscansWorkData"
 
     },
     "accomplishmentThread\0signalEndAccThread\0"
     "\0std::vector<std::pair<std::string,std::string> >\0"
-    "rdgsNamesVector\0RdgFileFormat\0"
-    "rdgFileFormat\0sendProgressData\0"
-    "progressPos\0progressMax\0sendSurfRdgsWorkData\0"
-    "sendRdgsZData\0sendProgressRdgsWorkData"
+    "bscansNamesVector\0BscanFileFormat\0"
+    "bscanFileFormat\0sendProgressData\0"
+    "progressPos\0progressMax\0sendSurfBscansWorkData\0"
+    "sendBscansZData\0sendProgressBscansWorkData"
 };
 #undef QT_MOC_LITERAL
 
@@ -91,18 +91,18 @@ void accomplishmentThread::qt_static_metacall(QObject *_o, QMetaObject::Call _c,
         accomplishmentThread *_t = static_cast<accomplishmentThread *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->signalEndAccThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< RdgFileFormat(*)>(_a[2]))); break;
+        case 0: _t->signalEndAccThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< BscanFileFormat(*)>(_a[2]))); break;
         case 1: _t->sendProgressData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 2: _t->sendSurfRdgsWorkData(); break;
-        case 3: _t->sendRdgsZData(); break;
-        case 4: _t->sendProgressRdgsWorkData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 2: _t->sendSurfBscansWorkData(); break;
+        case 3: _t->sendBscansZData(); break;
+        case 4: _t->sendProgressBscansWorkData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         void **func = reinterpret_cast<void **>(_a[1]);
         {
-            typedef void (accomplishmentThread::*_t)(std::vector<std::pair<std::string,std::string>> , RdgFileFormat );
+            typedef void (accomplishmentThread::*_t)(std::vector<std::pair<std::string,std::string>> , BscanFileFormat );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::signalEndAccThread)) {
                 *result = 0;
                 return;
@@ -117,21 +117,21 @@ void accomplishmentThread::qt_static_metacall(QObject *_o, QMetaObject::Call _c,
         }
         {
             typedef void (accomplishmentThread::*_t)();
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::sendSurfRdgsWorkData)) {
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::sendSurfBscansWorkData)) {
                 *result = 2;
                 return;
             }
         }
         {
             typedef void (accomplishmentThread::*_t)();
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::sendRdgsZData)) {
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::sendBscansZData)) {
                 *result = 3;
                 return;
             }
         }
         {
             typedef void (accomplishmentThread::*_t)(int , int );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::sendProgressRdgsWorkData)) {
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&accomplishmentThread::sendProgressBscansWorkData)) {
                 *result = 4;
                 return;
             }
@@ -176,7 +176,7 @@ int accomplishmentThread::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void accomplishmentThread::signalEndAccThread(std::vector<std::pair<std::string,std::string>> _t1, RdgFileFormat _t2)
+void accomplishmentThread::signalEndAccThread(std::vector<std::pair<std::string,std::string>> _t1, BscanFileFormat _t2)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);
@@ -190,19 +190,19 @@ void accomplishmentThread::sendProgressData(int _t1, int _t2)
 }
 
 // SIGNAL 2
-void accomplishmentThread::sendSurfRdgsWorkData()
+void accomplishmentThread::sendSurfBscansWorkData()
 {
     QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
 }
 
 // SIGNAL 3
-void accomplishmentThread::sendRdgsZData()
+void accomplishmentThread::sendBscansZData()
 {
     QMetaObject::activate(this, &staticMetaObject, 3, nullptr);
 }
 
 // SIGNAL 4
-void accomplishmentThread::sendProgressRdgsWorkData(int _t1, int _t2)
+void accomplishmentThread::sendProgressBscansWorkData(int _t1, int _t2)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 4, _a);

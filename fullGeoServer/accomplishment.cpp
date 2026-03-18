@@ -6,7 +6,7 @@
 #include <string>
 #include <mutex>
 
-#include "rdgsData.h"
+#include "bscansData.h"
 
 Accomplishment::Accomplishment(QObject* parent): QObject(parent)
 {
@@ -85,13 +85,13 @@ void Accomplishment::parserFileTrz(int dataTrzId)
     m_thread->m_parserDataTrzVectors[dataTrzId].push_back(parserDataElement);
 }
 
-void Accomplishment::createRdgsDataTrz(
-    std::vector<std::pair<std::string,std::string>> rdgsNamesVectorPairs,
+void Accomplishment::createBscansDataTrz(
+    std::vector<std::pair<std::string,std::string>> bscansNamesVectorPairs,
     std::vector<std::string> fullFileNameTrzVector, std::vector<std::string> fileNameTrzVector
 ){
     m_thread->m_fullFileNameTrzVector.swap(fullFileNameTrzVector);
     m_thread->m_fileNameTrzVector.swap(fileNameTrzVector);
-    m_thread->m_rdgsNamesVectorPairs.swap(rdgsNamesVectorPairs);
+    m_thread->m_bscansNamesVectorPairs.swap(bscansNamesVectorPairs);
     m_thread->start();
 }
 
@@ -119,27 +119,27 @@ void Accomplishment::openFilesCsv(std::vector<std::string> fullFileNamePropsCsvV
     m_thread->m_fullFileNameDataCsvVector.swap(fullFileNameDataCsvVector);
 }
 
-void Accomplishment::createRdgsDataCsv(
-    std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs, std::vector<std::string> fileNameDataCsvVector
+void Accomplishment::createBscansDataCsv(
+    std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs, std::vector<std::string> fileNameDataCsvVector
 ) {
     m_thread->m_fileNameDataCsvVector.swap(fileNameDataCsvVector);
-    m_thread->m_rdgsNamesVectorPairs.swap(rdgsNamesVectorPairs);
+    m_thread->m_bscansNamesVectorPairs.swap(bscansNamesVectorPairs);
     m_thread->start();
 }
 
-void Accomplishment::createRdgsDataHdf5(
-    std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,
+void Accomplishment::createBscansDataHdf5(
+    std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs,
     std::vector<std::string> fullFileNameHdf5Vector,
-    std::vector<std::vector<std::string>> filesRdgNamesHdf5Vectors
+    std::vector<std::vector<std::string>> filesBscanNamesHdf5Vectors
 ) {
     m_thread->m_fullFileNameHdf5Vector.swap(fullFileNameHdf5Vector);
-    m_thread->m_filesRdgNamesHdf5Vectors.swap(filesRdgNamesHdf5Vectors);
+    m_thread->m_filesBscanNamesHdf5Vectors.swap(filesBscanNamesHdf5Vectors);
     
-    m_thread->m_rdgsNamesVectorPairs.swap(rdgsNamesVectorPairs);
+    m_thread->m_bscansNamesVectorPairs.swap(bscansNamesVectorPairs);
     m_thread->start();
 }
 
-void Accomplishment::slotEndAccThread(std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs, RdgFileFormat rdgFileFormat)
+void Accomplishment::slotEndAccThread(std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs, BscanFileFormat bscanFileFormat)
 {
-    emit signalActivateAccompThread(rdgsNamesVectorPairs, rdgFileFormat);
+    emit signalActivateAccompThread(bscansNamesVectorPairs, bscanFileFormat);
 }

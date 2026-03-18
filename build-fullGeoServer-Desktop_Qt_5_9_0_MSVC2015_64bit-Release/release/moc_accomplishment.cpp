@@ -22,7 +22,7 @@ QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_Accomplishment_t {
     QByteArrayData data[8];
-    char stringdata0[158];
+    char stringdata0[164];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -35,16 +35,16 @@ QT_MOC_LITERAL(0, 0, 14), // "Accomplishment"
 QT_MOC_LITERAL(1, 15, 26), // "signalActivateAccompThread"
 QT_MOC_LITERAL(2, 42, 0), // ""
 QT_MOC_LITERAL(3, 43, 48), // "std::vector<std::pair<std::st..."
-QT_MOC_LITERAL(4, 92, 20), // "rdgsNamesVectorPairs"
-QT_MOC_LITERAL(5, 113, 13), // "RdgFileFormat"
-QT_MOC_LITERAL(6, 127, 13), // "rdgFileFormat"
-QT_MOC_LITERAL(7, 141, 16) // "slotEndAccThread"
+QT_MOC_LITERAL(4, 92, 22), // "bscansNamesVectorPairs"
+QT_MOC_LITERAL(5, 115, 15), // "BscanFileFormat"
+QT_MOC_LITERAL(6, 131, 15), // "bscanFileFormat"
+QT_MOC_LITERAL(7, 147, 16) // "slotEndAccThread"
 
     },
     "Accomplishment\0signalActivateAccompThread\0"
     "\0std::vector<std::pair<std::string,std::string> >\0"
-    "rdgsNamesVectorPairs\0RdgFileFormat\0"
-    "rdgFileFormat\0slotEndAccThread"
+    "bscansNamesVectorPairs\0BscanFileFormat\0"
+    "bscanFileFormat\0slotEndAccThread"
 };
 #undef QT_MOC_LITERAL
 
@@ -82,15 +82,15 @@ void Accomplishment::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _
         Accomplishment *_t = static_cast<Accomplishment *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->signalActivateAccompThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< RdgFileFormat(*)>(_a[2]))); break;
-        case 1: _t->slotEndAccThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< RdgFileFormat(*)>(_a[2]))); break;
+        case 0: _t->signalActivateAccompThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< BscanFileFormat(*)>(_a[2]))); break;
+        case 1: _t->slotEndAccThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< BscanFileFormat(*)>(_a[2]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         void **func = reinterpret_cast<void **>(_a[1]);
         {
-            typedef void (Accomplishment::*_t)(std::vector<std::pair<std::string,std::string>> , RdgFileFormat );
+            typedef void (Accomplishment::*_t)(std::vector<std::pair<std::string,std::string>> , BscanFileFormat );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&Accomplishment::signalActivateAccompThread)) {
                 *result = 0;
                 return;
@@ -136,7 +136,7 @@ int Accomplishment::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 }
 
 // SIGNAL 0
-void Accomplishment::signalActivateAccompThread(std::vector<std::pair<std::string,std::string>> _t1, RdgFileFormat _t2)
+void Accomplishment::signalActivateAccompThread(std::vector<std::pair<std::string,std::string>> _t1, BscanFileFormat _t2)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 0, _a);

@@ -1,7 +1,7 @@
 #ifndef TRANSFORMATION_H
 #define TRANSFORMATION_H
 
-#include "rdgsData.h"
+#include "bscansData.h"
 #include "map"
 #include "algorithm"
 #include <fstream>
@@ -32,18 +32,18 @@
 #define spc        300000000
 
 #define LongitudeDim 500
-#define percentsParam 100.00
+#define promilleParam 1000.00
 #define deltaParam 0.0000001
 #define deltaPixels 4
 #define scaleFactor 80
 
-#define limitRdgWidth 300
+#define limitBscanWidth 400
 
 #define tFilterPM      10.00
 #define deltaTFilterPM  0.20
 #define kFilterPM       5.00
 
-#define rdgMetricKoeff 0.000001
+#define bscanMetricKoeff 0.000001
 
 inline double epsdData(int materialId)
 {
@@ -57,20 +57,20 @@ inline double gammaData(int materialId)
     return gammaData[materialId];
 }
 
-inline void createVectorRdgsPoints(const st_rdgInfoData& rdgInfoData, int i, double deltaLatitude, double deltaLongitude, double* rdgsPoints, int& dimRdgs)
+inline void createVectorBscansPoints(const st_bscanInfoData& bscanInfoData, int i, double deltaLatitude, double deltaLongitude, double* bscansPoints, int& dimBscans)
 {
-    if (i == rdgInfoData.vectorRdgData.size()-1)
+    if (i == bscanInfoData.vectorBscanData.size()-1)
     {
-        rdgsPoints[0] = rdgInfoData.vectorRdgData[i].latitude_degree;
-        rdgsPoints[1] = rdgInfoData.vectorRdgData[i].longitude_degree;
-        dimRdgs = 2;
+        bscansPoints[0] = bscanInfoData.vectorBscanData[i].latitude_degree;
+        bscansPoints[1] = bscanInfoData.vectorBscanData[i].longitude_degree;
+        dimBscans = 2;
     }
     else
     {
-        double inPointLat   = rdgInfoData.vectorRdgData[i].latitude_degree;
-        double inPointLong  = rdgInfoData.vectorRdgData[i].longitude_degree;
-        double fnPointLat   = rdgInfoData.vectorRdgData[i+1].latitude_degree;
-        double fnPointLong  = rdgInfoData.vectorRdgData[i+1].longitude_degree;
+        double inPointLat   = bscanInfoData.vectorBscanData[i].latitude_degree;
+        double inPointLong  = bscanInfoData.vectorBscanData[i].longitude_degree;
+        double fnPointLat   = bscanInfoData.vectorBscanData[i+1].latitude_degree;
+        double fnPointLong  = bscanInfoData.vectorBscanData[i+1].longitude_degree;
 
         int quantLat  = (int)fabs((fnPointLat-inPointLat)/deltaLatitude) + 1;
         int quantLong = (int)fabs((fnPointLong-inPointLong)/deltaLongitude) + 1;
@@ -81,11 +81,11 @@ inline void createVectorRdgsPoints(const st_rdgInfoData& rdgInfoData, int i, dou
             {
                 double latitude  = inPointLat  + ((fnPointLat-inPointLat)/(fabs(fnPointLat-inPointLat)))*deltaLatitude*count;
                 double longitude = inPointLong + (latitude-inPointLat)*(fnPointLong - inPointLong)/(fnPointLat - inPointLat);
-                rdgsPoints[2*count]   = latitude;
-                rdgsPoints[2*count+1] = longitude;
+                bscansPoints[2*count]   = latitude;
+                bscansPoints[2*count+1] = longitude;
             }
 
-            dimRdgs = 2*(quantLat-1);
+            dimBscans = 2*(quantLat-1);
         }
         else
         {
@@ -93,84 +93,84 @@ inline void createVectorRdgsPoints(const st_rdgInfoData& rdgInfoData, int i, dou
             {
                 double longitude  = inPointLong  + ((fnPointLong-inPointLong)/(fabs(fnPointLong-inPointLong)))*deltaLongitude*count;
                 double latitude = inPointLat + (longitude-inPointLong)*(fnPointLat - inPointLat)/(fnPointLong - inPointLong);
-                rdgsPoints[2*count]   = latitude;
-                rdgsPoints[2*count+1] = longitude;
+                bscansPoints[2*count]   = latitude;
+                bscansPoints[2*count+1] = longitude;
             }
 
-            dimRdgs = 2*(quantLong-1);
+            dimBscans = 2*(quantLong-1);
         }
     }
 }
 
-inline std::tuple<std::string, int>  defTupleRdgs(
-        const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,int i, int j,
+inline std::tuple<std::string, int>  defTupleBscans(
+        const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap,int i, int j,
         double leftLatitude, double rightLatitude, double lowLongitude, double upLongitude,
-        double deltaLatitude, double deltaLongitude, int rdgsSurfWidth, int rdgsSurfHeight,
-        double* rdgsPoints
+        double deltaLatitude, double deltaLongitude, int bscansSurfWidth, int bscansSurfHeight,
+        double* bscansPoints
     )
 {
-    int dimRdgs = 0;
-    for (auto rdgsMapIter = rdgsInfoDataMap.begin(); rdgsMapIter != rdgsInfoDataMap.end(); rdgsMapIter++)
+    int dimBscans = 0;
+    for (auto bscansMapIter = bscansInfoDataMap.begin(); bscansMapIter != bscansInfoDataMap.end(); bscansMapIter++)
     {
-        for (int k = 0; k < rdgsMapIter->second.vectorRdgData.size(); k++)
+        for (int k = 0; k < bscansMapIter->second.vectorBscanData.size(); k++)
         {
-            createVectorRdgsPoints(rdgsMapIter->second, k, deltaLatitude, deltaLongitude, rdgsPoints, dimRdgs);
+            createVectorBscansPoints( bscansMapIter->second, k, deltaLatitude, deltaLongitude, bscansPoints, dimBscans);
 
-            for (int l = 0; l < dimRdgs/2; l++)
+            for (int l = 0; l < dimBscans/2; l++)
             {
                 if (i == 0 && j == 0)
                 {
-                    if (((rdgsPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(rdgsPoints[2*l]   - (leftLatitude + deltaLatitude*(i+1))) < deltaLatitude  )) &&
-                        ( (rdgsPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(rdgsPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(bscansPoints[2*l]   - (leftLatitude + deltaLatitude*(i+1))) < deltaLatitude  )) &&
+                        ( (bscansPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(bscansPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
-                else if (i == 0 && j == rdgsSurfHeight-1)
+                else if (i == 0 && j == bscansSurfHeight-1)
                 {
-                    if (((rdgsPoints[2*l]   >= leftLatitude + deltaLatitude*i     ) && (fabs(rdgsPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))) < deltaLatitude )) &&
-                        ((rdgsPoints[2*l+1] >  lowLongitude + deltaLongitude*(j-1)) && (fabs(rdgsPoints[2*l+1] - upLongitude)                        <= deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l]   >= leftLatitude + deltaLatitude*i     ) && (fabs(bscansPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))) < deltaLatitude )) &&
+                        ((bscansPoints[2*l+1] >  lowLongitude + deltaLongitude*(j-1)) && (fabs(bscansPoints[2*l+1] - upLongitude)                        <= deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
-                else if (i == rdgsSurfWidth-1 && j == 0)
+                else if (i == bscansSurfWidth-1 && j == 0)
                 {
-                    if (((rdgsPoints[2*l]  > leftLatitude + deltaLatitude*(i-1)) && (fabs(rdgsPoints[2*l] - rightLatitude)                          <= deltaLatitude )) &&
-                        ((rdgsPoints[2*l+1] >= lowLongitude + deltaLongitude*j)  && (fabs(rdgsPoints[2*l+1] -(lowLongitude + deltaLongitude*(j+1))) <  deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l]  > leftLatitude + deltaLatitude*(i-1)) && (fabs(bscansPoints[2*l] - rightLatitude)                          <= deltaLatitude )) &&
+                        ((bscansPoints[2*l+1] >= lowLongitude + deltaLongitude*j)  && (fabs(bscansPoints[2*l+1] -(lowLongitude + deltaLongitude*(j+1))) <  deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
-                else if (i == rdgsSurfWidth-1 && j == rdgsSurfHeight-1)
+                else if (i == bscansSurfWidth-1 && j == bscansSurfHeight-1)
                 {
-                    if (((rdgsPoints[2*l] > leftLatitude + deltaLatitude*(i-1))    && (fabs(rdgsPoints[2*l] - rightLatitude) <= deltaLatitude )) &&
-                        ((rdgsPoints[2*l+1] > lowLongitude + deltaLongitude*(j-1)) && (fabs(rdgsPoints[2*l+1] - upLongitude) <= deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l] > leftLatitude + deltaLatitude*(i-1))    && (fabs(bscansPoints[2*l] - rightLatitude) <= deltaLatitude )) &&
+                        ((bscansPoints[2*l+1] > lowLongitude + deltaLongitude*(j-1)) && (fabs(bscansPoints[2*l+1] - upLongitude) <= deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
-                else if (i == 0 && (j != rdgsSurfHeight-1 && j != 0) )
+                else if (i == 0 && (j != bscansSurfHeight-1 && j != 0) )
                 {
-                    if (((rdgsPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(rdgsPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))   ) < deltaLatitude)) &&
-                        ((rdgsPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(rdgsPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(bscansPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))   ) < deltaLatitude)) &&
+                        ((bscansPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(bscansPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
-                else if ((i != rdgsSurfWidth-1 && i != 0) && j == 0)
+                else if ((i != bscansSurfWidth-1 && i != 0) && j == 0)
                 {
-                    if (((rdgsPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(rdgsPoints[2*l] - (leftLatitude + deltaLatitude*(i+1)))    < deltaLatitude )) &&
-                        ((rdgsPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(rdgsPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(bscansPoints[2*l] - (leftLatitude + deltaLatitude*(i+1)))    < deltaLatitude )) &&
+                        ((bscansPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(bscansPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
-                else if (i == rdgsSurfWidth-1 && (j != rdgsSurfHeight-1 && j != 0))
+                else if (i == bscansSurfWidth-1 && (j != bscansSurfHeight-1 && j != 0))
                 {
-                    if (((rdgsPoints[2*l]   > leftLatitude + deltaLatitude*(i-1)) && (fabs(rdgsPoints[2*l] - rightLatitude)                           <= rightLatitude)) &&
-                        ((rdgsPoints[2*l+1] >= lowLongitude + deltaLongitude*j  ) && (fabs(rdgsPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first,  k);
+                    if (((bscansPoints[2*l]   > leftLatitude + deltaLatitude*(i-1)) && (fabs(bscansPoints[2*l] - rightLatitude)                           <= rightLatitude)) &&
+                        ((bscansPoints[2*l+1] >= lowLongitude + deltaLongitude*j  ) && (fabs(bscansPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first,  k);
                 }
-                else if ((i != rdgsSurfWidth-1 && i != 0) && j == rdgsSurfHeight-1)
+                else if ((i != bscansSurfWidth-1 && i != 0) && j == bscansSurfHeight-1)
                 {
-                    if (((rdgsPoints[2*l]   >= leftLatitude + deltaLatitude*i)     && (fabs(rdgsPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))) <  deltaLatitude) ) &&
-                        ((rdgsPoints[2*l+1] > lowLongitude + deltaLongitude*(j-1)) && (fabs(rdgsPoints[2*l+1] - upLongitude)                        <= deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if (((bscansPoints[2*l]   >= leftLatitude + deltaLatitude*i)     && (fabs(bscansPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))) <  deltaLatitude) ) &&
+                        ((bscansPoints[2*l+1] > lowLongitude + deltaLongitude*(j-1)) && (fabs(bscansPoints[2*l+1] - upLongitude)                        <= deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
                 else
                 {
-                    if ( ((rdgsPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(rdgsPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))   ) < deltaLatitude)) &&
-                         ((rdgsPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(rdgsPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
-                        return std::make_tuple(rdgsMapIter->first, k);
+                    if ( ((bscansPoints[2*l]   >= leftLatitude + deltaLatitude*i ) && (fabs(bscansPoints[2*l] - (leftLatitude + deltaLatitude*(i+1))   ) < deltaLatitude)) &&
+                         ((bscansPoints[2*l+1] >= lowLongitude + deltaLongitude*j) && (fabs(bscansPoints[2*l+1] - (lowLongitude + deltaLongitude*(j+1))) < deltaLongitude)))
+                        return std::make_tuple( bscansMapIter->first, k);
                 }
             }
         }
@@ -178,42 +178,42 @@ inline std::tuple<std::string, int>  defTupleRdgs(
     return std::make_tuple("", -1);
 }
 
-inline void defLeftLatitude(const st_rdgInfoData& rdgInfoData, int i, double& leftLatitude)
+inline void defLeftLatitude(const st_bscanInfoData& bscanInfoData, int i, double& leftLatitude)
 {
-    if (leftLatitude < 0.0)                                               leftLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
-    else if (rdgInfoData.vectorRdgData[i].latitude_degree < leftLatitude) leftLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
+    if (leftLatitude < 0.0)                                               leftLatitude = bscanInfoData.vectorBscanData[i].latitude_degree;
+    else if (bscanInfoData.vectorBscanData[i].latitude_degree < leftLatitude) leftLatitude = bscanInfoData.vectorBscanData[i].latitude_degree;
 }
 
-inline void defRightLatitude(const st_rdgInfoData& rdgInfoData, int i, double& rightLatitude)
+inline void defRightLatitude(const st_bscanInfoData& bscanInfoData, int i, double& rightLatitude)
 {
-    if (rightLatitude < 0.0)                                               rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
-    else if (rdgInfoData.vectorRdgData[i].latitude_degree > rightLatitude) rightLatitude = rdgInfoData.vectorRdgData[i].latitude_degree;
+    if (rightLatitude < 0.0)                                               rightLatitude = bscanInfoData.vectorBscanData[i].latitude_degree;
+    else if (bscanInfoData.vectorBscanData[i].latitude_degree > rightLatitude) rightLatitude = bscanInfoData.vectorBscanData[i].latitude_degree;
 }
 
-inline void defLowLongitude(const st_rdgInfoData& rdgInfoData, int i,  double& lowLongitude)
+inline void defLowLongitude(const st_bscanInfoData& bscanInfoData, int i,  double& lowLongitude)
 {
-    if (lowLongitude < 0.0)  lowLongitude  = rdgInfoData.vectorRdgData[i].longitude_degree;
-    else if (rdgInfoData.vectorRdgData[i].longitude_degree < lowLongitude) lowLongitude = rdgInfoData.vectorRdgData[i].longitude_degree;
+    if (lowLongitude < 0.0)  lowLongitude  = bscanInfoData.vectorBscanData[i].longitude_degree;
+    else if (bscanInfoData.vectorBscanData[i].longitude_degree < lowLongitude) lowLongitude = bscanInfoData.vectorBscanData[i].longitude_degree;
 }
 
-inline void defUpLongitude(const st_rdgInfoData& rdgInfoData, int i,  double& upLongitude)
+inline void defUpLongitude(const st_bscanInfoData& bscanInfoData, int i,  double& upLongitude)
 {
-    if (upLongitude < 0.0)   upLongitude   = rdgInfoData.vectorRdgData[i].longitude_degree;
-    else if (rdgInfoData.vectorRdgData[i].longitude_degree > upLongitude) upLongitude = rdgInfoData.vectorRdgData[i].longitude_degree;
+    if (upLongitude < 0.0)   upLongitude   = bscanInfoData.vectorBscanData[i].longitude_degree;
+    else if (bscanInfoData.vectorBscanData[i].longitude_degree > upLongitude) upLongitude = bscanInfoData.vectorBscanData[i].longitude_degree;
 }
 
-inline void devMainLatLongParameters(const st_rdgInfoData& rdgInfoData,int i, double& leftLatitude, double& rightLatitude, double& lowLongitude, double& upLongitude)
+inline void devMainLatLongParameters(const st_bscanInfoData& bscanInfoData,int i, double& leftLatitude, double& rightLatitude, double& lowLongitude, double& upLongitude)
 {
-    defLeftLatitude (rdgInfoData, i, leftLatitude);
-    defRightLatitude(rdgInfoData, i, rightLatitude);
-    defLowLongitude (rdgInfoData, i, lowLongitude);
-    defUpLongitude  (rdgInfoData, i, upLongitude);
+    defLeftLatitude (bscanInfoData, i, leftLatitude);
+    defRightLatitude(bscanInfoData, i, rightLatitude);
+    defLowLongitude (bscanInfoData, i, lowLongitude);
+    defUpLongitude  (bscanInfoData, i, upLongitude);
 }
 
 inline void devMainParameters(
-    const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,
+    const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap,
     double leftLatitude, double& rightLatitude,  double lowLongitude, double upLongitude,
-    double& deltaLatitude, double& deltaLongitude, int& rdgsSurfWidth, int& rdgsSurfHeight
+    double& deltaLatitude, double& deltaLongitude, int& bscansSurfWidth, int& bscansSurfHeight
 )
 {
     std::vector<double> variousLatitudesVector;
@@ -221,21 +221,21 @@ inline void devMainParameters(
     variousLatitudesVector.resize(0);
     variousLongitidesVector.resize(0);
 
-    for (auto rdgsMapIter = rdgsInfoDataMap.begin(); rdgsMapIter != rdgsInfoDataMap.end(); rdgsMapIter++)
+    for (auto bscansMapIter = bscansInfoDataMap.begin(); bscansMapIter != bscansInfoDataMap.end(); bscansMapIter++)
     {
-        for (int i = 0; i <  rdgsMapIter->second.vectorRdgData.size(); i++)
+        for (int i = 0; i <  bscansMapIter->second.vectorBscanData.size(); i++)
         {
-            if (variousLatitudesVector.size() == 0) variousLatitudesVector.push_back(rdgsMapIter->second.vectorRdgData[i].latitude_degree);
+            if (variousLatitudesVector.size() == 0) variousLatitudesVector.push_back( bscansMapIter->second.vectorBscanData[i].latitude_degree);
             else if (
-                std::find(variousLatitudesVector.begin(), variousLatitudesVector.end(), rdgsMapIter->second.vectorRdgData[i].latitude_degree)   == variousLatitudesVector.end()
-            ) {  variousLatitudesVector.push_back(rdgsMapIter->second.vectorRdgData[i].latitude_degree);}
+                std::find(variousLatitudesVector.begin(), variousLatitudesVector.end(), bscansMapIter->second.vectorBscanData[i].latitude_degree)   == variousLatitudesVector.end()
+            ) {  variousLatitudesVector.push_back( bscansMapIter->second.vectorBscanData[i].latitude_degree);}
 
-            if (variousLongitidesVector.size() == 0) variousLongitidesVector.push_back(rdgsMapIter->second.vectorRdgData[i].longitude_degree);
+            if (variousLongitidesVector.size() == 0) variousLongitidesVector.push_back( bscansMapIter->second.vectorBscanData[i].longitude_degree);
             else if (
-                std::find(variousLongitidesVector.begin(), variousLongitidesVector.end(), rdgsMapIter->second.vectorRdgData[i].longitude_degree) == variousLongitidesVector.end()
-            ) {  variousLongitidesVector.push_back(rdgsMapIter->second.vectorRdgData[i].longitude_degree);}
+                std::find(variousLongitidesVector.begin(), variousLongitidesVector.end(), bscansMapIter->second.vectorBscanData[i].longitude_degree) == variousLongitidesVector.end()
+            ) {  variousLongitidesVector.push_back( bscansMapIter->second.vectorBscanData[i].longitude_degree);}
 
-            defRightLatitude(rdgsMapIter->second, i, rightLatitude);
+            defRightLatitude( bscansMapIter->second, i, rightLatitude);
         }
     }
 
@@ -248,83 +248,83 @@ inline void devMainParameters(
     for (int i = 0; i < variousLongitidesVector.size()-1; i++) { variousDiffLongitidesVector.push_back(variousLongitidesVector   [i+1] - variousLongitidesVector[i]);}
 
     deltaLatitude = *std::min_element(std::begin(variousDiffLatitudesVector), std::end(variousDiffLatitudesVector));
-    rdgsSurfWidth  = (int)( ((rightLatitude - leftLatitude)/deltaLatitude) + 1);
+    bscansSurfWidth  = (int)( ((rightLatitude - leftLatitude)/deltaLatitude) + 1);
 
     deltaLongitude = *std::min_element(std::begin(variousDiffLongitidesVector), std::end(variousDiffLongitidesVector));
-    rdgsSurfHeight = (int)( ((upLongitude - lowLongitude)/deltaLongitude)  + 1);
+    bscansSurfHeight = (int)( ((upLongitude - lowLongitude)/deltaLongitude)  + 1);
 
-    if (rdgsSurfHeight < LongitudeDim) rdgsSurfHeight = LongitudeDim; deltaLongitude = (upLongitude   - lowLongitude)/(rdgsSurfHeight -1);
+    if (bscansSurfHeight < LongitudeDim) bscansSurfHeight = LongitudeDim; deltaLongitude = (upLongitude   - lowLongitude)/(bscansSurfHeight -1);
 }
 
 
 inline void defMaxDeep(
-    const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int materialId, int filterId, int selectionId, double& maxDeep, int absRdgsInX,int absRdgsFnX
+    const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap, int materialId, int filterId, int selectionId, double& maxDeep, int absBscansInX,int absBscansFnX
 )
 {
     maxDeep = 0.0;
-    for (auto rdgsMapIter = rdgsInfoDataMap.begin(); rdgsMapIter != rdgsInfoDataMap.end(); rdgsMapIter++)
+    for (auto bscansMapIter = bscansInfoDataMap.begin(); bscansMapIter != bscansInfoDataMap.end(); bscansMapIter++)
     {
-        for (int i = absRdgsInX; i <= (rdgsMapIter->second.vectorRdgData.size() - 1 >= absRdgsFnX ? absRdgsFnX : rdgsMapIter->second.vectorRdgData.size() - 1); i++)
+        for (int i = absBscansInX; i <= ( bscansMapIter->second.vectorBscanData.size() - 1 >= absBscansFnX ? absBscansFnX : bscansMapIter->second.vectorBscanData.size() - 1); i++)
         {
-            int size = (rdgsMapIter->second.vectorRdgData[i]).vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size();
+            int size = ( bscansMapIter->second.vectorBscanData[i]).vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size();
 
-            if (rdgsMapIter->second.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][size-1] > maxDeep)
-                maxDeep = rdgsMapIter->second.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId + selectionId][size-1];
+            if ( bscansMapIter->second.vectorBscanData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][size-1] > maxDeep)
+                maxDeep = bscansMapIter->second.vectorBscanData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId + selectionId][size-1];
         }
     }
 }
 
-inline void defMinMaxRdgsRelief(std::vector<std::vector<double> > vectorRdgsFnRelief, double& maxRdgsRelief, double& minRdgsRelief)
+inline void defMinMaxBscansRelief(std::vector<std::vector<double> > vectorBscansFnRelief, double& maxBscansRelief, double& minBscansRelief)
 {
-    minRdgsRelief = -1.0;
-    maxRdgsRelief = -1.0;
+    minBscansRelief = -1.0;
+    maxBscansRelief = -1.0;
 
-    int width = vectorRdgsFnRelief.size();
-    int height = vectorRdgsFnRelief[0].size();
+    int width = vectorBscansFnRelief.size();
+    int height = vectorBscansFnRelief[0].size();
 
     for (int count1 = 0; count1 < width; count1++)
     {
         for (int count2 = 0; count2 < height; count2++)
         {
-            if (minRdgsRelief < 0.0) minRdgsRelief = vectorRdgsFnRelief[count1][count2];
-            else if (minRdgsRelief > vectorRdgsFnRelief[count1][count2]) minRdgsRelief = vectorRdgsFnRelief[count1][count2];
+            if (minBscansRelief < 0.0) minBscansRelief = vectorBscansFnRelief[count1][count2];
+            else if (minBscansRelief > vectorBscansFnRelief[count1][count2]) minBscansRelief = vectorBscansFnRelief[count1][count2];
 
-            if (maxRdgsRelief < 0.0) maxRdgsRelief = vectorRdgsFnRelief[count1][count2];
-            else if (maxRdgsRelief < vectorRdgsFnRelief[count1][count2]) maxRdgsRelief = vectorRdgsFnRelief[count1][count2];
+            if (maxBscansRelief < 0.0) maxBscansRelief = vectorBscansFnRelief[count1][count2];
+            else if (maxBscansRelief < vectorBscansFnRelief[count1][count2]) maxBscansRelief = vectorBscansFnRelief[count1][count2];
         }
     }
 }
 
-inline std::string defDeleteRdgName(double fixLatitude, double fixLongitude, const std::map<std::string, st_rdgInfoData>&  rdgsInfoDataMap)
+inline std::string defDeleteBscanName(double fixLatitude, double fixLongitude, const std::map<std::string, st_bscanInfoData>&  bscansInfoDataMap)
 {
     std::string result = "";
     double minLatLongDelta = 0.0;
 
-    for (auto rdgsMapIter = rdgsInfoDataMap.begin(); rdgsMapIter != rdgsInfoDataMap.end(); rdgsMapIter++)
+    for (auto bscansMapIter = bscansInfoDataMap.begin(); bscansMapIter != bscansInfoDataMap.end(); bscansMapIter++)
     {
-        for (int i = 0; i < rdgsMapIter->second.vectorRdgData.size(); i++)
+        for (int i = 0; i < bscansMapIter->second.vectorBscanData.size(); i++)
         {
             if (fabs(minLatLongDelta) < deltaParam ||  minLatLongDelta > sqrt(
-                (rdgsMapIter->second.vectorRdgData[i].latitude_degree  - fixLatitude)*
-                (rdgsMapIter->second.vectorRdgData[i].latitude_degree  - fixLatitude) +
-                (rdgsMapIter->second.vectorRdgData[i].longitude_degree - fixLongitude)*
-                (rdgsMapIter->second.vectorRdgData[i].longitude_degree - fixLongitude)
+                ( bscansMapIter->second.vectorBscanData[i].latitude_degree  - fixLatitude)*
+                ( bscansMapIter->second.vectorBscanData[i].latitude_degree  - fixLatitude) +
+                ( bscansMapIter->second.vectorBscanData[i].longitude_degree - fixLongitude)*
+                ( bscansMapIter->second.vectorBscanData[i].longitude_degree - fixLongitude)
             ))
             {
                 minLatLongDelta = sqrt(
-                    (rdgsMapIter->second.vectorRdgData[i].latitude_degree  - fixLatitude)*
-                    (rdgsMapIter->second.vectorRdgData[i].latitude_degree  - fixLatitude) +
-                    (rdgsMapIter->second.vectorRdgData[i].longitude_degree - fixLongitude)*
-                    (rdgsMapIter->second.vectorRdgData[i].longitude_degree - fixLongitude)
+                    ( bscansMapIter->second.vectorBscanData[i].latitude_degree  - fixLatitude)*
+                    ( bscansMapIter->second.vectorBscanData[i].latitude_degree  - fixLatitude) +
+                    ( bscansMapIter->second.vectorBscanData[i].longitude_degree - fixLongitude)*
+                    ( bscansMapIter->second.vectorBscanData[i].longitude_degree - fixLongitude)
                 );
-                result = rdgsMapIter->first;
+                result = bscansMapIter->first;
             }
         }
     }
     return result;
 }
 
-inline void defRdgsInRelief(QString fileName, std::vector<std::vector<QVector3D>>& vectorRdgsInRelief)
+inline void defBscansInRelief(QString fileName, std::vector<std::vector<QVector3D>>& vectorBscansInRelief)
 {
     QByteArray data;
 
@@ -339,7 +339,7 @@ inline void defRdgsInRelief(QString fileName, std::vector<std::vector<QVector3D>
 
         int width  = *((int*)(data.data()    ));
         int height = *((int*)(data.data() + 4));
-        vectorRdgsInRelief.resize(width);
+        vectorBscansInRelief.resize(width);
 
         double latitude  = 0.0;
         double longitude = 0.0;
@@ -355,20 +355,20 @@ inline void defRdgsInRelief(QString fileName, std::vector<std::vector<QVector3D>
                 z =          *((double*) (data.data() + 8+(3*pos+2)*8));
 
                 pos++;
-                vectorRdgsInRelief[count1].push_back(QVector3D(latitude, longitude, z));
+                vectorBscansInRelief[count1].push_back(QVector3D(latitude, longitude, z));
             }
         }
     }
 
 }
 
-inline void defMaxQuantImpulsesOfPacket(const std::map<std::string, st_rdgInfoData>&  rdgsInfoDataMap, int& maxQuantImpulsesOfPacket)
+inline void defMaxQuantImpulsesOfPacket(const std::map<std::string, st_bscanInfoData>&  bscansInfoDataMap, int& maxQuantImpulsesOfPacket)
 {
     maxQuantImpulsesOfPacket = 0;
-    for (auto rdgsMapIter = rdgsInfoDataMap.begin(); rdgsMapIter != rdgsInfoDataMap.end(); rdgsMapIter++)
+    for (auto bscansMapIter = bscansInfoDataMap.begin(); bscansMapIter != bscansInfoDataMap.end(); bscansMapIter++)
     {
-        if (maxQuantImpulsesOfPacket == 0 || maxQuantImpulsesOfPacket < rdgsMapIter->second.quantImpulsesOfPacket)
-            maxQuantImpulsesOfPacket = rdgsMapIter->second.quantImpulsesOfPacket;
+        if (maxQuantImpulsesOfPacket == 0 || maxQuantImpulsesOfPacket < bscansMapIter->second.quantImpulsesOfPacket)
+            maxQuantImpulsesOfPacket = bscansMapIter->second.quantImpulsesOfPacket;
     }
 }
 
@@ -439,28 +439,28 @@ inline void addLineToPixelsData(int inX, int inY, int fnX, int fnY, std::vector<
     }
 }
 
-inline double defRdgLog10(const st_rdgInfoData& rdgInfoData, int filterId, int i, int j)
+inline double defbscanLog10(const st_bscanInfoData& bscanInfoData, int filterId, int i, int j)
 {
     double result = 0.0;
 
     if (
-        (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >=0 &&
-        (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] >= rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId]
+        (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j] >=0 &&
+        (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j] >= bscanInfoData.contrastLog10BscanKoeff*bscanInfoData.vectorBscanData[i].vectorMaxImpulses[filterId]
     )
         result = log10(
-            1 + (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] -
-            rdgInfoData.contrastLog10RdgKoeff*(rdgInfoData.vectorRdgData[i].vectorMaxImpulses[filterId])
+            1 + (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j] -
+            bscanInfoData.contrastLog10BscanKoeff*(bscanInfoData.vectorBscanData[i].vectorMaxImpulses[filterId])
         );
 
     if (
-        (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] < 0 &&
-        fabs((rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j]) >= fabs(rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId])
+        (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j] < 0 &&
+        fabs((bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j]) >= fabs(bscanInfoData.contrastLog10BscanKoeff*bscanInfoData.vectorBscanData[i].vectorMinImpulses[filterId])
     )
     {
         result = -1.0*log10(
             1 + fabs(
-                (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] -
-                rdgInfoData.contrastLog10RdgKoeff*rdgInfoData.vectorRdgData[i].vectorMinImpulses[filterId]
+                (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j] -
+                bscanInfoData.contrastLog10BscanKoeff*bscanInfoData.vectorBscanData[i].vectorMinImpulses[filterId]
             )
         );
 
@@ -468,54 +468,58 @@ inline double defRdgLog10(const st_rdgInfoData& rdgInfoData, int filterId, int i
     return result;
 }
 
-inline void createVectorRdgLog10PairXY(
-    int filterId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, st_rdgInfoData& rdgInfoData
+inline void createVectorbscanLog10PairXY(
+    int filterId, int bscanHeight, int absbscanPixelsInX, int absbscanPixelsFnX, st_bscanInfoData& bscanInfoData
 )
 {
-    (rdgInfoData.vectorsRdgLog10PairXY[filterId]).resize(0);
+    (bscanInfoData.vectorsBscanLog10PairXY[filterId]).resize(0);
 
     QPair<int, int> pairXY;
-    double* pixelsDoubleData = new double [((absRdgPixelsFnX-absRdgPixelsInX)+3)*rdgHeight];
+    double* pixelsDoubleData = new double [((absbscanPixelsFnX-absbscanPixelsInX)+3)*bscanHeight];
 
-    double rdgLog10 = 0.0;
-    for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX + 2; i++)
+    double bscanLog10 = 0.0;
+    for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX + 2; i++)
     {
-        for (int j=0; j < rdgHeight; j++)
+        for (int j=0; j < bscanHeight; j++)
         {
-            if ((i == absRdgPixelsInX) || (i == absRdgPixelsFnX + 2)) rdgLog10 = rdgInfoData.vectorMinLog10RdgData[filterId];
-            else                                                      rdgLog10 = defRdgLog10(rdgInfoData,filterId,i-1,j);
+            if ((i == absbscanPixelsInX) || (i == absbscanPixelsFnX + 2)) bscanLog10 = bscanInfoData.vectorMinLog10BscanData[filterId];
+            else                                                      bscanLog10 = defbscanLog10(bscanInfoData,filterId,i-1,j);
 
             if (
-                (double)(rdgLog10 - rdgInfoData.vectorMinLog10RdgData[filterId])/
-                (rdgInfoData.vectorMaxLog10RdgData[filterId] - rdgInfoData.vectorMinLog10RdgData[filterId]) > 0.3
+                (double)(bscanLog10 - bscanInfoData.vectorMinLog10BscanData[filterId])/
+                (bscanInfoData.vectorMaxLog10BscanData[filterId] - bscanInfoData.vectorMinLog10BscanData[filterId]) > 0.3
             )
-                pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.0;
+                pixelsDoubleData[((absbscanPixelsFnX-absbscanPixelsInX)+3)*j+i-absbscanPixelsInX] = 0.0;
             else
-                pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] = 0.3;
+                pixelsDoubleData[((absbscanPixelsFnX-absbscanPixelsInX)+3)*j+i-absbscanPixelsInX] = 0.3;
         }
     }
 
-    for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX + 2; i++)
+    for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX + 2; i++)
     {
-        for (int j = 0; j < rdgHeight; j++)
+        for (int j = 0; j < bscanHeight; j++)
         {
             int quantPoints = 0;
-            if (pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j+i-absRdgPixelsInX] < deltaParam)
+            if (pixelsDoubleData[((absbscanPixelsFnX-absbscanPixelsInX)+3)*j+i-absbscanPixelsInX] < deltaParam)
             {
                 for (int i1 = i-1; i1 <= i+1; i1++)
                 {
                     for (int j1 = j-1; j1 <= j+1; j1++)
                     {
-                        if ( ((i1 >= absRdgPixelsInX && i1 <= absRdgPixelsFnX + 2) && (j1 >= 0 && j1 <= rdgHeight -1)) && (pixelsDoubleData[((absRdgPixelsFnX-absRdgPixelsInX)+3)*j1+i1-absRdgPixelsInX] > deltaParam)) quantPoints++;
+                        if (
+                                ((i1 >= absbscanPixelsInX && i1 <= absbscanPixelsFnX + 2) && (j1 >= 0 && j1 <= bscanHeight -1))    &&
+                                (pixelsDoubleData[((absbscanPixelsFnX-absbscanPixelsInX)+3)*j1+i1-absbscanPixelsInX] > deltaParam)
+                           )
+                           quantPoints++;
                     }
                 }
                 if (quantPoints >= 1 && quantPoints < 8)
                 {
-                    if ((i != absRdgPixelsInX) && (i != absRdgPixelsFnX + 2))
+                    if ((i != absbscanPixelsInX) && (i != absbscanPixelsFnX + 2))
                     {
                         pairXY.first  = i-1;
                         pairXY.second = j;
-                        (rdgInfoData.vectorsRdgLog10PairXY[filterId]).push_back(pairXY);
+                        (bscanInfoData.vectorsBscanLog10PairXY[filterId]).push_back(pairXY);
                     }
                 }
             }
@@ -524,9 +528,9 @@ inline void createVectorRdgLog10PairXY(
     delete [] pixelsDoubleData;
 }
 
-inline void outputVectorRdgsSurfSelectArea(
-    int rdgsSurfPixelsInX, int rdgsSurfPixelsInY, int rdgsSurfPixelsFnX, int rdgsSurfPixelsFnY,
-    int rdgsSurfPixelsWidth,  std::vector<QPair<int, int> > vectorPairXY,  GLubyte* rdgsSurfPixelsData
+inline void outputVectorbscansSurfSelectArea(
+    int bscansSurfPixelsInX, int bscansSurfPixelsInY, int bscansSurfPixelsFnX, int bscansSurfPixelsFnY,
+    int bscansSurfPixelsWidth,  std::vector<QPair<int, int> > vectorPairXY,  GLubyte* bscansSurfPixelsData
 )
 {
     if (vectorPairXY.size() > 0)
@@ -534,102 +538,103 @@ inline void outputVectorRdgsSurfSelectArea(
         for (int count = 0; count < vectorPairXY.size(); count++)
         {
             if (
-               (vectorPairXY[count].first  >= rdgsSurfPixelsInX && vectorPairXY[count].first  <= rdgsSurfPixelsFnX) &&
-               (vectorPairXY[count].second >= rdgsSurfPixelsInY && vectorPairXY[count].second <= rdgsSurfPixelsFnY)
+               (vectorPairXY[count].first  >= bscansSurfPixelsInX && vectorPairXY[count].first  <= bscansSurfPixelsFnX) &&
+               (vectorPairXY[count].second >= bscansSurfPixelsInY && vectorPairXY[count].second <= bscansSurfPixelsFnY)
             )
             {
-                rdgsSurfPixelsData[4*rdgsSurfPixelsWidth*(vectorPairXY[count].second-rdgsSurfPixelsInY) + 4*(vectorPairXY[count].first-rdgsSurfPixelsInX)+0] = 255;
-                rdgsSurfPixelsData[4*rdgsSurfPixelsWidth*(vectorPairXY[count].second-rdgsSurfPixelsInY) + 4*(vectorPairXY[count].first-rdgsSurfPixelsInX)+1] = 0;
-                rdgsSurfPixelsData[4*rdgsSurfPixelsWidth*(vectorPairXY[count].second-rdgsSurfPixelsInY) + 4*(vectorPairXY[count].first-rdgsSurfPixelsInX)+2] = 0;
-                rdgsSurfPixelsData[4*rdgsSurfPixelsWidth*(vectorPairXY[count].second-rdgsSurfPixelsInY) + 4*(vectorPairXY[count].first-rdgsSurfPixelsInX)+3] = 255;
+                bscansSurfPixelsData[4*bscansSurfPixelsWidth*(vectorPairXY[count].second-bscansSurfPixelsInY) + 4*(vectorPairXY[count].first-bscansSurfPixelsInX)+0] = 255;
+                bscansSurfPixelsData[4*bscansSurfPixelsWidth*(vectorPairXY[count].second-bscansSurfPixelsInY) + 4*(vectorPairXY[count].first-bscansSurfPixelsInX)+1] = 0;
+                bscansSurfPixelsData[4*bscansSurfPixelsWidth*(vectorPairXY[count].second-bscansSurfPixelsInY) + 4*(vectorPairXY[count].first-bscansSurfPixelsInX)+2] = 0;
+                bscansSurfPixelsData[4*bscansSurfPixelsWidth*(vectorPairXY[count].second-bscansSurfPixelsInY) + 4*(vectorPairXY[count].first-bscansSurfPixelsInX)+3] = 255;
             }
         }
     }
 }
 
-inline void outputVectorRdgSelectArea(
-    int rdgPixelsWidth, int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY, std::vector<QPair<int, int> > vectorPairXY, GLubyte* pixelsData
+inline void outputVectorBscanSelectArea(
+    int bscanPixelsWidth, int bscanPixelsInX, int bscanPixelsInY, int bscanPixelsFnX, int bscanPixelsFnY, std::vector<QPair<int, int> > vectorPairXY, GLubyte* pixelsData
 )
 {
     if (vectorPairXY.size() > 0)
     {
         for (int count = 0; count < vectorPairXY.size(); count++)
         {
-            if ( (vectorPairXY[count].first  >= rdgPixelsInX && vectorPairXY[count].first  <= rdgPixelsFnX) &&
-                 (vectorPairXY[count].second >= rdgPixelsInY && vectorPairXY[count].second <= rdgPixelsFnY))
+            if ( (vectorPairXY[count].first  >= bscanPixelsInX && vectorPairXY[count].first  <= bscanPixelsFnX) &&
+                 (vectorPairXY[count].second >= bscanPixelsInY && vectorPairXY[count].second <= bscanPixelsFnY))
             {
-                pixelsData[4*rdgPixelsWidth*(vectorPairXY[count].second-rdgPixelsInY) + 4*(int)(vectorPairXY[count].first-rdgPixelsInX)+0] = 255;
-                pixelsData[4*rdgPixelsWidth*(vectorPairXY[count].second-rdgPixelsInY) + 4*(int)(vectorPairXY[count].first-rdgPixelsInX)+1] = 0;
-                pixelsData[4*rdgPixelsWidth*(vectorPairXY[count].second-rdgPixelsInY) + 4*(int)(vectorPairXY[count].first-rdgPixelsInX)+2] = 0;
-                pixelsData[4*rdgPixelsWidth*(vectorPairXY[count].second-rdgPixelsInY) + 4*(int)(vectorPairXY[count].first-rdgPixelsInX)+3] = 255;
+                pixelsData[4*bscanPixelsWidth*(vectorPairXY[count].second-bscanPixelsInY) + 4*(int)(vectorPairXY[count].first-bscanPixelsInX)+0] = 255;
+                pixelsData[4*bscanPixelsWidth*(vectorPairXY[count].second-bscanPixelsInY) + 4*(int)(vectorPairXY[count].first-bscanPixelsInX)+1] = 0;
+                pixelsData[4*bscanPixelsWidth*(vectorPairXY[count].second-bscanPixelsInY) + 4*(int)(vectorPairXY[count].first-bscanPixelsInX)+2] = 0;
+                pixelsData[4*bscanPixelsWidth*(vectorPairXY[count].second-bscanPixelsInY) + 4*(int)(vectorPairXY[count].first-bscanPixelsInX)+3] = 255;
             }
         }
     }
 }
 
-inline void outputMapRdgSelectArea(
-      int rdgPixelsWidth, int rdgPixelsHeight, int rdgPixelsInX, int rdgPixelsInY, int rdgPixelsFnX, int rdgPixelsFnY,
-      const std::map<int, std::vector<QPair<int, int>> >& mapRdgPairXY, GLubyte* pixelsData)
+inline void outputMapBscanSelectArea(
+      int bscanPixelsWidth, int bscanPixelsHeight, int bscanPixelsInX, int bscanPixelsInY, int bscanPixelsFnX, int bscanPixelsFnY,
+      const std::map<int, std::vector<QPair<int, int>> >& mapBscanPairXY, GLubyte* pixelsData)
 {
-    if (mapRdgPairXY.size() > 0)
+    if (mapBscanPairXY.size() > 0)
     {
-        for (auto itMap = mapRdgPairXY.begin(); itMap != mapRdgPairXY.end(); itMap++)
+        for (auto itMap = mapBscanPairXY.begin(); itMap != mapBscanPairXY.end(); itMap++)
         {
             for (int count = 0; count < itMap->second.size(); count++)
             {
-                if ( (itMap->second[count].first  >= rdgPixelsInX && itMap->second[count].first  <= rdgPixelsFnX) &&
-                (itMap->second[count].second >= rdgPixelsInY && itMap->second[count].second <= rdgPixelsFnY))
+                if ( (itMap->second[count].first  >= bscanPixelsInX && itMap->second[count].first  <= bscanPixelsFnX) &&
+                     (itMap->second[count].second >= bscanPixelsInY && itMap->second[count].second <= bscanPixelsFnY)
+                )
                 {
-                    pixelsData[4*rdgPixelsWidth*(rdgPixelsHeight-1-(itMap->second[count].second-rdgPixelsInY))+4*(int)(itMap->second[count].first-rdgPixelsInX)+0] = 255;
-                    pixelsData[4*rdgPixelsWidth*(rdgPixelsHeight-1-(itMap->second[count].second-rdgPixelsInY))+4*(int)(itMap->second[count].first-rdgPixelsInX)+1] =   0;
-                    pixelsData[4*rdgPixelsWidth*(rdgPixelsHeight-1-(itMap->second[count].second-rdgPixelsInY))+4*(int)(itMap->second[count].first-rdgPixelsInX)+2] =   0;
-                    pixelsData[4*rdgPixelsWidth*(rdgPixelsHeight-1-(itMap->second[count].second-rdgPixelsInY))+4*(int)(itMap->second[count].first-rdgPixelsInX)+3] = 255;
+                    pixelsData[4*bscanPixelsWidth*(bscanPixelsHeight-1-(itMap->second[count].second-bscanPixelsInY))+4*(int)(itMap->second[count].first-bscanPixelsInX)+0] = 255;
+                    pixelsData[4*bscanPixelsWidth*(bscanPixelsHeight-1-(itMap->second[count].second-bscanPixelsInY))+4*(int)(itMap->second[count].first-bscanPixelsInX)+1] =   0;
+                    pixelsData[4*bscanPixelsWidth*(bscanPixelsHeight-1-(itMap->second[count].second-bscanPixelsInY))+4*(int)(itMap->second[count].first-bscanPixelsInX)+2] =   0;
+                    pixelsData[4*bscanPixelsWidth*(bscanPixelsHeight-1-(itMap->second[count].second-bscanPixelsInY))+4*(int)(itMap->second[count].first-bscanPixelsInX)+3] = 255;
                 }
             }
         }
     }
 }
 
-inline double defDepthScanUpLowRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int quantImpulsesOfPacket, int materialId, int filterId, int selectionId )
+inline double defDepthScanUpLowBscan(const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap,  std::string nameBscan,  int kBscan, int quantImpulsesOfPacket, int materialId, int filterId, int selectionId )
 {
     double result = 0.0;
-    auto itRdgsInfoDataMap = rdgsInfoDataMap.find(nameRdg);
-    if (itRdgsInfoDataMap != rdgsInfoDataMap.end())
+    auto itbscansInfoDataMap = bscansInfoDataMap.find(nameBscan);
+    if (itbscansInfoDataMap != bscansInfoDataMap.end())
     {
-        if (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itRdgsInfoDataMap
-                                      ->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1];
+        if (itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
+            result = itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itbscansInfoDataMap
+                                      ->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1];
         else
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][quantImpulsesOfPacket];
+            result = itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][quantImpulsesOfPacket];
     }
     return result;
 }
 
-inline double defDepthScanLowUpRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int quantImpulsesOfPacket, int materialId, int filterId, int selectionId)
+inline double defDepthScanLowUpBscan(const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap,  std::string nameBscan,  int kBscan, int quantImpulsesOfPacket, int materialId, int filterId, int selectionId)
 {
     double result = 0.0;
-    auto itRdgsInfoDataMap = rdgsInfoDataMap.find(nameRdg);
-    if (itRdgsInfoDataMap != rdgsInfoDataMap.end())
+    auto itbscansInfoDataMap = bscansInfoDataMap.find(nameBscan);
+    if (itbscansInfoDataMap != bscansInfoDataMap.end())
     {
-        if (itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
+        if (itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1 < quantImpulsesOfPacket)
             result = 0.0;
         else
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itRdgsInfoDataMap
-                                      ->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1] -
-            itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][quantImpulsesOfPacket];
+            result = itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itbscansInfoDataMap
+                                      ->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1] -
+            itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][quantImpulsesOfPacket];
     }
     return result;
 }
 
-inline double defFullDepthScanLowUpRdg(const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap,  std::string nameRdg,  int kRdg, int materialId, int filterId, int selectionId)
+inline double defFullDepthScanLowUpBscan(const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap,  std::string nameBscan,  int kBscan, int materialId, int filterId, int selectionId)
 {
     double result = 0.0;
-    auto itRdgsInfoDataMap = rdgsInfoDataMap.find(nameRdg);
-    if (itRdgsInfoDataMap != rdgsInfoDataMap.end())
+    auto itbscansInfoDataMap = bscansInfoDataMap.find(nameBscan);
+    if (itbscansInfoDataMap != bscansInfoDataMap.end())
     {
-        if (itRdgsInfoDataMap->first == nameRdg)
-            result = itRdgsInfoDataMap->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itRdgsInfoDataMap
-                                      ->second.vectorRdgData[kRdg].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1];
+        if (itbscansInfoDataMap->first == nameBscan)
+            result = itbscansInfoDataMap->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][itbscansInfoDataMap
+                                      ->second.vectorBscanData[kBscan].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId].size()-1];
     }
     return result;
 }
@@ -668,20 +673,20 @@ inline void loadBoundPointsLinePoints(const QString& loadCutLinePointsFile, int&
     }
 }
 
-inline void maskCellRdgSelected(int i, int j, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX,  int maskCell, std::vector<std::vector<int> >& vectorRdgSelectedPoints)
+inline void maskCellBscanSelected(int i, int j, int bscanHeight, int absbscanPixelsInX, int absbscanPixelsFnX,  int maskCell, std::vector<std::vector<int> >& vectorBscanSelectedPoints)
 {
-    vectorRdgSelectedPoints[i-absRdgPixelsInX][j] = maskCell;
+    vectorBscanSelectedPoints[i-absbscanPixelsInX][j] = maskCell;
 
     bool newMaskPointEx = false;
     for (int i1 = i-1; i1 <= i+1; i1++)
     {
         for (int j1 = j-1; j1 <= j+1; j1++)
         {
-            if (((i1 >=absRdgPixelsInX && i1 <= absRdgPixelsFnX) && (j1 >=0 && j1 <= rdgHeight -1)) && ( i1 != i || j1 != j))
+            if (((i1 >=absbscanPixelsInX && i1 <= absbscanPixelsFnX) && (j1 >=0 && j1 <= bscanHeight -1)) && ( i1 != i || j1 != j))
             {
-                if (vectorRdgSelectedPoints[i1-absRdgPixelsInX][j1] == -1 && newMaskPointEx == false)
+                if (vectorBscanSelectedPoints[i1-absbscanPixelsInX][j1] == -1 && newMaskPointEx == false)
                 {
-                    maskCellRdgSelected(i1, j1, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, maskCell, vectorRdgSelectedPoints);
+                    maskCellBscanSelected(i1, j1, bscanHeight, absbscanPixelsInX, absbscanPixelsFnX, maskCell, vectorBscanSelectedPoints);
                     newMaskPointEx = true;
                 }
             }
@@ -689,56 +694,57 @@ inline void maskCellRdgSelected(int i, int j, int rdgHeight, int absRdgPixelsInX
     }
 }
 
-inline void createMapRdgPairXY(
-    const std::vector<QPair<int, int> >& vectorRdgLog10PairXY, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, std::map<int, std::vector<QPair<int, int>> >& mapAutoLog10RdgPairXY
+inline void createMapBscanPairXY(
+    const std::vector<QPair<int, int> >& vectorbscanLog10PairXY, int bscanHeight, int absbscanPixelsInX, int absbscanPixelsFnX, std::map<int, std::vector<QPair<int, int>> >& mapAutoLog10BscanPairXY
 )
 {
-    mapAutoLog10RdgPairXY.clear();
-    if (vectorRdgLog10PairXY.size() > 0)
+    mapAutoLog10BscanPairXY.clear();
+    if (vectorbscanLog10PairXY.size() > 0)
     {
-        std::vector<std::vector<int> > vectorRdgSelectedPoints;
-        vectorRdgSelectedPoints.resize(absRdgPixelsFnX-absRdgPixelsInX+1);
+        std::vector<std::vector<int> > vectorBscanSelectedPoints;
 
-        for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX; i++)  vectorRdgSelectedPoints[i-absRdgPixelsInX].resize(rdgHeight);
+        vectorBscanSelectedPoints.resize(absbscanPixelsFnX-absbscanPixelsInX+1);
 
-        for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX; i++)
+        for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX; i++)  vectorBscanSelectedPoints[i-absbscanPixelsInX].resize(bscanHeight);
+
+        for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX; i++)
         {
-            for (int j = 0; j < rdgHeight; j++)
+            for (int j = 0; j < bscanHeight; j++)
             {
-                vectorRdgSelectedPoints[i-absRdgPixelsInX][j] = 0.0;
+                vectorBscanSelectedPoints[i-absbscanPixelsInX][j] = 0.0;
             }
         }
 
-        for (int i = 0; i < vectorRdgLog10PairXY.size(); i++)
+        for (int i = 0; i < vectorbscanLog10PairXY.size(); i++)
         {
-            vectorRdgSelectedPoints[vectorRdgLog10PairXY[i].first-absRdgPixelsInX][vectorRdgLog10PairXY[i].second] = -1;
+            vectorBscanSelectedPoints[vectorbscanLog10PairXY[i].first-absbscanPixelsInX][vectorbscanLog10PairXY[i].second] = -1;
         }
 
         int maskCell = 1;
-        for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX; i++)
+        for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX; i++)
         {
-            for (int j = 0; j < rdgHeight; j++)
+            for (int j = 0; j < bscanHeight; j++)
             {
-                if (vectorRdgSelectedPoints[i-absRdgPixelsInX][j] == -1)
+                if (vectorBscanSelectedPoints[i-absbscanPixelsInX][j] == -1)
                 {
-                    maskCellRdgSelected(i, j, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX,  maskCell, vectorRdgSelectedPoints);
+                    maskCellBscanSelected(i, j, bscanHeight, absbscanPixelsInX, absbscanPixelsFnX,  maskCell, vectorBscanSelectedPoints);
                     maskCell++;
                 }
             }
         }
 
-        for (int i = 1; i <= maskCell-1; i++)  {   mapAutoLog10RdgPairXY[i].resize(0); }
+        for (int i = 1; i <= maskCell-1; i++)  {   mapAutoLog10BscanPairXY[i].resize(0); }
 
-        for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX; i++)
+        for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX; i++)
         {
-            for (int j = 0; j < rdgHeight; j++)
+            for (int j = 0; j < bscanHeight; j++)
             {
-                if (vectorRdgSelectedPoints[i-absRdgPixelsInX][j] > 0)
+                if (vectorBscanSelectedPoints[i-absbscanPixelsInX][j] > 0)
                 {
                     QPair<int, int> pairXY;
                     pairXY.first  = i;
                     pairXY.second = j;
-                    mapAutoLog10RdgPairXY[vectorRdgSelectedPoints[i-absRdgPixelsInX][j]].push_back(pairXY);
+                    mapAutoLog10BscanPairXY[vectorBscanSelectedPoints[i-absbscanPixelsInX][j]].push_back(pairXY);
                 }
             }
         }
@@ -746,56 +752,56 @@ inline void createMapRdgPairXY(
 }
 
 inline void  createMaskMapAllXY(
-    int absRdgPixelsInX, int absRdgPixelsFnX, const std::map<int, std::vector<QPair<int, int>> >& mapRdgPairXY, std::map<int, std::map<int, std::vector<int>>>&  maskMapAllXY
+    int absbscanPixelsInX, int absbscanPixelsFnX, const std::map<int, std::vector<QPair<int, int>> >& mapBscanPairXY, std::map<int, std::map<int, std::vector<int>>>&  maskMapAllXY
 )
 {
     std::vector<std::vector<QPair<int, int>> > fullVectorPairsXY;
-    fullVectorPairsXY.resize(absRdgPixelsFnX - absRdgPixelsInX + 1);
+    fullVectorPairsXY.resize(absbscanPixelsFnX - absbscanPixelsInX + 1);
     QPair<int, int>                                       pairMY;
     std::map<int, std::vector<int>> maskMapXY;
 
-    for (auto mapIterAvail = mapRdgPairXY.begin(); mapIterAvail != mapRdgPairXY.end(); mapIterAvail++)
+    for (auto mapIterAvail = mapBscanPairXY.begin(); mapIterAvail != mapBscanPairXY.end(); mapIterAvail++)
     {
         for (int count1 = 0; count1 < mapIterAvail->second.size(); count1++)
         {
             pairMY.first  = mapIterAvail->first;
             pairMY.second = mapIterAvail->second[count1].second;
-            fullVectorPairsXY[mapIterAvail->second[count1].first-absRdgPixelsInX].push_back(pairMY);
+            fullVectorPairsXY[mapIterAvail->second[count1].first-absbscanPixelsInX].push_back(pairMY);
         }
     }
 
-    for (int count1 = absRdgPixelsInX; count1 <= absRdgPixelsFnX; count1++)
+    for (int count1 = absbscanPixelsInX; count1 <= absbscanPixelsFnX; count1++)
     {
-        if (fullVectorPairsXY[count1-absRdgPixelsInX].size() > 0)
+        if (fullVectorPairsXY[count1-absbscanPixelsInX].size() > 0)
         {
             maskMapXY.clear();
-            for (int count2 = 0; count2 < fullVectorPairsXY[count1-absRdgPixelsInX].size(); count2++)
+            for (int count2 = 0; count2 < fullVectorPairsXY[count1-absbscanPixelsInX].size(); count2++)
             {
-                maskMapXY[fullVectorPairsXY[count1-absRdgPixelsInX][count2].first].push_back(fullVectorPairsXY[count1-absRdgPixelsInX][count2].second);
+                maskMapXY[fullVectorPairsXY[count1-absbscanPixelsInX][count2].first].push_back(fullVectorPairsXY[count1-absbscanPixelsInX][count2].second);
             }
             maskMapAllXY[count1] = maskMapXY;
         }
     }
 }
 
-inline void createMapRdgTypeRdgSelectionInfo(
-    int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, int materialId, int filterId, int selectionId,
-    const std::map<int, std::vector<QPair<int, int> > >&  mapAutoLog10RdgPairXY, st_rdgInfoData& rdgInfoData
+inline void createMapBscanTypeBscanSelectionInfo(
+    int bscanHeight, int absbscanPixelsInX, int absbscanPixelsFnX, int materialId, int filterId, int selectionId,
+    const std::map<int, std::vector<QPair<int, int> > >&  mapAutoLog10BscanPairXY, st_bscanInfoData& bscanInfoData
 )
 {
-    for (int i = absRdgPixelsInX; i <= absRdgPixelsFnX; i++)
+    for (int i = absbscanPixelsInX; i <= absbscanPixelsFnX; i++)
     {
-        for (int j=0; j < rdgHeight; j++)
+        for (int j=0; j < bscanHeight; j++)
         {
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][j] =
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId            ][j];
+            bscanInfoData.vectorBscanData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][j] =
+            bscanInfoData.vectorBscanData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId            ][j];
         }
     }
 
-    if (mapAutoLog10RdgPairXY.size() > 0)
+    if (mapAutoLog10BscanPairXY.size() > 0)
     {
         std::map<int, std::map<int, std::vector<int>>> maskMapAllXY;
-        createMaskMapAllXY(absRdgPixelsInX, absRdgPixelsFnX, mapAutoLog10RdgPairXY, maskMapAllXY);
+        createMaskMapAllXY(absbscanPixelsInX, absbscanPixelsFnX, mapAutoLog10BscanPairXY, maskMapAllXY);
 
         int X{0}, YIn{0}, YFn{0};
         double sumImpIn{0.0}, sumImpFn{0.0};
@@ -805,24 +811,50 @@ inline void createMapRdgTypeRdgSelectionInfo(
             if (maskMapAllXY[mapIter1->first].size()>1)
             {
                 X = mapIter1->first;
+
+                std::pair<int, int> pairYInYFN;
+
+                std::vector<std::pair<int, int>> vectorPairsYInYFn;
+                vectorPairsYInYFn.resize(0);
+
                 for (auto mapIter2 = maskMapAllXY[mapIter1->first].begin(); mapIter2 != maskMapAllXY[mapIter1->first].end(); mapIter2++)
                 {
                     if (mapIter2->second.size()> 1)
                     {
-                        for (int count1 = 0; count1 < mapIter2->second.size()-1; count1++)
+                        for (int count = 0; count < mapIter2->second.size()-1; count++)
                         {
-                            YIn = mapIter2->second[0];
-                            YFn = mapIter2->second[count1+1];
+                            pairYInYFN.first  = mapIter2->second[0];
+                            pairYInYFN.second = mapIter2->second[count+1];
 
-                            sumImpIn = rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][YIn];
-                            sumImpFn = rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][YFn];
+                            bool newPairYInYFn = true;
+                            if (vectorPairsYInYFn.size() > 0)
+                            {
+                                for (int count1 = 0; count1 <= vectorPairsYInYFn.size()-1; count1++)
+                                {
+                                    newPairYInYFn = !((pairYInYFN.first  > vectorPairsYInYFn[count1].first && pairYInYFN.first  < vectorPairsYInYFn[count1].second ) &&
+                                                     (pairYInYFN.second > vectorPairsYInYFn[count1].first && pairYInYFN.second < vectorPairsYInYFn[count1].second ));
+                                    if (newPairYInYFn == false) break;
+                                }
+                            }
+
+
+                            if (newPairYInYFn == true)
+                            {
+                            YIn = pairYInYFN.first;
+                            YFn =  pairYInYFN.second;
+
+                            sumImpIn = bscanInfoData.vectorBscanData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][YIn];
+                            sumImpFn = bscanInfoData.vectorBscanData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][YFn];
 
                             for (int count2 = YIn; count2<=YFn; count2++)
                             {
                                 if (count2 < (YIn+YFn)/2.0)
-                                    rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][count2] = sumImpIn;
+                                    bscanInfoData.vectorBscanData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][count2] = sumImpIn;
                                 else
-                                    rdgInfoData.vectorRdgData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][count2] = sumImpFn;
+                                    bscanInfoData.vectorBscanData[X].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+selectionId][count2] = sumImpFn;
+                            }
+
+                            vectorPairsYInYFn.push_back(pairYInYFN);
                             }
                         }
                     }
@@ -832,11 +864,11 @@ inline void createMapRdgTypeRdgSelectionInfo(
     }
 }
 
-inline void saveRdgAutoSelection(std::map<int, std::vector<QPair<int, int>> > mapRdgPairXY, double time_step_ns, QString saveRdgAutoSelectionDataFile)
+inline void saveBscanAutoSelection(std::map<int, std::vector<QPair<int, int>> > mapBscanPairXY, double time_step_ns, QString saveBscanAutoSelectionDataFile)
 {
-    csvfile csv(saveRdgAutoSelectionDataFile.toStdString());
+    csvfile csv(saveBscanAutoSelectionDataFile.toStdString());
     csv <<"layerId" << "trackId"<<"impulseId"<<"time delay ns"<< endrow;
-    for (auto itMap = mapRdgPairXY.begin(); itMap != mapRdgPairXY.end(); itMap++)
+    for (auto itMap = mapBscanPairXY.begin(); itMap != mapBscanPairXY.end(); itMap++)
     {
         for (int i = 0; i <= itMap->second.size()-1; i++)
         {
@@ -845,10 +877,10 @@ inline void saveRdgAutoSelection(std::map<int, std::vector<QPair<int, int>> > ma
     }
 }
 
-inline void loadRdgAutoSelection(QString loadRdgAutoSelectionDataFile, std::map<int, std::vector<QPair<int, int>> >& mapRdgPairXY)
+inline void loadBscanAutoSelection(QString loadBscanAutoSelectionDataFile, std::map<int, std::vector<QPair<int, int>> >& mapBscanPairXY)
 {
     QPair<int, int> pairXY;
-    QFile file(loadRdgAutoSelectionDataFile);
+    QFile file(loadBscanAutoSelectionDataFile);
     if (file.open(QFile::ReadOnly | QFile::Text))
     {
         QTextStream in(&file);
@@ -864,7 +896,7 @@ inline void loadRdgAutoSelection(QString loadRdgAutoSelectionDataFile, std::map<
 
                 pairXY.first  = X;
                 pairXY.second = Y;
-                mapRdgPairXY[layerID].push_back(pairXY);
+                mapBscanPairXY[layerID].push_back(pairXY);
             }
             count++;
         }
@@ -912,13 +944,13 @@ inline double correctInt16TValue(const QByteArray& data, int parserOffset,  int 
     return *((int16_t*)(byteOutBlock.data()));
 }
 
-inline void defVectorRdgsTransLineSectionPoints(int inPosX, int inPosY, int fnPosX, int fnPosY, std::vector<std::pair<int, int>>& vectorRdgsTransLinePoints)
+inline void defVectorBscansTransLineSectionPoints(int inPosX, int inPosY, int fnPosX, int fnPosY, std::vector<std::pair<int, int>>& vectorBscansTransLinePoints)
 {
-    vectorRdgsTransLinePoints.resize(0);
+    vectorBscansTransLinePoints.resize(0);
 
-    std::pair<int, int> rdgPoint;
+    std::pair<int, int> bscanPoint;
 
-    vectorRdgsTransLinePoints.resize(0);
+    vectorBscansTransLinePoints.resize(0);
     int length = (int)(sqrt( (double)(fnPosX - inPosX)*(fnPosX - inPosX) +
                              (double)(fnPosY - inPosY)*(fnPosY - inPosY)))+1;
     int x{0}, y{0};
@@ -940,15 +972,15 @@ inline void defVectorRdgsTransLineSectionPoints(int inPosX, int inPosY, int fnPo
             x = inPosX + count*(fnPosX - inPosX)/(length-1.0);
             y = inPosY + count*(fnPosY - inPosY)/(length-1.0);
         }
-        rdgPoint.first  = x;
-        rdgPoint.second = y;
-        vectorRdgsTransLinePoints.push_back(rdgPoint);
+        bscanPoint.first  = x;
+        bscanPoint.second = y;
+        vectorBscansTransLinePoints.push_back(bscanPoint);
     }
 }
 
 
 inline void wheelOpengl(
-    double eventDelta, boolean allScaling, boolean hScaling, boolean vScaling, int absRdgPixelsInX, int absRdgPixelsFnX, int height,
+    double eventDelta, boolean allScaling, boolean hScaling, boolean vScaling, int absbscanPixelsInX, int absbscanPixelsFnX, int height,
     int& pixelsWidth, int& pixelsHeight, int& pixelsInX, int& pixelsInY, int& pixelsFnX, int& pixelsFnY,
     int& pixelsCentX, int& pixelsCentY
 )
@@ -968,16 +1000,16 @@ inline void wheelOpengl(
 
     if ((allScaling == true) || (hScaling == true))
     {
-        if       (pixelsWidth  < (absRdgPixelsFnX-absRdgPixelsInX+1)/scaleFactor ) { pixelsWidth  = (absRdgPixelsFnX-absRdgPixelsInX+1)/scaleFactor; }
-        else if  (pixelsWidth  > (absRdgPixelsFnX-absRdgPixelsInX+1))              { pixelsWidth  = (absRdgPixelsFnX-absRdgPixelsInX+1);             }
-        if (pixelsCentX + pixelsWidth/2 > absRdgPixelsFnX)
+        if       (pixelsWidth  < (absbscanPixelsFnX-absbscanPixelsInX+1)/scaleFactor ) { pixelsWidth  = (absbscanPixelsFnX-absbscanPixelsInX+1)/scaleFactor; }
+        else if  (pixelsWidth  > (absbscanPixelsFnX-absbscanPixelsInX+1))              { pixelsWidth  = (absbscanPixelsFnX-absbscanPixelsInX+1);             }
+        if (pixelsCentX + pixelsWidth/2 > absbscanPixelsFnX)
         {
-            pixelsFnX = absRdgPixelsFnX;
+            pixelsFnX = absbscanPixelsFnX;
             pixelsInX = pixelsFnX-pixelsWidth+1;
         }
-        else if ( pixelsCentX - (pixelsWidth/2) < absRdgPixelsInX)
+        else if ( pixelsCentX - (pixelsWidth/2) < absbscanPixelsInX)
         {
-            pixelsInX = absRdgPixelsInX;
+            pixelsInX = absbscanPixelsInX;
             pixelsFnX = pixelsWidth-1;
         }
         else
@@ -1013,7 +1045,7 @@ inline void wheelOpengl(
 
 inline void moveOpengl(
     int pressX, int pressY, int releaseX, int releaseY,
-    int absRdgPixelsInX, int absRdgPixelsFnX, int height, int pixelsWidth, int pixelsHeight,
+    int absbscanPixelsInX, int absbscanPixelsFnX, int height, int pixelsWidth, int pixelsHeight,
     int& pixelsInX, int& pixelsInY, int& pixelsFnX, int& pixelsFnY, int& pixelsCentX, int& pixelsCentY
 )
 {
@@ -1025,10 +1057,10 @@ inline void moveOpengl(
         int deltaXIn = 0;
         int deltaXFn = 0;
         int dimX = pressX - releaseX;
-        if (pixelsInX + dimX > absRdgPixelsFnX) deltaXIn =  absRdgPixelsFnX  - pixelsInX;
-        if (pixelsInX + dimX < absRdgPixelsInX) deltaXIn = -pixelsInX;
-        if (pixelsFnX + dimX > absRdgPixelsFnX) deltaXFn =  absRdgPixelsFnX - pixelsFnX;
-        if (pixelsFnX + dimX < absRdgPixelsInX) deltaXFn = -pixelsFnX;
+        if (pixelsInX + dimX > absbscanPixelsFnX) deltaXIn =  absbscanPixelsFnX  - pixelsInX;
+        if (pixelsInX + dimX < absbscanPixelsInX) deltaXIn = -pixelsInX;
+        if (pixelsFnX + dimX > absbscanPixelsFnX) deltaXFn =  absbscanPixelsFnX - pixelsFnX;
+        if (pixelsFnX + dimX < absbscanPixelsInX) deltaXFn = -pixelsFnX;
         if (abs(deltaXIn)> 0 || abs(deltaXFn)> 0)
         {
             if (abs(deltaXIn) > 0) dimX = deltaXIn;
@@ -1049,9 +1081,9 @@ inline void moveOpengl(
         }
 
         if (
-            (pixelsInX + dimX >= absRdgPixelsInX && pixelsInX + dimX <= absRdgPixelsFnX) &&
+            (pixelsInX + dimX >= absbscanPixelsInX && pixelsInX + dimX <= absbscanPixelsFnX) &&
             (pixelsInY + dimY >= 0               && pixelsInY + dimY <= height - 1)      &&
-            (pixelsFnX + dimX >= absRdgPixelsInX && pixelsFnX + dimX <= absRdgPixelsFnX) &&
+            (pixelsFnX + dimX >= absbscanPixelsInX && pixelsFnX + dimX <= absbscanPixelsFnX) &&
             (pixelsFnY + dimY >= 0               && pixelsFnY + dimY <= height - 1)
          )
         {
@@ -1067,130 +1099,130 @@ inline void moveOpengl(
     }
 }
 
-inline void executeTypeRdgSelectionInfo(
-    int materialId, int filterId, int selectionId, int rdgHeight, int absRdgPixelsInX, int absRdgPixelsFnX, st_rdgInfoData& rdgInfoData
+inline void executeTypeBscanSelectionInfo(
+    int materialId, int filterId, int selectionId, int bscanHeight, int absbscanPixelsInX, int absbscanPixelsFnX, st_bscanInfoData& bscanInfoData
 )
 {
-    if (rdgInfoData.vectorRdgData.size()-1 <= absRdgPixelsInX) absRdgPixelsInX = rdgInfoData.vectorRdgData.size()-1;
-    if (rdgInfoData.vectorRdgData.size()-1 <= absRdgPixelsFnX) absRdgPixelsFnX = rdgInfoData.vectorRdgData.size()-1;
+    if (bscanInfoData.vectorBscanData.size()-1 <= absbscanPixelsInX) absbscanPixelsInX = bscanInfoData.vectorBscanData.size()-1;
+    if (bscanInfoData.vectorBscanData.size()-1 <= absbscanPixelsFnX) absbscanPixelsFnX = bscanInfoData.vectorBscanData.size()-1;
 
-    if (absRdgPixelsFnX > absRdgPixelsInX)
+    if (absbscanPixelsFnX > absbscanPixelsInX)
     {
-        createVectorRdgLog10PairXY(filterId, rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, rdgInfoData);
-        createMapRdgPairXY(rdgInfoData.vectorsRdgLog10PairXY[filterId], rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, rdgInfoData.vectorMapAutoLog10RdgPairXY[filterId]);
-        createMapRdgTypeRdgSelectionInfo(rdgHeight, absRdgPixelsInX, absRdgPixelsFnX, materialId, filterId, selectionId, rdgInfoData.vectorMapAutoLog10RdgPairXY[filterId], rdgInfoData);
+        createVectorbscanLog10PairXY(filterId, bscanHeight, absbscanPixelsInX, absbscanPixelsFnX, bscanInfoData);
+        createMapBscanPairXY(bscanInfoData.vectorsBscanLog10PairXY[filterId], bscanHeight, absbscanPixelsInX, absbscanPixelsFnX, bscanInfoData.vectorMapAutoLog10BscanPairXY[filterId]);
+        createMapBscanTypeBscanSelectionInfo(bscanHeight, absbscanPixelsInX, absbscanPixelsFnX, materialId, filterId, selectionId, bscanInfoData.vectorMapAutoLog10BscanPairXY[filterId], bscanInfoData);
     }
 }
 
-inline void samplingAllLog10Rdgs(
-    int materialId, int filterId, std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,
-    std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int absRdgPixelsInX, int absRdgPixelsFnX
+inline void samplingAllLog10Bscans(
+    int materialId, int filterId, std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs,
+    std::map<std::string, st_bscanInfoData>& bscansInfoDataMap, int absbscanPixelsInX, int absbscanPixelsFnX
 )
 {
-    for (auto iter = rdgsNamesVectorPairs.begin(); iter != rdgsNamesVectorPairs.end(); iter++)
+    for (auto iter = bscansNamesVectorPairs.begin(); iter != bscansNamesVectorPairs.end(); iter++)
     {
-        executeTypeRdgSelectionInfo(
-            materialId, filterId, 2, rdgsInfoDataMap[iter->first].quantImpulsesOfPacket, absRdgPixelsInX, absRdgPixelsFnX, rdgsInfoDataMap[iter->first]
+        executeTypeBscanSelectionInfo(
+            materialId, filterId, 2, bscansInfoDataMap[iter->first].quantImpulsesOfPacket, absbscanPixelsInX, absbscanPixelsFnX, bscansInfoDataMap[iter->first]
         );
     }
 }
 
-inline void createCsvRdgsFiles(const QStringList& filesRdgNamesCsv, QStringList& filesRdgNamesPropsCsv, QStringList& filesRdgNamesDataCsv)
+inline void createCsvBscansFiles(const QStringList& filesBscanNamesCsv, QStringList& filesBscanNamesPropsCsv, QStringList& filesBscanNamesDataCsv)
 {
-    for (int count = 0; count <= filesRdgNamesCsv.size()-1; count++)
+    for (int count = 0; count <= filesBscanNamesCsv.size()-1; count++)
     {
-        QFile fileRdg(filesRdgNamesCsv.at(count));
-        if (!fileRdg.open(QFile::ReadOnly | QFile::Text)) std::cout<<"File not exists"<<std::endl;
+        QFile fileBscan(filesBscanNamesCsv.at(count));
+        if (!fileBscan.open(QFile::ReadOnly | QFile::Text)) std::cout<<"File not exists"<<std::endl;
         else
         {
-            QTextStream in(&fileRdg);
+            QTextStream in(&fileBscan);
             QString line = in.readLine();
 
-            if (line.split(";").size()< 20) filesRdgNamesPropsCsv.push_back(filesRdgNamesCsv.at(count));
-            else                            filesRdgNamesDataCsv.push_back(filesRdgNamesCsv.at(count));
+            if (line.split(";").size()< 20) filesBscanNamesPropsCsv.push_back(filesBscanNamesCsv.at(count));
+            else                            filesBscanNamesDataCsv.push_back(filesBscanNamesCsv.at(count));
         }
     }
 }
 
-inline void allocateMainRdgContainers(st_rdgInfoData& rdgInfoDataMap, int vectorRdgDataPos)
+inline void allocateMainBscanContainers(st_bscanInfoData& bscanInfoData, int vectorBscanDataPos)
 {
-    (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorMinImpulses).resize(countFilters);
-    (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorMaxImpulses).resize(countFilters);
-    (rdgInfoDataMap.vectorRdgData[vectorRdgDataPos].vectorsDeeps).resize(countSelectors*countFilters*countMaterials);
-    (rdgInfoDataMap.vectorsRdgLog10PairXY).resize(countFilters);
-    (rdgInfoDataMap.vectorMapAutoLog10RdgPairXY).resize(countFilters);
+    (bscanInfoData.vectorBscanData[vectorBscanDataPos].vectorMinImpulses).resize(countFilters);
+    (bscanInfoData.vectorBscanData[vectorBscanDataPos].vectorMaxImpulses).resize(countFilters);
+    (bscanInfoData.vectorBscanData[vectorBscanDataPos].vectorsDeeps).resize(countSelectors*countFilters*countMaterials);
+    (bscanInfoData.vectorsBscanLog10PairXY).resize(countFilters);
+    (bscanInfoData.vectorMapAutoLog10BscanPairXY).resize(countFilters);
 }
 
-inline void createRdgDataMinMaxImpulses(st_rdgInfoData& rdgInfoDataMap, int count1, int quantImpulsesOfPacket, int filterId)
+inline void createBscanDataMinMaxImpulses(st_bscanInfoData& bscanInfoData, int count1, int quantImpulsesOfPacket, int filterId)
 {
-    rdgInfoDataMap.vectorRdgData[count1].vectorMinImpulses[filterId] = *std::min_element(
-        rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].begin(),
-        rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].end()
+    bscanInfoData.vectorBscanData[count1].vectorMinImpulses[filterId] = *std::min_element(
+        bscanInfoData.vectorBscanData[count1].vectorsDoubleData[filterId].begin(),
+        bscanInfoData.vectorBscanData[count1].vectorsDoubleData[filterId].end()
     );
 
-    rdgInfoDataMap.vectorRdgData[count1].vectorMaxImpulses[filterId] = *std::max_element(
-        rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].begin(),
-        rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId].end()
+    bscanInfoData.vectorBscanData[count1].vectorMaxImpulses[filterId] = *std::max_element(
+        bscanInfoData.vectorBscanData[count1].vectorsDoubleData[filterId].begin(),
+        bscanInfoData.vectorBscanData[count1].vectorsDoubleData[filterId].end()
     );
 }
 
-inline void createRdgDataDeeps(st_rdgInfoData& rdgInfoDataMap, int count1, int quantImpulsesOfPacket, int filterId, int materialId)
+inline void createBscanDataDeeps(st_bscanInfoData& bscanInfoData, int count1, int quantImpulsesOfPacket, int filterId, int materialId)
 {
-    rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId + 0].resize(quantImpulsesOfPacket);
+    bscanInfoData.vectorBscanData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId + 0].resize(quantImpulsesOfPacket);
 
     double fixJDeep = 0;
     double sumDeeps = 0;
     double sumIntens = 0;
     for (int j=0; j < quantImpulsesOfPacket; j++)
     {
-        if (j == 0)    sumIntens  = fabs(rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId][j]*rdgMetricKoeff);
-        else           sumIntens += fabs(rdgInfoDataMap.vectorRdgData[count1].vectorsDoubleData[filterId][j]*rdgMetricKoeff);
+        if (j == 0)    sumIntens  = fabs(bscanInfoData.vectorBscanData[count1].vectorsDoubleData[filterId][j]*bscanMetricKoeff);
+        else           sumIntens += fabs(bscanInfoData.vectorBscanData[count1].vectorsDoubleData[filterId][j]*bscanMetricKoeff);
 
-        fixJDeep = 0.5*spc*nanokoef*rdgInfoDataMap.vectorRdgData[count1].time_step_ns/sqrt(epsdData(materialId)*exp(gammaData(materialId)*sumIntens));
+        fixJDeep = 0.5*spc*nanokoef*bscanInfoData.vectorBscanData[count1].time_step_ns/sqrt(epsdData(materialId)*exp(gammaData(materialId)*sumIntens));
         sumDeeps += fixJDeep;
-        rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][j] = sumDeeps;
+        bscanInfoData.vectorBscanData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0][j] = sumDeeps;
     }
 
     for (int count = 1; count <=2; count++)
     {
-        rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+count].resize(quantImpulsesOfPacket);
+        bscanInfoData.vectorBscanData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+count].resize(quantImpulsesOfPacket);
     }
-    rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+1] =
-    rdgInfoDataMap.vectorRdgData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0];
+    bscanInfoData.vectorBscanData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+1] =
+    bscanInfoData.vectorBscanData[count1].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId+0];
 }
 
-inline void defAdditionalRdgMainData(std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, int quantImpulsesOfPacket)
+inline void defAdditionalBscanMainData(std::map<std::string, st_bscanInfoData>& bscansInfoDataMap, int quantImpulsesOfPacket)
 {
-    for (auto mapIter1 = rdgsInfoDataMap.begin(); mapIter1 != rdgsInfoDataMap.end(); mapIter1++)
+    for (auto mapIter1 = bscansInfoDataMap.begin(); mapIter1 != bscansInfoDataMap.end(); mapIter1++)
     {
         if (mapIter1->second.quantImpulsesOfPacket <= 0)
         {
             mapIter1->second.quantImpulsesOfPacket = quantImpulsesOfPacket;
 
-            mapIter1->second.vectorMaxLog10RdgData.resize(countFilters);
-            mapIter1->second.vectorMinLog10RdgData.resize(countFilters);
+            mapIter1->second.vectorMaxLog10BscanData.resize(countFilters);
+            mapIter1->second.vectorMinLog10BscanData.resize(countFilters);
 
-            int rdgWidth  = mapIter1->second.vectorRdgData.size();
+            int bscanWidth  = mapIter1->second.vectorBscanData.size();
             for (int count = 0; count <= countFilters-1; count++)
             {
-                for (int i=0; i<rdgWidth; i++)
+                for (int i=0; i<bscanWidth; i++)
                 {
                     if (i == 0)
                     {
-                        mapIter1->second.vectorMaxLog10RdgData[count] =
-                                log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]);
-                        mapIter1->second.vectorMinLog10RdgData[count] =
-                                -1.0*log10(1 + fabs(mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]));
+                        mapIter1->second.vectorMaxLog10BscanData[count] =
+                                log10(1 + mapIter1->second.vectorBscanData[i].vectorMaxImpulses[count]);
+                        mapIter1->second.vectorMinLog10BscanData[count] =
+                                -1.0*log10(1 + fabs(mapIter1->second.vectorBscanData[i].vectorMinImpulses[count]));
                     }
                     else
                     {
-                        if (log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]) > mapIter1->second.vectorMaxLog10RdgData[count])
-                            mapIter1->second.vectorMaxLog10RdgData[count] =
-                                    log10(1 + mapIter1->second.vectorRdgData[i].vectorMaxImpulses[count]);
+                        if (log10(1 + mapIter1->second.vectorBscanData[i].vectorMaxImpulses[count]) > mapIter1->second.vectorMaxLog10BscanData[count])
+                            mapIter1->second.vectorMaxLog10BscanData[count] =
+                                    log10(1 + mapIter1->second.vectorBscanData[i].vectorMaxImpulses[count]);
 
-                        if (-1.0*log10(1 + fabs(mapIter1->second.vectorRdgData[i].vectorMinImpulses[count])) < mapIter1->second.vectorMinLog10RdgData[count])
-                            mapIter1->second.vectorMinLog10RdgData[count] =
-                                    -1.0*log10(1 + fabs(mapIter1->second.vectorRdgData[i].vectorMinImpulses[count]));
+                        if (-1.0*log10(1 + fabs(mapIter1->second.vectorBscanData[i].vectorMinImpulses[count])) < mapIter1->second.vectorMinLog10BscanData[count])
+                            mapIter1->second.vectorMinLog10BscanData[count] =
+                                    -1.0*log10(1 + fabs(mapIter1->second.vectorBscanData[i].vectorMinImpulses[count]));
                     }
                 }
             }
@@ -1198,81 +1230,81 @@ inline void defAdditionalRdgMainData(std::map<std::string, st_rdgInfoData>& rdgs
     }
 }
 
-inline void correctRdgData(
-    std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, st_rdgsWorkData& rdgsWorkData,
-    std::vector<std::pair<std::string, std::string>>& rdgsNamesVectorPairs, std::string rdgFilesFullData
+inline void correctBscanData(
+    std::map<std::string, st_bscanInfoData>& bscansInfoDataMap, st_bscansWorkData& bscansWorkData,
+    std::vector<std::pair<std::string, std::string>>& bscansNamesVectorPairs, std::string bscanFilesFullData
 )
 {
     std::pair<std::string, std::string> stringPair;
-    for (auto mapIter = rdgsInfoDataMap.begin(); mapIter != rdgsInfoDataMap.end(); mapIter++)
+    for (auto mapIter = bscansInfoDataMap.begin(); mapIter != bscansInfoDataMap.end(); mapIter++)
     {
         std::vector<std::pair<std::string, std::string>>::iterator vectorPairsIt = std::find_if(
-            rdgsNamesVectorPairs.begin(), rdgsNamesVectorPairs.end(), [&](const std::pair<std::string, std::string>& stringInPair)
+            bscansNamesVectorPairs.begin(), bscansNamesVectorPairs.end(), [&](const std::pair<std::string, std::string>& stringInPair)
             {
                 return (stringInPair.first == mapIter->first);
             }
         );
 
-        if (vectorPairsIt == rdgsNamesVectorPairs.end())
+        if (vectorPairsIt == bscansNamesVectorPairs.end())
         {
             stringPair.first  = mapIter->first;
-            stringPair.second = rdgFilesFullData;
-            rdgsNamesVectorPairs.push_back(stringPair);
+            stringPair.second = bscanFilesFullData;
+            bscansNamesVectorPairs.push_back(stringPair);
         }
     }
 
     //градусы (пришлось выдумать)
-    rdgsWorkData.leftLatitude  = 51.193075;
-    rdgsWorkData.lowLongitude  = 34.677180;
-    rdgsWorkData.upLongitude   = 34.678180;
+    bscansWorkData.leftLatitude  = 51.193075;
+    bscansWorkData.lowLongitude  = 34.6777180;
+    bscansWorkData.upLongitude   = 34.6778180;
 
-    int height = rdgsInfoDataMap.size();
-    double deltaLongitude = (rdgsWorkData.upLongitude - rdgsWorkData.lowLongitude)/(2*height);
-    double deltaLatitude  = 0.00001536;
+    int height = bscansInfoDataMap.size();
+    double deltaLongitude = (bscansWorkData.upLongitude - bscansWorkData.lowLongitude)/(2*height);
+    double deltaLatitude  = 0.000001536;
 
     //фиксируем радарограммы исходя из произведенной обрезки хвостов
     int mapId = 0;
-    for (auto mapIter = rdgsInfoDataMap.begin(); mapIter != rdgsInfoDataMap.end(); mapIter++)
+    for (auto mapIter = bscansInfoDataMap.begin(); mapIter != bscansInfoDataMap.end(); mapIter++)
     {
-        for (int i=0; i<mapIter->second.vectorRdgData.size(); i++)
+        for (int i=0; i<mapIter->second.vectorBscanData.size(); i++)
         {
-            mapIter->second.vectorRdgData[i].latitude_degree  = rdgsWorkData.leftLatitude + i          *deltaLatitude;
-            mapIter->second.vectorRdgData[i].longitude_degree = rdgsWorkData.lowLongitude + (1+2*mapId)*deltaLongitude;
+            mapIter->second.vectorBscanData[i].latitude_degree  = bscansWorkData.leftLatitude + i          *deltaLatitude;
+            mapIter->second.vectorBscanData[i].longitude_degree = bscansWorkData.lowLongitude + (1+2*mapId)*deltaLongitude;
         }
         mapId++;
     }
 }
 
-inline void representRdgLine(int inPosX, int inPosY, int fnPosX, int fnPosY, st_rdgsWorkData& rdgsWorkData, bool fnPosAct)
+inline void representBscanLine(int inPosX, int inPosY, int fnPosX, int fnPosY, st_bscansWorkData& bscansWorkData, bool fnPosAct)
 {
-    std::vector<std::pair<int, int>> vectorRdgsTransLinePoints;
-    defVectorRdgsTransLineSectionPoints(inPosX, inPosY,  fnPosX,  fnPosY, vectorRdgsTransLinePoints);
+    std::vector<std::pair<int, int>> vectorBscansTransLinePoints;
+    defVectorBscansTransLineSectionPoints(inPosX, inPosY,  fnPosX,  fnPosY, vectorBscansTransLinePoints);
 
-    std::string nameRdg = "";
-    int         kRdg    = 0;
+    std::string nameBscan = "";
+    int         kBscan    = 0;
 
-    if (vectorRdgsTransLinePoints.size() > 0)
+    if (vectorBscansTransLinePoints.size() > 0)
     {
         if (fnPosAct == true)
         {
-            nameRdg = std::get<0>(rdgsWorkData.vectorRdgsData[rdgsWorkData.rdgsSurfWidth*fnPosY+fnPosX]);
-            kRdg    = std::get<1>(rdgsWorkData.vectorRdgsData[rdgsWorkData.rdgsSurfWidth*fnPosY+fnPosX]);
+            nameBscan = std::get<0>(bscansWorkData.vectorBscansData[bscansWorkData.bscansSurfWidth*fnPosY+fnPosX]);
+            kBscan    = std::get<1>(bscansWorkData.vectorBscansData[bscansWorkData.bscansSurfWidth*fnPosY+fnPosX]);
         }
         else
         {
-            nameRdg = std::get<0>(rdgsWorkData.vectorRdgsData[rdgsWorkData.rdgsSurfWidth*inPosY+inPosX]);
-            kRdg    = std::get<1>(rdgsWorkData.vectorRdgsData[rdgsWorkData.rdgsSurfWidth*inPosY+inPosX]);
+            nameBscan = std::get<0>(bscansWorkData.vectorBscansData[bscansWorkData.bscansSurfWidth*inPosY+inPosX]);
+            kBscan    = std::get<1>(bscansWorkData.vectorBscansData[bscansWorkData.bscansSurfWidth*inPosY+inPosX]);
         }
 
-        int count = vectorRdgsTransLinePoints.size()-1;
+        int count = vectorBscansTransLinePoints.size()-1;
         while (count >= 0)
         {
-            if ((std::get<0>(rdgsWorkData.vectorRdgsData[rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[count].second + vectorRdgsTransLinePoints[count].first]) == "") &&
-                (std::get<1>(rdgsWorkData.vectorRdgsData[rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[count].second + vectorRdgsTransLinePoints[count].first]) == -1)
+            if ((std::get<0>(bscansWorkData.vectorBscansData[bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[count].second + vectorBscansTransLinePoints[count].first]) == "") &&
+                (std::get<1>(bscansWorkData.vectorBscansData[bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[count].second + vectorBscansTransLinePoints[count].first]) == -1)
             ) {
-                rdgsWorkData.vectorRdgsData[
-                    rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[count].second + vectorRdgsTransLinePoints[count].first
-                ] = std::make_tuple(nameRdg, kRdg);
+                bscansWorkData.vectorBscansData[
+                    bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[count].second + vectorBscansTransLinePoints[count].first
+                ] = std::make_tuple(nameBscan, kBscan);
             }
             count--;
         }
@@ -1294,113 +1326,113 @@ template <class T> inline static QList<T> toList(const QVariant &qv)
     return dataList;
 }
 
-inline void readLastRdgsDirsFromSettings(QString& trzDir, QString& csvDir, QString& hdf5Dir)
+inline void readLastBscansDirsFromSettings(QString& trzDir, QString& csvDir, QString& hdf5Dir)
 {
     //загрузка предыдущих радарограмм
-    QSettings setupR("rdgsDirsList.ini", QSettings::IniFormat);
-    QList<QString> rdgsDirsList;
-    int files_count = setupR.beginReadArray("rdgsDirs");
+    QSettings setupR("bscansDirsList.ini", QSettings::IniFormat);
+    QList<QString> bscansDirsList;
+    int files_count = setupR.beginReadArray("bscansDirs");
     for (int groups=0; groups<files_count; groups++)
     {
         setupR.setArrayIndex(groups);
-        rdgsDirsList =  toList<QString>(setupR.value("rdgsDirsList"));
-        if (rdgsDirsList.size() == 3)
+        bscansDirsList =  toList<QString>(setupR.value("bscansDirsList"));
+        if (bscansDirsList.size() == 3)
         {
-            if (QDir(trzDir).exists())  trzDir  = rdgsDirsList.at(0);
-            if (QDir(csvDir).exists())  csvDir  = rdgsDirsList.at(1);
-            if (QDir(hdf5Dir).exists()) hdf5Dir = rdgsDirsList.at(2);
+            if (QDir(trzDir).exists())  trzDir  = bscansDirsList.at(0);
+            if (QDir(csvDir).exists())  csvDir  = bscansDirsList.at(1);
+            if (QDir(hdf5Dir).exists()) hdf5Dir = bscansDirsList.at(2);
         }
     }
 }
 
-inline void writeLastRdgsDirs(const QString& trzDir, const QString& csvDir, const QString& hdf5Dir)
+inline void writeLastBscansDirs(const QString& trzDir, const QString& csvDir, const QString& hdf5Dir)
 {
-    QList<QString> rdgsDirsList;
-    rdgsDirsList.clear();
-    rdgsDirsList.push_back(trzDir);
-    rdgsDirsList.push_back(csvDir);
-    rdgsDirsList.push_back(hdf5Dir);
+    QList<QString> bscansDirsList;
+    bscansDirsList.clear();
+    bscansDirsList.push_back(trzDir);
+    bscansDirsList.push_back(csvDir);
+    bscansDirsList.push_back(hdf5Dir);
 
-    QSettings setup("rdgsDirsList.ini", QSettings::IniFormat);
-    setup.beginWriteArray("rdgsDirs");
+    QSettings setup("bscansDirsList.ini", QSettings::IniFormat);
+    setup.beginWriteArray("bscansDirs");
     for (int groups=0; groups<1; groups++)
     {
         setup.setArrayIndex(groups);
-        setup.setValue("rdgsDirsList", toVariant (rdgsDirsList));
+        setup.setValue("bscansDirsList", toVariant (bscansDirsList));
     }
     setup.endArray();
     setup.sync();
 }
 
-inline void readLastNamesRdgsFromSettings(QStringList& filesRdgNamesTrz, std::vector<int>& trzNumAntennasVector, QStringList& filesRdgNamesCsv, QStringList& paperRdgsHdf5Names)
+inline void readLastNamesBscansFromSettings(QStringList& filesBscanNamesTrz, std::vector<int>& trzNumAntennasVector, QStringList& filesBscanNamesCsv, QStringList& paperBscansHdf5Names)
 {
     //загрузка предыдущих радарограмм
-    QSettings setupR("rdgsFilesNamesList.ini", QSettings::IniFormat);
-    QList<QString> rdgsFilesList;
-    int files_count = setupR.beginReadArray("rdgsFiles");
+    QSettings setupR("bscansFilesNamesList.ini", QSettings::IniFormat);
+    QList<QString> bscansFilesList;
+    int files_count = setupR.beginReadArray("bscansFiles");
     for (int groups=0; groups<files_count; groups++)
     {
         setupR.setArrayIndex(groups);
-        rdgsFilesList =  toList<QString>(setupR.value("rdgsFilesNamesList"));
+        bscansFilesList =  toList<QString>(setupR.value("bscansFilesNamesList"));
     }
 
-    for (int count = 0; count < rdgsFilesList.size(); count++)
+    for (int count = 0; count < bscansFilesList.size(); count++)
     {
-        if (rdgsFilesList[count].split(".trz").size() > 1)
+        if (bscansFilesList[count].split(".trz").size() > 1)
         {
-            QFile file(rdgsFilesList[count].split("&&&&").at(1).toStdString().c_str());
+            QFile file(bscansFilesList[count].split("&&&&").at(1).toStdString().c_str());
             bool fileTrzIsOpened = file.open(QIODevice::ReadOnly);
             if (
-                (filesRdgNamesTrz.size() == 0) ||
+                (filesBscanNamesTrz.size() == 0) ||
                 (
-                    (filesRdgNamesTrz.size() > 0) &&
-                    (std::find(filesRdgNamesTrz.begin(), filesRdgNamesTrz.end(), rdgsFilesList[count].split("&&&&").at(1)) == filesRdgNamesTrz.end())
+                    (filesBscanNamesTrz.size() > 0) &&
+                    (std::find(filesBscanNamesTrz.begin(), filesBscanNamesTrz.end(), bscansFilesList[count].split("&&&&").at(1)) == filesBscanNamesTrz.end())
                 )
-            )   if (fileTrzIsOpened) filesRdgNamesTrz.push_back(rdgsFilesList[count].split("&&&&").at(1));
-            if (fileTrzIsOpened) trzNumAntennasVector.push_back((rdgsFilesList[count].split("&&&&").at(0)).split("&&").at(1).toInt());
+            )   if (fileTrzIsOpened) filesBscanNamesTrz.push_back(bscansFilesList[count].split("&&&&").at(1));
+            if (fileTrzIsOpened) trzNumAntennasVector.push_back((bscansFilesList[count].split("&&&&").at(0)).split("&&").at(1).toInt());
             file.close();
         }
-        if (rdgsFilesList[count].split(".csv").size() > 1)
+        if (bscansFilesList[count].split(".csv").size() > 1)
         {
-            QFile file(rdgsFilesList[count].split("&&&&").at(0));
+            QFile file(bscansFilesList[count].split("&&&&").at(0));
             bool fileCsvIsOpened = file.open(QIODevice::ReadOnly);
             if (fileCsvIsOpened)
             {
-                filesRdgNamesCsv.push_back(rdgsFilesList[count].split("&&&&").at(0));
-                filesRdgNamesCsv.push_back(rdgsFilesList[count].split("&&&&").at(1));
+                filesBscanNamesCsv.push_back(bscansFilesList[count].split("&&&&").at(0));
+                filesBscanNamesCsv.push_back(bscansFilesList[count].split("&&&&").at(1));
             }
             file.close();
         }
-        if (rdgsFilesList[count].split(".trz").size() == 1 && rdgsFilesList[count].split(".csv").size() == 1)   paperRdgsHdf5Names.push_back(rdgsFilesList[count]);
+        if (bscansFilesList[count].split(".trz").size() == 1 && bscansFilesList[count].split(".csv").size() == 1)   paperBscansHdf5Names.push_back(bscansFilesList[count]);
     }
 }
 
-inline void writeLastNamesRdgsToSettings(std::vector<std::pair<std::string, std::string>>  rdgsNamesVectorPairs)
+inline void writeLastNamesBscansToSettings(std::vector<std::pair<std::string, std::string>>  bscansNamesVectorPairs)
 {
-    QList<QString> rdgsFilesNamesList;
-    rdgsFilesNamesList.clear();
-    for (int count = 0; count < rdgsNamesVectorPairs.size(); count++)
+    QList<QString> bscansFilesNamesList;
+    bscansFilesNamesList.clear();
+    for (int count = 0; count < bscansNamesVectorPairs.size(); count++)
     {
         if (
-            QString::fromStdString(rdgsNamesVectorPairs[count].second).split(".trz").size() == 1 &&
-            QString::fromStdString(rdgsNamesVectorPairs[count].second).split(".csv").size() == 1
-        )   rdgsFilesNamesList.push_back(QString::fromStdString(rdgsNamesVectorPairs[count].first));
+            QString::fromStdString(bscansNamesVectorPairs[count].second).split(".trz").size() == 1 &&
+            QString::fromStdString(bscansNamesVectorPairs[count].second).split(".csv").size() == 1
+        )   bscansFilesNamesList.push_back(QString::fromStdString(bscansNamesVectorPairs[count].first));
 
-        if (QString::fromStdString(rdgsNamesVectorPairs[count].second).split(".csv").size() > 1)
-            rdgsFilesNamesList.push_back(QString::fromStdString(rdgsNamesVectorPairs[count].second));
+        if (QString::fromStdString(bscansNamesVectorPairs[count].second).split(".csv").size() > 1)
+            bscansFilesNamesList.push_back(QString::fromStdString(bscansNamesVectorPairs[count].second));
 
-        if (QString::fromStdString(rdgsNamesVectorPairs[count].second).split(".trz").size() > 1)
-            rdgsFilesNamesList.push_back(
-                QString::fromStdString(rdgsNamesVectorPairs[count].first) + QString::fromStdString("&&&&") + QString::fromStdString(rdgsNamesVectorPairs[count].second)
+        if (QString::fromStdString(bscansNamesVectorPairs[count].second).split(".trz").size() > 1)
+            bscansFilesNamesList.push_back(
+                QString::fromStdString(bscansNamesVectorPairs[count].first) + QString::fromStdString("&&&&") + QString::fromStdString(bscansNamesVectorPairs[count].second)
             );
     }
 
-    QSettings setup("rdgsFilesNamesList.ini", QSettings::IniFormat);
-    setup.beginWriteArray("rdgsFiles");
+    QSettings setup("bscansFilesNamesList.ini", QSettings::IniFormat);
+    setup.beginWriteArray("bscansFiles");
     for (int groups=0; groups<1; groups++)
     {
         setup.setArrayIndex(groups);
-        setup.setValue("rdgsFilesNamesList", toVariant (rdgsFilesNamesList));
+        setup.setValue("bscansFilesNamesList", toVariant (bscansFilesNamesList));
     }
     setup.endArray();
     setup.sync();
@@ -1439,20 +1471,20 @@ inline std::vector<std::tuple<int, int, int>> defVectorTuplesColors(const QColor
     return vectorTuplesColors;
 }
 
-inline void createPairHdf5RdgFiles( const QFileInfoList& folderItems, QString paperRdgName, int fileRdgId, std::pair<std::string, std::vector<std::string>>& pairHdf5RdgFiles)
+inline void createPairHdf5BscanFiles( const QFileInfoList& folderItems, QString paperBscanName, int fileBscanId, std::pair<std::string, std::vector<std::string>>& pairHdf5BscanFiles)
 {
-    QString i_filename = folderItems.at(fileRdgId).canonicalFilePath();
+    QString i_filename = folderItems.at(fileBscanId).canonicalFilePath();
     if (i_filename == "." || i_filename == ".." || i_filename.isEmpty()) return;
     if (i_filename.toStdString().find(".out") == i_filename.toStdString().length()-4  ||  i_filename.toStdString().find(".hdf5") == i_filename.toStdString().length()-5)
-        pairHdf5RdgFiles.second.push_back((i_filename).toStdString());
+        pairHdf5BscanFiles.second.push_back((i_filename).toStdString());
 }
 
 inline double filterPM(double initValue) { return (1.0/(1.0+(initValue/kFilterPM)*(initValue/kFilterPM))); }
 
-inline void definingRdgFilterData(st_rdgInfoData& rdgInfoData, int filterId)
+inline void definingBscanFilterData(st_bscanInfoData& bscanInfoData, int filterId)
 {
-    int width = rdgInfoData.vectorRdgData.size();
-    int height = rdgInfoData.vectorRdgData[0].vectorsDoubleData[filterId].size();
+    int width = bscanInfoData.vectorBscanData.size();
+    int height = bscanInfoData.vectorBscanData[0].vectorsDoubleData[filterId].size();
 
     std::vector<double> availVectorData;
     availVectorData.resize(width * height);
@@ -1462,7 +1494,7 @@ inline void definingRdgFilterData(st_rdgInfoData& rdgInfoData, int filterId)
     {
         for (int j=0; j <= height-1; j++)
         {
-            availVectorData[i + j*width] = (rdgInfoData.vectorRdgData[i].vectorsDoubleData[0])[j];
+            availVectorData[i + j*width] = (bscanInfoData.vectorBscanData[i].vectorsDoubleData[0])[j];
         }
     }
 
@@ -1484,7 +1516,7 @@ inline void definingRdgFilterData(st_rdgInfoData& rdgInfoData, int filterId)
                 east  = availVectorData[i   + (j+1)*width] - availVectorData[i + j*width];
                 west  = availVectorData[i   + (j-1)*width] - availVectorData[i + j*width];
 
-                (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j] = availVectorData[j*width + i] +
+                (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j] = availVectorData[j*width + i] +
                 deltaTFilterPM*(filterPM(north)*north+filterPM(south)*south+filterPM(east)*east+filterPM(west)*west);
             }
         }
@@ -1497,39 +1529,12 @@ inline void definingRdgFilterData(st_rdgInfoData& rdgInfoData, int filterId)
             {
                 for (int j=0; j <= height-1; j++)
                 {
-                    availVectorData[i + j*width] = (rdgInfoData.vectorRdgData[i].vectorsDoubleData[filterId])[j];
+                    availVectorData[i + j*width] = (bscanInfoData.vectorBscanData[i].vectorsDoubleData[filterId])[j];
                 }
             }
         }
     }
     while(level < tFilterPM);
-}
-
-inline void defMaxRdgMinRdg(const st_rdgInfoData& rdgInfoData, int materialId, int filterId, int i, int j, double& maxRdg, double& minRdg)
-{
-    if (j == 0)
-    {
-        if (rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] > maxRdg)
-            maxRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j];
-        if (rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] < minRdg)
-            minRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j];
-    }
-    else
-    {
-        if (
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1] > maxRdg
-        )
-            maxRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1];
-
-        if (
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1]  < minRdg
-        )
-            minRdg = rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j] -
-            rdgInfoData.vectorRdgData[i].vectorsDeeps[countFilters*countSelectors*materialId + countSelectors*filterId][j-1];
-    }
 }
 
 #endif // TRANSFORMATION_H

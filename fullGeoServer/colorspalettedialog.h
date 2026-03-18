@@ -30,7 +30,7 @@ private:
 
     QPointer<QPushButton> m_sendColorsButton;
 
-    void defColor(QColorDialog* colorRdgsSurfDialog, QColor& colorRdgsSurf);
+    void defColor(QColorDialog* colorBscansSurfDialog, QColor& colorBscansSurf);
 
 private slots:
     void defColorUp();

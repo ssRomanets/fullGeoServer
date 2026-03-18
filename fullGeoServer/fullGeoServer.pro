@@ -36,59 +36,65 @@ SOURCES += \
         main.cpp \
         mainwindow.cpp \
     accomplishment.cpp \
-    rdg2dWidget.cpp \
+    bscan2dWidget.cpp \
     contentWidget.cpp \
-    rdgGlWidget.cpp \
-    sectionRdgWidget.cpp \
+    bscanGlWidget.cpp \
+    ascanWidget.cpp \
     sectionChartView.cpp \
-    rdgs2dWidget.cpp \
-    rdgsSurfGlWidget.cpp \
-    sectionRdgsSurfWidget.cpp \
-    rdgs3dWidget.cpp \
-    dataRdgWidget.cpp \
-    tableRdgTrackDataWidget.cpp \
-    tableRdgLogAutoDataWidget.cpp \
-    rdgTrackDataTableModel.cpp \
-    rdgSelectedDataTableModel.cpp \
+    bscans2dWidget.cpp \
+    bscansSurfGlWidget.cpp \
+    sectionBscansSurfWidget.cpp \
+    bscans3dWidget.cpp \
+    ascanDataWidget.cpp \
+    tableBscanLogAutoDataWidget.cpp \
+    ascanDataTableModel.cpp \
+    bscanSelectedDataTableModel.cpp \
     accomplishmentThread.cpp \
-    rdgsTransGlWidget.cpp \
-    structureRdgsGraph.cpp \
-    structureRdgsWidget.cpp \
-    correctRdgsSurfDialog.cpp \
+    bscansTransGlWidget.cpp \
+    structureBscansGraph.cpp \
+    structureBscansWidget.cpp \
+    correctBscansSurfDialog.cpp \
     colorsPaletteDialog.cpp \
-    sectionDeepRdgWidget.cpp \
-    deepRdgTrackDataTableModel.cpp \
-    tableDeepRdgTrackDataWidget.cpp
+    ascanDeepWidget.cpp \
+    ascanDeepDataTableModel.cpp \
+    tableAscanDeepDataWidget.cpp \
+    tableAscanDataWidget.cpp \
+    bscanDeep2dWidget.cpp \
+    bscanDeepGlWidget.cpp \
+    ascanDeepDataWidget.cpp
 
 HEADERS += \
         mainwindow.h \
     accomplishment.h \
-    rdg2dWidget.h \
-    rdgGlWidget.h \
-    rdgsData.h \
+    bscan2dWidget.h \
+    bscanGlWidget.h \
     contentWidget.h \
     sectionChartView.h \
-    sectionRdgWidget.h \
-    rdgs2dWidget.h \
-    rdgsSurfGlWidget.h \
-    sectionRdgsSurfWidget.h \
-    rdgs3dWidget.h \
+    ascanWidget.h \
+    bscans2dWidget.h \
+    bscansSurfGlWidget.h \
+    sectionBscansSurfWidget.h \
+    bscans3dWidget.h \
     transformation.h \
-    dataRdgWidget.h \
-    tableRdgTrackDataWidget.h \
-    tableRdgLogAutoDataWidget.h \
+    ascanDataWidget.h \
+    tableBscanLogAutoDataWidget.h \
     csvfile.h \
-    rdgTrackDataTableModel.h \
-    rdgSelectedDataTableModel.h \
+    ascanDataTableModel.h \
     accomplishmentThread.h \
-    rdgsTransGlWidget.h \
-    structureRdgsGraph.h \
-    structureRdgsWidget.h \
-    correctRdgsSurfDialog.h \
+    bscansTransGlWidget.h \
+    structureBscansGraph.h \
+    structureBscansWidget.h \
+    correctBscansSurfDialog.h \
     colorsPaletteDialog.h \
-    sectionDeepRdgWidget.h \
-    deepRdgTrackDataTableModel.h \
-    tableDeepRdgTrackDataWidget.h
+    ascanDeepWidget.h \
+    ascanDeepDataTableModel.h \
+    tableAscanDeepDataWidget.h \
+    tableAscanDataWidget.h \
+    bscanSelectedDataTableModel.h \
+    bscansData.h \
+    bscanDeep2dWidget.h \
+    bscanDeepGlWidget.h \
+    ascanDeepDataWidget.h
 
 RESOURCES += \
     item.qrc

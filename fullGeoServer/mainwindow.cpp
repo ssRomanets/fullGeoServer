@@ -7,43 +7,46 @@ Q_DECLARE_METATYPE(QStringList)
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
 {
     qRegisterMetaType<std::string>("std::string");
-    qRegisterMetaType<RdgFileFormat>("RdgFileFormat");
+    qRegisterMetaType<BscanFileFormat>("BscanFileFormat");
     qRegisterMetaType<QColor>("QColor");
     qRegisterMetaType<std::vector<std::string>>("std::vector<std::string>");
     qRegisterMetaType<std::vector<std::pair<std::string, std::string>>>("std::vector<std::pair<std::string, std::string>>");
     qRegisterMetaTypeStreamOperators<QStringList>("QStringList");
 
     m_stackedWidget = new QStackedWidget;
-    m_stackedWidget->addWidget(m_rdg2dWidget);
-    m_stackedWidget->addWidget(m_rdgs2dWidget);
-    m_stackedWidget->addWidget(m_rdgs3dWidget);
+    m_stackedWidget->addWidget(m_bscan2dWidget);
+    m_stackedWidget->addWidget(m_bscanDeep2dWidget);
+    m_stackedWidget->addWidget(m_bscans2dWidget);
+    m_stackedWidget->addWidget(m_bscans3dWidget);
 
-    m_rdgsNamesVectorPairs.resize(0);
-    m_recentRdgsFileActsVector.resize(0);
+    m_bscansNamesVectorPairs.resize(0);
+    m_recentBscansFileActsVector.resize(0);
 
     init();
 
-    connect(this, &MainWindow::signalClearRdgsInfoDataMap, m_rdg2dWidget, &rdg2dWidget::slotClearRdgsInfoDataMap);
-    connect(this, &MainWindow::signalEraseRdgsInfoDataMap, m_rdg2dWidget, &rdg2dWidget::slotEraseRdgsInfoDataMap);
+    connect(this, &MainWindow::signalClearBscansInfoDataMap, m_bscan2dWidget, &bscan2dWidget::slotClearBscansInfoDataMap);
+    connect(this, &MainWindow::signalEraseBscansInfoDataMap, m_bscan2dWidget, &bscan2dWidget::slotEraseBscansInfoDataMap);
 
-    connect(this, &MainWindow::closeSection2dAction,   m_rdgs2dWidget, &rdgs2dWidget::slotCloseSection2dAction);
-    connect(this, &MainWindow::closeCut3dAction,   m_rdgs3dWidget, &rdgs3dWidget::slotCloseCut3dAction);
-    connect(m_rdgs3dWidget, &rdgs3dWidget::sendDeleteRdgName, this, &MainWindow::receiveDeleteRdgName);
+    connect(this, &MainWindow::closeSection2dAction,   m_bscans2dWidget, &bscans2dWidget::slotCloseSection2dAction);
+    connect(this, &MainWindow::closeCut3dAction,   m_bscans3dWidget, &bscans3dWidget::slotCloseCut3dAction);
+    connect(m_bscans3dWidget, &bscans3dWidget::sendDeleteBscanName, this, &MainWindow::receiveDeleteBscanName);
 
-    connect(m_rdgs2dWidget, &rdgs2dWidget::signalFixRdgsSurfPixels,    this, &MainWindow::slotFixRdgsSurfPixels);
-    connect(this, &MainWindow::signalSetupRdgsSurfPixels, m_rdgs2dWidget, &rdgs2dWidget::slotSetupRdgsSurfPixels);
+    connect(m_bscans2dWidget, &bscans2dWidget::signalFixBscansSurfPixels,    this, &MainWindow::slotFixBscansSurfPixels);
+    connect(this, &MainWindow::signalSetupBscansSurfPixels, m_bscans2dWidget, &bscans2dWidget::slotSetupBscansSurfPixels);
 
-    connect(m_rdgs3dWidget, &rdgs3dWidget::signalFixDeleteRdgName, this, &MainWindow::slotFixDeleteRdgName);
-    connect(m_rdgs3dWidget, &rdgs3dWidget::signalFixFillRdgs,    this, &MainWindow::slotFixFillRdgs);
+    connect(m_bscans3dWidget, &bscans3dWidget::signalFixDeleteBscanName, this, &MainWindow::slotFixDeleteBscanName);
+    connect(m_bscans3dWidget, &bscans3dWidget::signalFixFillBscans,    this, &MainWindow::slotFixFillBscans);
 
-    connect(this, &MainWindow::signalDefDeleteRdgName,  m_rdgs3dWidget, &rdgs3dWidget::slotDefDeleteRdgName);
-    connect(this, &MainWindow::signalFillRdgsExecute, m_rdgs3dWidget, &rdgs3dWidget::slotFillRdgsExecute);
+    connect(this, &MainWindow::signalDefDeleteBscanName,  m_bscans3dWidget, &bscans3dWidget::slotDefDeleteBscanName);
+    connect(this, &MainWindow::signalFillBscansExecute, m_bscans3dWidget, &bscans3dWidget::slotFillBscansExecute);
 
     m_progressBar = new QProgressBar;
 
     m_mainWidget = new QWidget();
     m_mainLayout  = new QVBoxLayout;
     m_mainLayout->addWidget(m_stackedWidget);
+
+    m_materialLabel  = new QLabel("Тип грунта");
 
     m_materialComboBox = new QComboBox(this);
     m_materialComboBox->addItem("Лед");
@@ -65,120 +68,132 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent)
     m_materialComboBox->setFixedHeight(20);
     m_materialComboBox->setFixedWidth(200);
 
-    m_labelHRdgsLengthBar  = new QLabel("Проход по длинной радарограмме ");
-    m_scrollHRdgsLengthBar = new QScrollBar(Qt::Horizontal);
-    m_scrollHRdgsLengthBar->setFocusPolicy(Qt::StrongFocus);
-    m_scrollHRdgsLengthBar->setFixedHeight(20);
-    m_scrollHRdgsLengthBar->setFixedWidth(300);
-    m_scrollHRdgsLengthBar->setVisible(false);
+    m_labelHBscansLengthBar  = new QLabel("Переход по кадрам радарограммы");
+    m_scrollHBscansLengthBar = new QScrollBar(Qt::Horizontal);
+    m_scrollHBscansLengthBar->setFocusPolicy(Qt::StrongFocus);
+    m_scrollHBscansLengthBar->setFixedHeight(20);
+    m_scrollHBscansLengthBar->setFixedWidth(300);
+    m_scrollHBscansLengthBar->setValue(0);
+    m_scrollHBscansLengthBar->setRange(0,0);
 
-    m_rdgQuantImpulsesLabel = new QLabel("Число отсчетов rdg ");
-    m_rdgQuantImpulsesSlider = new QSlider(Qt::Horizontal);
-    m_rdgQuantImpulsesSlider->setSingleStep(1);
-    m_rdgQuantImpulsesSlider->setTickPosition(QSlider::TicksRight);
+    m_bscanQuantImpulsesLabel = new QLabel("Число отсчетов ");
+    m_bscanQuantImpulsesSlider = new QSlider(Qt::Horizontal);
+    m_bscanQuantImpulsesSlider->setSingleStep(1);
+    m_bscanQuantImpulsesSlider->setTickPosition(QSlider::TicksRight);
 
-    m_rdgsTransitLabel  = new QLabel("Переход по радарограммам ");
-    m_rdgsTransitSlider = new QSlider(Qt::Horizontal);
-    m_rdgsTransitSlider->setSingleStep(1);
-    m_rdgsTransitSlider->setTickPosition(QSlider::TicksRight);
-    m_leftRdgsTransitButton  = new QPushButton(tr("<-"), this);
-    m_rightRdgsTransitButton = new QPushButton(tr("->"), this);
+    m_bscansTransitLabel  = new QLabel("Переход по радарограммам ");
+    m_bscansTransitSlider = new QSlider(Qt::Horizontal);
+    m_bscansTransitSlider->setSingleStep(1);
+    m_bscansTransitSlider->setTickPosition(QSlider::TicksRight);
+    m_leftBscansTransitButton  = new QPushButton(tr("<-"), this);
+    m_rightBscansTransitButton = new QPushButton(tr("->"), this);
 
+    m_materialLabel->setVisible(false);
     m_materialComboBox->setVisible(false);
-    openScrollHRdgsLengthBar(false);
-    rdgsTransitControlsVisible(false);
-    impulsesRdgControlsVisible(false);
+    fixScrollHBscansLengthBar();
+    bscansTransitControlsVisible(false);
+    impulsesBscanControlsVisible(false);
 
     m_lowLayout  = new QHBoxLayout;
+    m_lowLayout->addWidget(m_materialLabel);
     m_lowLayout->addWidget(m_materialComboBox);
-    m_lowLayout->addWidget(m_labelHRdgsLengthBar);
-    m_lowLayout->addWidget(m_scrollHRdgsLengthBar);
+    m_lowLayout->addWidget(m_labelHBscansLengthBar);
+    m_lowLayout->addWidget(m_scrollHBscansLengthBar);
 
-    m_lowLayout->addWidget(m_rdgQuantImpulsesLabel);
-    m_lowLayout->addWidget(m_rdgQuantImpulsesSlider);
+    m_lowLayout->addWidget(m_bscanQuantImpulsesLabel);
+    m_lowLayout->addWidget(m_bscanQuantImpulsesSlider);
 
-    m_lowLayout->addWidget(m_rdgsTransitLabel);
-    m_lowLayout->addWidget(m_leftRdgsTransitButton);
-    m_lowLayout->addWidget(m_rdgsTransitSlider);
-    m_lowLayout->addWidget(m_rightRdgsTransitButton);
+    m_lowLayout->addWidget(m_bscansTransitLabel);
+    m_lowLayout->addWidget(m_leftBscansTransitButton);
+    m_lowLayout->addWidget(m_bscansTransitSlider);
+    m_lowLayout->addWidget(m_rightBscansTransitButton);
     m_mainLayout->addLayout(m_lowLayout);
 
     m_mainWidget->setLayout( m_mainLayout);
     setCentralWidget(m_mainWidget);
 
-    connect(m_rdg2dWidget->m_accomplishment->m_thread, &accomplishmentThread::sendSurfRdgsWorkData, this, &MainWindow::receiveRdgsWorkData);
-    connect(m_rdg2dWidget->m_accomplishment->m_thread, &accomplishmentThread::sendRdgsZData,        this, &MainWindow::receiveRdgsZData);
-    connect(m_rdg2dWidget->m_accomplishment->m_thread, &accomplishmentThread::sendProgressData,     this, &MainWindow::receiveProgressData);
+    connect(m_bscan2dWidget->m_accomplishment->m_thread, &accomplishmentThread::sendSurfBscansWorkData, this, &MainWindow::receiveBscansWorkData);
+    connect(m_bscan2dWidget->m_accomplishment->m_thread, &accomplishmentThread::sendBscansZData,        this, &MainWindow::receiveBscansZData);
+    connect(m_bscan2dWidget->m_accomplishment->m_thread, &accomplishmentThread::sendProgressData,     this, &MainWindow::receiveProgressData);
 
-    connect(m_rdgQuantImpulsesSlider, &QSlider::valueChanged, this, &MainWindow::setQuantImpulsesOfPacketSlider);
+    connect(m_bscanDeep2dWidget, &bscanDeep2dWidget::signalFixPixels,               this,                &MainWindow::slotSetupBscanDeepPixels);
+    connect(this,                &MainWindow::signalSetupBscanDeepPixels,      m_bscanDeep2dWidget, &bscanDeep2dWidget::slotSetupPixels);
 
-    connect(m_rdgs2dWidget, &rdgs2dWidget::sendOutRdgsSurfInfo, this, &MainWindow::receiveOutRdgsSurfInfo);
+    connect(m_bscanDeep2dWidget, &bscanDeep2dWidget::signalFixDataBscanDeepWidgets, this,                &MainWindow::slotFixDataBscanDeepWidgets);
+    connect(this,                &MainWindow::signalSetupFixDataBscanDeepWidgets,   m_bscanDeep2dWidget, &bscanDeep2dWidget::slotSetupFixDataWidgets);
 
-    connect(m_rdg2dWidget, &rdg2dWidget::sendOutRdgInfo, this, &MainWindow::receiveOutRdgInfo);
-    connect(m_rdg2dWidget, &rdg2dWidget::signalActivateAccompThread, this, &MainWindow::slotActivateAccompThread);
+    connect(m_bscanDeep2dWidget, &bscanDeep2dWidget::signalFixPageData,     this,                &MainWindow::slotSetupBscanDeepPageData);
+    connect(this,                &MainWindow::signalSetupBscanDeepPageData, m_bscanDeep2dWidget, &bscanDeep2dWidget::slotSetupBscanDeepPageData);
 
-    connect(m_rdgs2dWidget, &rdgs2dWidget::signalFixRdgsSurfSection, this, &MainWindow::slotFixRdgsSurfSection);
-    connect(this, &MainWindow::signalOutputRdgsSurfSection, m_rdgs2dWidget, &rdgs2dWidget::slotOutputRdgsSurfSection);
+    connect(m_bscanQuantImpulsesSlider, &QSlider::valueChanged, this, &MainWindow::setQuantImpulsesOfPacketSlider);
+
+    connect(m_bscans2dWidget, &bscans2dWidget::sendOutBscansSurfInfo, this, &MainWindow::receiveOutBscansSurfInfo);
+
+    connect(m_bscan2dWidget, &bscan2dWidget::sendOutBscanInfo, this, &MainWindow::receiveOutBscanInfo);
+    connect(m_bscan2dWidget, &bscan2dWidget::signalActivateAccompThread, this, &MainWindow::slotActivateAccompThread);
+
+    connect(m_bscans2dWidget, &bscans2dWidget::signalFixBscansSurfSection, this, &MainWindow::slotFixBscansSurfSection);
+    connect(this, &MainWindow::signalOutputBscansSurfSection, m_bscans2dWidget, &bscans2dWidget::slotOutputBscansSurfSection);
 
     connect(m_materialComboBox, SIGNAL(activated(int)), SLOT(materialIdChanged(int)));
 
-    connect(m_rdgsTransitSlider,      &QSlider::valueChanged, this, &MainWindow::changeRdg);
-    connect(m_leftRdgsTransitButton,  &QPushButton::clicked,  this, &MainWindow::leftChangeRdg);
-    connect(m_rightRdgsTransitButton, &QPushButton::clicked,  this, &MainWindow::rightChangeRdg);
+    connect(m_bscansTransitSlider,      &QSlider::valueChanged, this, &MainWindow::changeBscan);
+    connect(m_leftBscansTransitButton,  &QPushButton::clicked,  this, &MainWindow::leftChangeBscan);
+    connect(m_rightBscansTransitButton, &QPushButton::clicked,  this, &MainWindow::rightChangeBscan);
 
-    connect(m_scrollHRdgsLengthBar, &QScrollBar::sliderPressed, this, &MainWindow::scrollHRdgsLengthBarPressed);
-    connect(m_scrollHRdgsLengthBar, &QScrollBar::sliderMoved, this, &MainWindow::scrollHRdgsLengthBarMoved);
-    connect(m_scrollHRdgsLengthBar, &QScrollBar::sliderReleased, this, &MainWindow::scrollHRdgsLengthBarReleased);
-    connect(m_scrollHRdgsLengthBar, &QScrollBar::valueChanged, this, &MainWindow::scrollHRdgsLengthBarChanged);
+    connect(m_scrollHBscansLengthBar, &QScrollBar::sliderPressed, this, &MainWindow::scrollHBscansLengthBarPressed);
+    connect(m_scrollHBscansLengthBar, &QScrollBar::sliderMoved, this, &MainWindow::scrollHBscansLengthBarMoved);
+    connect(m_scrollHBscansLengthBar, &QScrollBar::sliderReleased, this, &MainWindow::scrollHBscansLengthBarReleased);
+    connect(m_scrollHBscansLengthBar, &QScrollBar::valueChanged, this, &MainWindow::scrollHBscansLengthBarChanged);
 
     m_colorsPaletteDialog = new colorsPaletteDialog();
     connect(m_colorsPaletteDialog, &colorsPaletteDialog::sendColorsPalette, this, &MainWindow::receiveColorsPalette);
 
-    readLastRdgsDirsFromSettings(m_trzDir, m_csvDir, m_hdf5Dir);
-    setupLastRdgs();
+    readLastBscansDirsFromSettings(m_trzDir, m_csvDir, m_hdf5Dir);
+    setupLastBscans();
 }
 
 MainWindow::~MainWindow(){}
 
-void MainWindow::setupLastRdgs()
+void MainWindow::setupLastBscans()
 {
-    m_filesRdgNamesTrz.clear();
+    m_filesBscanNamesTrz.clear();
     m_trzNumAntennasVector.resize(0);
 
-    m_filesRdgNamesCsv.clear();
-    m_infoRdgsHdf5Names.clear();
+    m_filesBscanNamesCsv.clear();
+    m_infoBscansHdf5Names.clear();
 
-    readLastNamesRdgsFromSettings(m_filesRdgNamesTrz, m_trzNumAntennasVector, m_filesRdgNamesCsv, m_infoRdgsHdf5Names);
+    readLastNamesBscansFromSettings(m_filesBscanNamesTrz, m_trzNumAntennasVector, m_filesBscanNamesCsv, m_infoBscansHdf5Names);
 
-    if      (m_trzNumAntennasVector.size() > 0) m_rdg2dWidget->setupTrzRdgs (m_filesRdgNamesTrz, m_trzNumAntennasVector, m_rdgsNamesVectorPairs);
-    else if (m_filesRdgNamesCsv.size()     > 0) m_rdg2dWidget->setupCsvRdgs (m_filesRdgNamesCsv, m_rdgsNamesVectorPairs);
-    else if (m_infoRdgsHdf5Names.size()    > 0) m_rdg2dWidget->setupHdf5Rdgs(m_infoRdgsHdf5Names, m_rdgsNamesVectorPairs);
+    if      (m_trzNumAntennasVector.size() > 0)   m_bscan2dWidget->setupTrzBscans (m_filesBscanNamesTrz, m_trzNumAntennasVector, m_bscansNamesVectorPairs);
+    else if (m_filesBscanNamesCsv.size()     > 0) m_bscan2dWidget->setupCsvBscans (m_filesBscanNamesCsv, m_bscansNamesVectorPairs);
+    else if (m_infoBscansHdf5Names.size()    > 0) m_bscan2dWidget->setupHdf5Bscans(m_infoBscansHdf5Names, m_bscansNamesVectorPairs);
 }
 
-void MainWindow::receiveDeleteRdgName(const std::string& delRdgName)
+void MainWindow::receiveDeleteBscanName(const std::string& delBscanName)
 {
-    deleteFile(delRdgName);
+    deleteFile(delBscanName);
 }
 
-void MainWindow::slotFixRdgsSurfPixels()
+void MainWindow::slotFixBscansSurfPixels()
 {
-    emit signalSetupRdgsSurfPixels(m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData);
+    emit signalSetupBscansSurfPixels(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData);
 }
 
-void MainWindow::slotFixRdgsSurfSection()
+void MainWindow::slotFixBscansSurfSection()
 {
-    emit signalOutputRdgsSurfSection(m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData);
+    emit signalOutputBscansSurfSection(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData);
 }
 
-void MainWindow::slotFixDeleteRdgName(double fixLatitude, double fixLongitude)
+void MainWindow::slotFixDeleteBscanName(double fixLatitude, double fixLongitude)
 {
-    emit signalDefDeleteRdgName(m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, fixLatitude, fixLongitude);
+    emit signalDefDeleteBscanName(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, fixLatitude, fixLongitude);
 }
 
-void MainWindow::slotFixFillRdgs(bool resetCutPointsRdgs)
+void MainWindow::slotFixFillBscans(bool resetCutPointsBscans)
 {
-    emit signalFillRdgsExecute(
-        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData, resetCutPointsRdgs
+    emit signalFillBscansExecute(
+        m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData, resetCutPointsBscans
     );
 }
 
@@ -198,17 +213,17 @@ void MainWindow::receiveProgressData(int progressPos, int progressMax)
 void MainWindow::init()
 {
     createActions();
-    m_stackedWidget->setCurrentWidget(m_rdg2dWidget);
+    m_stackedWidget->setCurrentWidget(m_bscan2dWidget);
 }
 
-void MainWindow::receiveOutRdgsSurfInfo(QString outRdgsSurfInfo)
+void MainWindow::receiveOutBscansSurfInfo(QString outBscansSurfInfo)
 {
-     statusBar()->showMessage(outRdgsSurfInfo);
+     statusBar()->showMessage(outBscansSurfInfo);
 }
 
-void MainWindow::receiveOutRdgInfo(QString outRdgInfo)
+void MainWindow::receiveOutBscanInfo(QString outBscanInfo)
 {
-    statusBar()->showMessage(outRdgInfo);
+    statusBar()->showMessage(outBscanInfo);
 }
 
 void MainWindow::createActions()
@@ -231,9 +246,9 @@ void MainWindow::createActions()
     connect(openKmlAct, &QAction::triggered, this, &MainWindow::openKml);
     fileMenu->addAction(openKmlAct);
 
-    QPointer<QAction> deleteAllRdgsAct = new QAction(tr("&Удалить все радарограммы"), this);
-    connect(deleteAllRdgsAct, &QAction::triggered, this, &MainWindow::deleteAllFiles);
-    fileMenu->addAction(deleteAllRdgsAct);
+    QPointer<QAction> deleteAllBscansAct = new QAction(tr("&Удалить все радарограммы"), this);
+    connect(deleteAllBscansAct, &QAction::triggered, this, &MainWindow::deleteAllFiles);
+    fileMenu->addAction(deleteAllBscansAct);
 
     QPointer<QAction> saveAct = new QAction(tr("&Сохранить"), this);
     saveAct->setShortcuts(QKeySequence::Save);
@@ -243,8 +258,8 @@ void MainWindow::createActions()
 
     fileMenu->addSeparator();
 
-    m_recentFilesRdgMenu = fileMenu->addMenu(tr("Недавние..."));
-    m_deleteFilesRdgMenu = fileMenu->addMenu(tr("Удалить..."));
+    m_recentFilesBscanMenu = fileMenu->addMenu(tr("Недавние..."));
+    m_deleteFilesBscanMenu = fileMenu->addMenu(tr("Удалить..."));
 
     QPointer<QAction> closeAct = fileMenu->addAction(tr("&Закрыть"), this, &MainWindow::close);
     closeAct->setShortcut(tr("Ctrl+W"));
@@ -252,35 +267,43 @@ void MainWindow::createActions()
 
     QPointer<QMenu> imagesMenu = menuBar()->addMenu(tr("&Изображения"));
 
-    QAction* rdg2DImageAct = new QAction(tr("&Изображение радарограммы"), this);
-    connect(rdg2DImageAct, &QAction::triggered, this, &MainWindow::openImageRdg);
-    imagesMenu->addAction(rdg2DImageAct);
+    QAction* bscan2DImageAct = new QAction(tr("&Изображение bscan"), this);
+    connect(bscan2DImageAct, &QAction::triggered, this, &MainWindow::openImageBscan);
+    imagesMenu->addAction(bscan2DImageAct);
 
-    QAction* rdgPaletteAct = new QAction(tr("&Палитра радарограммы"), this);
-    connect(rdgPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteRdg);
-    imagesMenu->addAction(rdgPaletteAct);
+    QAction* bscanPaletteAct = new QAction(tr("&Палитра bscan"), this);
+    connect(bscanPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteBscan);
+    imagesMenu->addAction(bscanPaletteAct);
 
-    QPointer<QAction> rdgs2DImageAct = new QAction(tr("&2D Изображение профилей по радарограммам"), this);
-    connect( rdgs2DImageAct, &QAction::triggered, this, &MainWindow::open2dImageRdgs);
-    imagesMenu->addAction(rdgs2DImageAct);
+    QAction* bscanDeep2DImageAct = new QAction(tr("&Изображение глубины по bscan"), this);
+    connect(bscanDeep2DImageAct, &QAction::triggered, this, &MainWindow::openImageDeepBscan);
+    imagesMenu->addAction(bscanDeep2DImageAct);
 
-    QPointer<QAction> rdgsSurfPaletteAct = new QAction(tr("&Палитра по профилям радарограмм"), this);
-    connect(rdgsSurfPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteSurfRdgs);
-    imagesMenu->addAction(rdgsSurfPaletteAct);
+    QAction* bscanDeepPaletteAct = new QAction(tr("&Палитра по глубине bscan"), this);
+    connect(bscanDeepPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteBscanDeep);
+    imagesMenu->addAction(bscanDeepPaletteAct);
 
-    QPointer<QAction> rdgs3DImageAct = new QAction(tr("&3D Изображение профилей по радарограммам"), this);
-    connect( rdgs3DImageAct, &QAction::triggered, this, &MainWindow::open3dImageRdgs);
-    imagesMenu->addAction(rdgs3DImageAct);
+    QPointer<QAction> bscans2DImageAct = new QAction(tr("&2D Изображение профилей по bscans"), this);
+    connect( bscans2DImageAct, &QAction::triggered, this, &MainWindow::open2dImageBscans);
+    imagesMenu->addAction(bscans2DImageAct);
 
-    QPointer<QAction> rdgsTransPaletteAct = new QAction(tr("&Палитра по переходу между радарограммами"), this);
-    connect(rdgsTransPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteTransRdgs);
-    imagesMenu->addAction(rdgsTransPaletteAct);
+    QPointer<QAction> bscansSurfPaletteAct = new QAction(tr("&Палитра по профилям bscans"), this);
+    connect(bscansSurfPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteSurfBscans);
+    imagesMenu->addAction(bscansSurfPaletteAct);
 
-    m_includeFilterOnRdgAction = new QAction(tr("&Включаем фильтр Перона и Малика"), this);
-    m_includeFilterOnRdgAction->setCheckable(true);
-    m_includeFilterOnRdgAction->setChecked(false);
-    imagesMenu->addAction(m_includeFilterOnRdgAction);
-    connect(m_includeFilterOnRdgAction, &QAction::toggled, this, &MainWindow::includeFilterOnRdg);
+    QPointer<QAction> bscans3DImageAct = new QAction(tr("&3D Изображение профилей по bscans"), this);
+    connect( bscans3DImageAct, &QAction::triggered, this, &MainWindow::open3dImageBscans);
+    imagesMenu->addAction(bscans3DImageAct);
+
+    QPointer<QAction> bscansTransPaletteAct = new QAction(tr("&Палитра по переходу между bscans"), this);
+    connect(bscansTransPaletteAct, &QAction::triggered, this, &MainWindow::defPaletteTransBscans);
+    imagesMenu->addAction(bscansTransPaletteAct);
+
+    m_includeFilterOnBscanAction = new QAction(tr("&Включаем фильтр Перона и Малика"), this);
+    m_includeFilterOnBscanAction->setCheckable(true);
+    m_includeFilterOnBscanAction->setChecked(false);
+    imagesMenu->addAction(m_includeFilterOnBscanAction);
+    connect(m_includeFilterOnBscanAction, &QAction::toggled, this, &MainWindow::includeFilterOnBscan);
 
     QPointer<QMenu> toolsMenu = menuBar()->addMenu(tr("&Инструменты по 2D-3D"));
 
@@ -306,163 +329,185 @@ void MainWindow::createActions()
 
     toolsMenu->addSeparator();
 
-    m_highLowImpulsesRdgsAction  = new QAction(tr("&Сверху-вниз/снизу-вверх по импульсам rdg"), this);
-    m_highLowImpulsesRdgsAction->setCheckable(true);
-    m_highLowImpulsesRdgsAction->setChecked(true);
-    toolsMenu->addAction(m_highLowImpulsesRdgsAction);
-    connect(m_highLowImpulsesRdgsAction, &QAction::triggered, this, &MainWindow::changeHighLowOnRdgs);
+    m_highLowImpulsesBscansAction  = new QAction(tr("&Сверху-вниз/снизу-вверх по импульсам "), this);
+    m_highLowImpulsesBscansAction->setCheckable(true);
+    m_highLowImpulsesBscansAction->setChecked(true);
+    toolsMenu->addAction(m_highLowImpulsesBscansAction);
+    connect(m_highLowImpulsesBscansAction, &QAction::triggered, this, &MainWindow::changeHighLowOnBscans);
 
-    m_showFullRdgsAction         = new QAction(tr("&Учет полных радарограмм"), this);
-    m_showFullRdgsAction->setCheckable(true);
-    m_showFullRdgsAction->setChecked(true);
-    toolsMenu->addAction(m_showFullRdgsAction);
-    connect(m_showFullRdgsAction, &QAction::triggered, this, &MainWindow::showFullRdgsData);
+    m_showFullBscansAction         = new QAction(tr("&Учет полных bscans"), this);
+    m_showFullBscansAction->setCheckable(true);
+    m_showFullBscansAction->setChecked(true);
+    toolsMenu->addAction(m_showFullBscansAction);
+    connect(m_showFullBscansAction, &QAction::triggered, this, &MainWindow::showFullBscansData);
 
     enabledCutActions(false, false, false);
 
-    QPointer<QMenu> actionsRdgMenu = menuBar()->addMenu(tr("&Операции с радарограммой"));
-    m_showInitRdgAct = new QAction(tr("&Исходная радарограмма"), this);
-    connect(m_showInitRdgAct, &QAction::triggered, this, &MainWindow::setInitRdg);
-    actionsRdgMenu->addAction(m_showInitRdgAct);
+    QPointer<QMenu> actionsBscanMenu = menuBar()->addMenu(tr("&Операции с bscan"));
+    m_showInitBscanAct = new QAction(tr("&Исходный bscan"), this);
+    connect(m_showInitBscanAct, &QAction::triggered, this, &MainWindow::setInitBscan);
+    actionsBscanMenu->addAction(m_showInitBscanAct);
 
-    m_showLogRdgAct = new QAction(tr("&Логарифмическая радарограмма"), this);
-    connect(m_showLogRdgAct, &QAction::triggered, this, &MainWindow::setLogRdg);
-    actionsRdgMenu->addAction(m_showLogRdgAct);
+    m_showLogBscanAct = new QAction(tr("&Логарифмический bscan"), this);
+    connect(m_showLogBscanAct, &QAction::triggered, this, &MainWindow::setLogBscan);
+    actionsBscanMenu->addAction(m_showLogBscanAct);
 
-    m_logRdgMouseSelectionAct = new QAction(tr("&Выделяем область мышкой по Log Rdg"), this);
-    connect(m_logRdgMouseSelectionAct, &QAction::triggered, this, &MainWindow::setLogRdgMouseSelection);
-    m_logRdgMouseSelectionAct->setCheckable(true);
-    actionsRdgMenu->addAction(m_logRdgMouseSelectionAct);
+    m_logBscanMouseSelectionAct = new QAction(tr("&Выделяем область мышкой по Log Bscan"), this);
+    connect(m_logBscanMouseSelectionAct, &QAction::triggered, this, &MainWindow::setLogBscanMouseSelection);
+    m_logBscanMouseSelectionAct->setCheckable(true);
+    actionsBscanMenu->addAction(m_logBscanMouseSelectionAct);
 
-    m_logRdgAutoSelectionAct = new QAction(tr("&Автоматическое выделение области по Log Rdg"), this);
-    connect(m_logRdgAutoSelectionAct, &QAction::triggered, this, &MainWindow::setLogRdgAutoSelection);
-    m_logRdgAutoSelectionAct->setCheckable(true);
-    actionsRdgMenu->addAction(m_logRdgAutoSelectionAct);
+    m_logBscanAutoSelectionAct = new QAction(tr("&Автоматическое выделение области по Log Bscan"), this);
+    connect(m_logBscanAutoSelectionAct, &QAction::triggered, this, &MainWindow::setLogBscanAutoSelection);
+    m_logBscanAutoSelectionAct->setCheckable(true);
+    actionsBscanMenu->addAction(m_logBscanAutoSelectionAct);
 
-    m_showInitRdgSelectionAct = new QAction(tr("&Показываем выделенные области на Init Rdg"), this);
-    connect(m_showInitRdgSelectionAct, &QAction::triggered, this, &MainWindow::setShowInitRdgSelection);
-    m_showInitRdgSelectionAct->setCheckable(true);
-    actionsRdgMenu->addAction(m_showInitRdgSelectionAct);
+    m_showInitBscanSelectionAct = new QAction(tr("&Показываем выделенные области на Init Bscan"), this);
+    connect(m_showInitBscanSelectionAct, &QAction::triggered, this, &MainWindow::setShowInitBscanSelection);
+    m_showInitBscanSelectionAct->setCheckable(true);
+    actionsBscanMenu->addAction(m_showInitBscanSelectionAct);
 
-    m_resetRdgSelectionAct = new QAction(tr("&Убираем выделенные области со всех Rdg"), this);
-    connect(m_resetRdgSelectionAct, &QAction::triggered, this, &MainWindow::slotResetRdgSelection);
-    actionsRdgMenu->addAction(m_resetRdgSelectionAct);
+    m_resetBscanSelectionAct = new QAction(tr("&Убираем выделенные области со всех Bscan"), this);
+    connect(m_resetBscanSelectionAct, &QAction::triggered, this, &MainWindow::slotResetBscanSelection);
+    actionsBscanMenu->addAction(m_resetBscanSelectionAct);
 
-    m_saveRdgAutoSelectionDataAct = new QAction(tr("&Сохраняем автоматически-выделенные области"), this);
-    connect(m_saveRdgAutoSelectionDataAct, &QAction::triggered, this, &MainWindow::saveRdgAutoSelectionData);
-    actionsRdgMenu->addAction(m_saveRdgAutoSelectionDataAct);
+    m_saveBscanAutoSelectionDataAct = new QAction(tr("&Сохраняем автоматически-выделенные области"), this);
+    connect(m_saveBscanAutoSelectionDataAct, &QAction::triggered, this, &MainWindow::saveBscanAutoSelectionData);
+    actionsBscanMenu->addAction(m_saveBscanAutoSelectionDataAct);
 
-    m_loadRdgAutoSelectionDataAct = new QAction(tr("&Загружаем автоматически-выделенные области"), this);
-    connect(m_loadRdgAutoSelectionDataAct, &QAction::triggered, this, &MainWindow::loadRdgAutoSelectionData);
-    actionsRdgMenu->addAction(m_loadRdgAutoSelectionDataAct);
+    m_loadBscanAutoSelectionDataAct = new QAction(tr("&Загружаем автоматически-выделенные области"), this);
+    connect(m_loadBscanAutoSelectionDataAct, &QAction::triggered, this, &MainWindow::loadBscanAutoSelectionData);
+    actionsBscanMenu->addAction(m_loadBscanAutoSelectionDataAct);
 
-    QPointer<QMenu> selectionsUseRdgMenu = menuBar()->addMenu(tr("&Активирование способа выделения областей по log образу rdg."));
-    m_useVoidSelectionAct  = new QAction(tr("&нет выделенией по радарограмме"), this);
+    QPointer<QMenu> selectionsUseBscanMenu = menuBar()->addMenu(tr("&Активирование способа выделения областей по log образу."));
+    m_useVoidSelectionAct  = new QAction(tr("&нет выделенией по bscan"), this);
     m_useVoidSelectionAct->setData(QString::fromStdString("void selection is activated"));
     m_useVoidSelectionAct->setCheckable(true);
     m_useVoidSelectionAct->setChecked(true);
-    connect(m_useVoidSelectionAct, &QAction::triggered, this, &MainWindow::useSelectionOnRdg);
-    selectionsUseRdgMenu->addAction(m_useVoidSelectionAct);
+    connect(m_useVoidSelectionAct, &QAction::triggered, this, &MainWindow::useSelectionOnBscan);
+    selectionsUseBscanMenu->addAction(m_useVoidSelectionAct);
 
-    m_useMouseSelectionAct = new QAction(tr("&выделение мышью по радарограмме"), this);
+    m_useMouseSelectionAct = new QAction(tr("&выделение мышью по bscan"), this);
     m_useMouseSelectionAct->setData(QString::fromStdString("mouse selection is activated"));
     m_useMouseSelectionAct->setCheckable(true);
-    connect(m_useMouseSelectionAct, &QAction::triggered, this, &MainWindow::useSelectionOnRdg);
-    selectionsUseRdgMenu->addAction(m_useMouseSelectionAct);
+    connect(m_useMouseSelectionAct, &QAction::triggered, this, &MainWindow::useSelectionOnBscan);
+    selectionsUseBscanMenu->addAction(m_useMouseSelectionAct);
 
-    m_useAutoSelectionAct  = new QAction(tr("&автоматическое выделение по радарограмме"), this);
+    m_useAutoSelectionAct  = new QAction(tr("&автоматическое выделение по bscan"), this);
     m_useAutoSelectionAct->setData(QString::fromStdString("auto selection is activated"));
     m_useAutoSelectionAct->setCheckable(true);
-    connect(m_useAutoSelectionAct, &QAction::triggered, this, &MainWindow::useSelectionOnRdg);
-    selectionsUseRdgMenu->addAction(m_useAutoSelectionAct);
+    connect(m_useAutoSelectionAct, &QAction::triggered, this, &MainWindow::useSelectionOnBscan);
+    selectionsUseBscanMenu->addAction(m_useAutoSelectionAct);
 
-    QPointer<QMenu> scalingsRdgsMenu = menuBar()->addMenu(tr("&Масштабирование"));
-    m_rdgAllScalingAct  = new QAction(tr("&общее масштабирование радарограммы"), this);
-    m_rdgAllScalingAct->setData(QString::fromStdString("all rdg scaling"));
-    m_rdgAllScalingAct->setCheckable(true);
-    m_rdgAllScalingAct->setChecked(true);
-    connect(m_rdgAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdg);
-    scalingsRdgsMenu->addAction(m_rdgAllScalingAct);
+    QPointer<QMenu> scalingsBscansMenu = menuBar()->addMenu(tr("&Масштабирование"));
 
-    m_rdgHScalingAct  = new QAction(tr("&горизонтальное масштабирование радарограммы"), this);
-    m_rdgHScalingAct->setData(QString::fromStdString("h rdg scaling"));
-    m_rdgHScalingAct->setCheckable(true);
-    m_rdgHScalingAct->setChecked(false);
-    connect(m_rdgHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdg);
-    scalingsRdgsMenu->addAction(m_rdgHScalingAct);
+    m_bscanAllScalingAct  = new QAction(tr("&общее масштабирование bscan"), this);
+    m_bscanAllScalingAct->setData(QString::fromStdString("all bscan scaling"));
+    m_bscanAllScalingAct->setCheckable(true);
+    m_bscanAllScalingAct->setChecked(true);
+    connect(m_bscanAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscan);
+    scalingsBscansMenu->addAction(m_bscanAllScalingAct);
 
-    m_rdgVScalingAct  = new QAction(tr("&вертикальное масштабирование радарограммы"), this);
-    m_rdgVScalingAct->setData(QString::fromStdString("v rdg scaling"));
-    m_rdgVScalingAct->setCheckable(true);
-    m_rdgVScalingAct->setChecked(false);
-    connect(m_rdgVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdg);
-    scalingsRdgsMenu->addAction(m_rdgVScalingAct);
+    m_bscanHScalingAct  = new QAction(tr("&горизонтальное масштабирование bscan"), this);
+    m_bscanHScalingAct->setData(QString::fromStdString("h bscan scaling"));
+    m_bscanHScalingAct->setCheckable(true);
+    m_bscanHScalingAct->setChecked(false);
+    connect(m_bscanHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscan);
+    scalingsBscansMenu->addAction(m_bscanHScalingAct);
 
-    scalingsRdgsMenu->addSeparator();
+    m_bscanVScalingAct  = new QAction(tr("&вертикальное масштабирование bscan"), this);
+    m_bscanVScalingAct->setData(QString::fromStdString("v bscan scaling"));
+    m_bscanVScalingAct->setCheckable(true);
+    m_bscanVScalingAct->setChecked(false);
+    connect(m_bscanVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscan);
+    scalingsBscansMenu->addAction(m_bscanVScalingAct);
+    scalingsBscansMenu->addSeparator();
 
-    m_rdgsSurfAllScalingAct  = new QAction(tr("&общее масштабирование поверхности"), this);
-    m_rdgsSurfAllScalingAct->setData(QString::fromStdString("all rdgs surf scaling"));
-    m_rdgsSurfAllScalingAct->setCheckable(true);
-    m_rdgsSurfAllScalingAct->setChecked(true);
-    connect(m_rdgsSurfAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdgsSurf);
-    scalingsRdgsMenu->addAction(m_rdgsSurfAllScalingAct);
+    m_bscanDeepAllScalingAct  = new QAction(tr("&общее масштабирование по bscan deep"), this);
+    m_bscanDeepAllScalingAct->setData(QString::fromStdString("all bscan deep scaling"));
+    m_bscanDeepAllScalingAct->setCheckable(true);
+    m_bscanDeepAllScalingAct->setChecked(true);
+    connect(m_bscanDeepAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscanDeep);
+    scalingsBscansMenu->addAction(m_bscanDeepAllScalingAct);
 
-    m_rdgsSurfHScalingAct  = new QAction(tr("&горизонтальное масштабирование поверхности"), this);
-    m_rdgsSurfHScalingAct->setData(QString::fromStdString("h rdgs surf scaling"));
-    m_rdgsSurfHScalingAct->setCheckable(true);
-    m_rdgsSurfHScalingAct->setChecked(false);
-    connect(m_rdgsSurfHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdgsSurf);
-    scalingsRdgsMenu->addAction(m_rdgsSurfHScalingAct);
+    m_bscanDeepHScalingAct  = new QAction(tr("&горизонтальное масштабирование по bscan deep"), this);
+    m_bscanDeepHScalingAct->setData(QString::fromStdString("h bscan deep scaling"));
+    m_bscanDeepHScalingAct->setCheckable(true);
+    m_bscanDeepHScalingAct->setChecked(false);
+    connect(m_bscanDeepHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscanDeep);
+    scalingsBscansMenu->addAction(m_bscanDeepHScalingAct);
 
-    m_rdgsSurfVScalingAct  = new QAction(tr("&вертикальное масштабирование поверхности"), this);
-    m_rdgsSurfVScalingAct->setData(QString::fromStdString("v rdgs surf scaling"));
-    m_rdgsSurfVScalingAct->setCheckable(true);
-    m_rdgsSurfVScalingAct->setChecked(false);
-    connect(m_rdgsSurfVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdgsSurf);
-    scalingsRdgsMenu->addAction(m_rdgsSurfVScalingAct);
+    m_bscanDeepVScalingAct  = new QAction(tr("&вертикальное масштабирование по deep bscan"), this);
+    m_bscanDeepVScalingAct->setData(QString::fromStdString("v bscan deep scaling"));
+    m_bscanDeepVScalingAct->setCheckable(true);
+    m_bscanDeepVScalingAct->setChecked(false);
+    connect(m_bscanDeepVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscanDeep);
+    scalingsBscansMenu->addAction(m_bscanDeepVScalingAct);
+    scalingsBscansMenu->addSeparator();
 
-    scalingsRdgsMenu->addSeparator();
+    m_bscansSurfAllScalingAct  = new QAction(tr("&общее масштабирование поверхности bscans"), this);
+    m_bscansSurfAllScalingAct->setData(QString::fromStdString("all surf bscan scaling"));
+    m_bscansSurfAllScalingAct->setCheckable(true);
+    m_bscansSurfAllScalingAct->setChecked(true);
+    connect(m_bscansSurfAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscansSurf);
+    scalingsBscansMenu->addAction(m_bscansSurfAllScalingAct);
 
-    m_rdgsTransAllScalingAct  = new QAction(tr("&общее масштабирование между радарограммами"), this);
-    m_rdgsTransAllScalingAct->setData(QString::fromStdString("all rdgs trans scaling"));
-    m_rdgsTransAllScalingAct->setCheckable(true);
-    m_rdgsTransAllScalingAct->setChecked(true);
-    connect(m_rdgsTransAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdgsTrans);
-    scalingsRdgsMenu->addAction(m_rdgsTransAllScalingAct);
+    m_bscansSurfHScalingAct  = new QAction(tr("&горизонтальное масштабирование поверхности bscans"), this);
+    m_bscansSurfHScalingAct->setData(QString::fromStdString("h surf bscan scaling"));
+    m_bscansSurfHScalingAct->setCheckable(true);
+    m_bscansSurfHScalingAct->setChecked(false);
+    connect(m_bscansSurfHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscansSurf);
+    scalingsBscansMenu->addAction(m_bscansSurfHScalingAct);
 
-    m_rdgsTransHScalingAct  = new QAction(tr("&горизонтальное масштабирование между радарограммами"), this);
-    m_rdgsTransHScalingAct->setData(QString::fromStdString("h rdgs trans scaling"));
-    m_rdgsTransHScalingAct->setCheckable(true);
-    m_rdgsTransHScalingAct->setChecked(false);
-    connect(m_rdgsTransHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdgsTrans);
-    scalingsRdgsMenu->addAction(m_rdgsTransHScalingAct);
+    m_bscansSurfVScalingAct  = new QAction(tr("&вертикальное масштабирование поверхности bscans"), this);
+    m_bscansSurfVScalingAct->setData(QString::fromStdString("v surf bscan scaling"));
+    m_bscansSurfVScalingAct->setCheckable(true);
+    m_bscansSurfVScalingAct->setChecked(false);
+    connect(m_bscansSurfVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscansSurf);
+    scalingsBscansMenu->addAction(m_bscansSurfVScalingAct);
 
-    m_rdgsTransVScalingAct  = new QAction(tr("&вертикальное масштабирование между радарограммами"), this);
-    m_rdgsTransVScalingAct->setData(QString::fromStdString("v rdgs trans scaling"));
-    m_rdgsTransVScalingAct->setCheckable(true);
-    m_rdgsTransVScalingAct->setChecked(false);
-    connect(m_rdgsTransVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnRdgsTrans);
-    scalingsRdgsMenu->addAction(m_rdgsTransVScalingAct);
+    scalingsBscansMenu->addSeparator();
 
-    enabledShowRdgActions(false);
+    m_bscansTransAllScalingAct  = new QAction(tr("&общее масштабирование между bscans"), this);
+    m_bscansTransAllScalingAct->setData(QString::fromStdString("all trans bscans scaling"));
+    m_bscansTransAllScalingAct->setCheckable(true);
+    m_bscansTransAllScalingAct->setChecked(true);
+    connect(m_bscansTransAllScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscansTrans);
+    scalingsBscansMenu->addAction(m_bscansTransAllScalingAct);
+
+    m_bscansTransHScalingAct  = new QAction(tr("&горизонтальное масштабирование между bscans"), this);
+    m_bscansTransHScalingAct->setData(QString::fromStdString("h trans bscans scaling"));
+    m_bscansTransHScalingAct->setCheckable(true);
+    m_bscansTransHScalingAct->setChecked(false);
+    connect(m_bscansTransHScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscansTrans);
+    scalingsBscansMenu->addAction(m_bscansTransHScalingAct);
+
+    m_bscansTransVScalingAct  = new QAction(tr("&вертикальное масштабирование между bscans"), this);
+    m_bscansTransVScalingAct->setData(QString::fromStdString("v trans bscans scaling"));
+    m_bscansTransVScalingAct->setCheckable(true);
+    m_bscansTransVScalingAct->setChecked(false);
+    connect(m_bscansTransVScalingAct, &QAction::triggered, this, &MainWindow::setupScalingOnBscansTrans);
+    scalingsBscansMenu->addAction(m_bscansTransVScalingAct);
+
+    enabledShowBscanActions(false);
 }
 
 void MainWindow::openTrz()
 {
     if (m_trzDir == "") m_trzDir = QCoreApplication::applicationDirPath();
 
-    m_filesRdgNamesTrz = QFileDialog::getOpenFileNames(this, tr("Select Multiple Files"), m_trzDir, tr("Image Files(*.trz)"));
+    m_filesBscanNamesTrz = QFileDialog::getOpenFileNames(this, tr("Select Multiple Files"), m_trzDir, tr("Image Files(*.trz)"));
     m_trzNumAntennasVector.resize(0);
-    if (m_filesRdgNamesTrz.size() > 0)
+    if (m_filesBscanNamesTrz.size() > 0)
     {
         m_trzDir = "";
-        for (int count = 0; count <= m_filesRdgNamesTrz.at(0).split("/").size()-2; count++)
+        for (int count = 0; count <= m_filesBscanNamesTrz.at(0).split("/").size()-2; count++)
         {
-            if (count != m_filesRdgNamesTrz.at(0).split("/").size()-2) m_trzDir = m_trzDir + m_filesRdgNamesTrz.at(0).split("/").at(count) + "/";
-            else                                                       m_trzDir = m_trzDir + m_filesRdgNamesTrz.at(0).split("/").at(count) ;
+            if (count != m_filesBscanNamesTrz.at(0).split("/").size()-2) m_trzDir = m_trzDir + m_filesBscanNamesTrz.at(0).split("/").at(count) + "/";
+            else                                                       m_trzDir = m_trzDir + m_filesBscanNamesTrz.at(0).split("/").at(count) ;
         }
-        writeLastRdgsDirs(m_trzDir, m_csvDir, m_hdf5Dir);
-        m_rdg2dWidget->setupTrzRdgs(m_filesRdgNamesTrz, m_trzNumAntennasVector, m_rdgsNamesVectorPairs);
+        writeLastBscansDirs(m_trzDir, m_csvDir, m_hdf5Dir);
+        m_bscan2dWidget->setupTrzBscans(m_filesBscanNamesTrz, m_trzNumAntennasVector, m_bscansNamesVectorPairs);
     }
 }
 
@@ -470,18 +515,18 @@ void MainWindow::openCsv()
 {   
     if (m_csvDir == "") m_csvDir = QCoreApplication::applicationDirPath();
 
-    m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData = false;
-    m_filesRdgNamesCsv = QFileDialog::getOpenFileNames(this, tr("Select Multiple Files"), m_csvDir, tr("Image Files(*.csv)"));
-    if (m_filesRdgNamesCsv.size() > 0)
+    m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData = false;
+    m_filesBscanNamesCsv = QFileDialog::getOpenFileNames(this, tr("Select Multiple Files"), m_csvDir, tr("Image Files(*.csv)"));
+    if (m_filesBscanNamesCsv.size() > 0)
     {
         m_csvDir = "";
-        for (int count = 0; count <= m_filesRdgNamesCsv.at(0).split("/").size()-2; count++)
+        for (int count = 0; count <= m_filesBscanNamesCsv.at(0).split("/").size()-2; count++)
         {
-            if (count != m_filesRdgNamesCsv.at(0).split("/").size()-2) m_csvDir = m_csvDir + m_filesRdgNamesCsv.at(0).split("/").at(count) + "/";
-            else                                                       m_csvDir = m_csvDir + m_filesRdgNamesCsv.at(0).split("/").at(count) + "/";
+            if (count != m_filesBscanNamesCsv.at(0).split("/").size()-2) m_csvDir = m_csvDir + m_filesBscanNamesCsv.at(0).split("/").at(count) + "/";
+            else                                                       m_csvDir = m_csvDir + m_filesBscanNamesCsv.at(0).split("/").at(count) + "/";
         }
-        writeLastRdgsDirs(m_trzDir, m_csvDir, m_hdf5Dir);
-        m_rdg2dWidget->setupCsvRdgs(m_filesRdgNamesCsv, m_rdgsNamesVectorPairs);
+        writeLastBscansDirs(m_trzDir, m_csvDir, m_hdf5Dir);
+        m_bscan2dWidget->setupCsvBscans(m_filesBscanNamesCsv, m_bscansNamesVectorPairs);
     }
 }
 
@@ -502,81 +547,86 @@ void MainWindow::openHdf5()
 
     m_hdf5Dir = hdf5dlg->directory().canonicalPath();
 
-    m_infoRdgsHdf5Names = hdf5dlg->selectedFiles();
+    m_infoBscansHdf5Names = hdf5dlg->selectedFiles();
 
-    writeLastRdgsDirs(m_trzDir, m_csvDir, m_hdf5Dir);
+    writeLastBscansDirs(m_trzDir, m_csvDir, m_hdf5Dir);
 
-    m_rdg2dWidget->setupHdf5Rdgs(m_infoRdgsHdf5Names, m_rdgsNamesVectorPairs);
+    m_bscan2dWidget->setupHdf5Bscans(m_infoBscansHdf5Names, m_bscansNamesVectorPairs);
     hdf5dlg->close();
 }
 
-void MainWindow::setupRdgCurrentName()
+void MainWindow::setupBscanCurrentName()
 {
-    if (m_rdgCurrentName == "")  m_rdgCurrentName = m_rdgsNamesVectorPairs[0].first;  
+    if (m_bscanCurrentName == "")  m_bscanCurrentName = m_bscansNamesVectorPairs[0].first;
 }
 
-void MainWindow::setupRdgControls()
+void MainWindow::setupBscanControls()
 {
-    m_rdg2dWidget->showNewRdg(m_rdgCurrentName);
+    m_bscan2dWidget->showNewBscan(m_bscanCurrentName);
+    m_bscanDeep2dWidget->showNewBscanDeep(m_bscanCurrentName, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName]);
+
+    m_materialLabel->setVisible(true);
     m_materialComboBox->setVisible(true);
-    if (m_stackedWidget->currentIndex() == 0)
+    if (m_stackedWidget->currentIndex() <=1)
     {
-        enabledShowRdgActions(true);
-        openScrollHRdgsLengthBar(true);
-        if (m_rdgsNamesVectorPairs.size() > 1)
+        enabledShowBscanActions(true);
+        fixScrollHBscansLengthBar();
+        if (m_bscansNamesVectorPairs.size() > 1)
         {
-            setupRdgsSliderSetup(0, m_rdgsNamesVectorPairs.size());
-            rdgsTransitControlsVisible(true);
+            setupBscansSliderSetup(0, m_bscansNamesVectorPairs.size());
+            bscansTransitControlsVisible(true);
         }
     }
     createActionsFilesMenu();
 }
 
-void MainWindow::controlRdgsSamplingData( bool& dataSampling, bool& executeParserData, RdgFileFormat rdgFileFormat)
+void MainWindow::controlBscansSamplingData( bool& dataSampling, bool& executeParserData, BscanFileFormat BscanFileFormat)
 {
-    switch(rdgFileFormat)
+    switch(BscanFileFormat)
     {
-        case RdgFileFormat::Trz:
+        case BscanFileFormat::Trz:
         {
-            m_filesRdgNamesTrz.clear();
+            m_filesBscanNamesTrz.clear();
             m_trzNumAntennasVector.clear();
-            if (m_filesRdgNamesCsv.size()     > 0)      m_rdg2dWidget->setupCsvRdgs(m_filesRdgNamesCsv, m_rdgsNamesVectorPairs);
-            else if (m_infoRdgsHdf5Names.size()   > 0) m_rdg2dWidget->setupHdf5Rdgs(m_infoRdgsHdf5Names, m_rdgsNamesVectorPairs);
+            if (m_filesBscanNamesCsv.size()     > 0)      m_bscan2dWidget->setupCsvBscans(m_filesBscanNamesCsv, m_bscansNamesVectorPairs);
+            else if (m_infoBscansHdf5Names.size()   > 0)  m_bscan2dWidget->setupHdf5Bscans(m_infoBscansHdf5Names, m_bscansNamesVectorPairs);
             break;
         }
-        case RdgFileFormat::Csv:
+        case BscanFileFormat::Csv:
         {
-            m_filesRdgNamesCsv.clear();
-            if (m_infoRdgsHdf5Names.size()   > 0) m_rdg2dWidget->setupHdf5Rdgs(m_infoRdgsHdf5Names, m_rdgsNamesVectorPairs);
+            m_filesBscanNamesCsv.clear();
+            if (m_infoBscansHdf5Names.size()   > 0) m_bscan2dWidget->setupHdf5Bscans(m_infoBscansHdf5Names, m_bscansNamesVectorPairs);
             break;
         }
-        case RdgFileFormat::Hdf5:
+        case BscanFileFormat::Hdf5:
         {
-            m_infoRdgsHdf5Names.clear();
+            m_infoBscansHdf5Names.clear();
             break;
         }
     }
 
-    if (m_filesRdgNamesTrz.size() == 0 && m_trzNumAntennasVector.size() == 0 && m_filesRdgNamesCsv.size() == 0 && m_infoRdgsHdf5Names.size() == 0)
+    if (m_filesBscanNamesTrz.size() == 0 && m_trzNumAntennasVector.size() == 0 && m_filesBscanNamesCsv.size() == 0 && m_infoBscansHdf5Names.size() == 0)
     {
-        setupRdgCurrentName();
-        setupRdgControls();
+        setupBscanCurrentName();
+        setupBscanControls();
         if (dataSampling == true) dataSampling = false;
-        if (m_rdgsNamesVectorPairs.size() > 1)
+        if (m_bscansNamesVectorPairs.size() > 1)
         {
             executeParserData = true;
-            m_rdg2dWidget->m_accomplishment->m_thread->start();
+            m_bscan2dWidget->m_accomplishment->m_thread->start();
         }
     }
 }
 
-void MainWindow::slotActivateAccompThread(std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs, RdgFileFormat rdgFileFormat)
+void MainWindow::slotActivateAccompThread(std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs, BscanFileFormat bscanFileFormat)
 {
-    m_rdgsNamesVectorPairs.swap(rdgsNamesVectorPairs);
-
-    if      (rdgFileFormat == RdgFileFormat::Trz)  controlRdgsSamplingData(m_rdg2dWidget->m_accomplishment->m_thread->m_trzDataSampling, m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData, rdgFileFormat);
-    else if (rdgFileFormat == RdgFileFormat::Csv)  controlRdgsSamplingData( m_rdg2dWidget->m_accomplishment->m_thread->m_csvDataSampling, m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData, rdgFileFormat);
-    else if (rdgFileFormat == RdgFileFormat::Hdf5) controlRdgsSamplingData(m_rdg2dWidget->m_accomplishment->m_thread->m_hdf5DataSampling, m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData, rdgFileFormat);
+    m_bscansNamesVectorPairs.swap(bscansNamesVectorPairs);
+    if      (bscanFileFormat == BscanFileFormat::Trz)
+        controlBscansSamplingData(m_bscan2dWidget->m_accomplishment->m_thread->m_trzDataSampling, m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData, bscanFileFormat);
+    else if (bscanFileFormat == BscanFileFormat::Csv)
+        controlBscansSamplingData( m_bscan2dWidget->m_accomplishment->m_thread->m_csvDataSampling, m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData, bscanFileFormat);
+    else if (bscanFileFormat == BscanFileFormat::Hdf5)
+        controlBscansSamplingData(m_bscan2dWidget->m_accomplishment->m_thread->m_hdf5DataSampling, m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData, bscanFileFormat);
 }
 
 void MainWindow::openKml()
@@ -590,170 +640,207 @@ void MainWindow::openKml()
     if (fileName.isNull() || fileName.isEmpty())  return;
     else
     {
-        defRdgsInRelief(fileName, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.vectorRdgsInRelief);
-        if (m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.leftLatitude > 0.0)
+        defBscansInRelief(fileName, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.vectorBscansInRelief);
+        if (m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.leftLatitude > 0.0)
         {
-            m_rdg2dWidget->m_accomplishment->m_thread->m_defRdgsFnRelief = true;
-            m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData = true;
-            m_rdg2dWidget->m_accomplishment->m_thread->start();
+            m_bscan2dWidget->m_accomplishment->m_thread->m_defBscansFnRelief = true;
+            m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData = true;
+            m_bscan2dWidget->m_accomplishment->m_thread->start();
         }
     }
 }
 
-void MainWindow::openImageRdg()
+void MainWindow::openImageBscan()
 {
     enabledCutActions(false, false, false);
-    if (m_rdgCurrentName != "")
-    {
-        m_stackedWidget->setCurrentWidget(m_rdg2dWidget);
-        impulsesRdgControlsVisible(false);
-        if (m_rdgsNamesVectorPairs.size() > 1)
+    m_stackedWidget->setCurrentWidget(m_bscan2dWidget);
+    if (m_bscanCurrentName != "")
+    {  
+        impulsesBscanControlsVisible(false);
+        if (m_bscansNamesVectorPairs.size() > 1)
         {
-            openScrollHRdgsLengthBar(true);
-            rdgsTransitControlsVisible(true);
+            fixScrollHBscansLengthBar();
+            bscansTransitControlsVisible(true);
         }
         statusBar()->show();
-        enabledShowRdgActions(true);
-        showRdgImage(true);
+        enabledShowBscanActions(true);
+        showBscanImage(true);
     }
 }
 
-void MainWindow::defPaletteRdg()
+void  MainWindow::openImageDeepBscan()
 {
-    if (m_rdgCurrentName != "" && m_stackedWidget->currentIndex() == 0 && !m_colorsPaletteDialog->isVisible()) m_colorsPaletteDialog->exec();
-}
-
-void MainWindow::defAbsRdgsStructInXAndFnX(int& absRdgsStructInX, int& absRdgsStructFnX)
-{
-    if ( (m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfWidth > limitRdgWidth) && (m_showFullRdgs == true) )
-    {
-        absRdgsStructInX = m_scrollHRdgsLengthBar->value()-limitRdgWidth+1;
-        absRdgsStructFnX = m_scrollHRdgsLengthBar->value();
-    }
-    else if (m_showFullRdgs == true)
-    {
-        absRdgsStructInX = 0;
-        absRdgsStructFnX = m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfWidth-1;
-    }
-
-    if  ((m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfMinWidth > limitRdgWidth) && (m_showFullRdgs == false) )
-    {
-        absRdgsStructInX = m_scrollHRdgsLengthBar->value()-limitRdgWidth+1;
-        absRdgsStructFnX = m_scrollHRdgsLengthBar->value();
-    }
-    else if (m_showFullRdgs == false)
-    {
-        absRdgsStructInX = 0;
-        absRdgsStructFnX = m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfMinWidth-1;
+    enabledCutActions(false, false, false);
+    m_stackedWidget->setCurrentWidget(m_bscanDeep2dWidget);
+    if (m_bscanCurrentName != "")
+    {   
+        impulsesBscanControlsVisible(false);
+        if (m_bscansNamesVectorPairs.size() > 1)
+        {
+            fixScrollHBscansLengthBar();
+            bscansTransitControlsVisible(true);
+        }
+        statusBar()->show();
+        enabledShowBscanActions(false);
+        showBscanImage(true);
     }
 }
 
-void MainWindow::scrollHRdgsLengthBarResetDataAtRdgsImages()
+void MainWindow::slotSetupBscanDeepPixels()
 {
-    if (m_showFullRdgs == true)
+    emit signalSetupBscanDeepPixels(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName]);
+}
+
+void MainWindow::slotFixDataBscanDeepWidgets()
+{
+    emit signalSetupFixDataBscanDeepWidgets(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName]);
+}
+
+void MainWindow::defPaletteBscan()
+{
+    if (m_bscanCurrentName != "" && m_stackedWidget->currentIndex() == 0 && !m_colorsPaletteDialog->isVisible()) m_colorsPaletteDialog->exec();
+}
+
+void MainWindow::defPaletteBscanDeep()
+{
+    if (m_bscanCurrentName != "" && m_stackedWidget->currentIndex() == 1 && !m_colorsPaletteDialog->isVisible()) m_colorsPaletteDialog->exec();
+}
+
+void MainWindow::defAbsBscansStructInXAndFnX(int& absBscansStructInX, int& absBscansStructFnX)
+{
+    if ( (m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfWidth > limitBscanWidth) && (m_showFullBscans == true) )
     {
-        if  (m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfWidth > limitRdgWidth)
-            openScrollHRdgsLengthBar(true);
+        absBscansStructInX = m_scrollHBscansLengthBar->value()-limitBscanWidth+1;
+        absBscansStructFnX = m_scrollHBscansLengthBar->value();
+    }
+    else if (m_showFullBscans == true)
+    {
+        absBscansStructInX = 0;
+        absBscansStructFnX = m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfWidth-1;
+    }
+
+    if  ((m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfMinWidth > limitBscanWidth) && (m_showFullBscans == false) )
+    {
+        absBscansStructInX = m_scrollHBscansLengthBar->value()-limitBscanWidth+1;
+        absBscansStructFnX = m_scrollHBscansLengthBar->value();
+    }
+    else if (m_showFullBscans == false)
+    {
+        absBscansStructInX = 0;
+        absBscansStructFnX = m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfMinWidth-1;
+    }
+}
+
+void MainWindow::scrollHBscansLengthBarResetDataAtBscansImages()
+{
+    if (m_showFullBscans == true)
+    {
+        if  (m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfWidth > limitBscanWidth)
+            fixScrollHBscansLengthBar();
         else
-            samplingAllLog10Rdgs(
-                m_materialId, m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
-                0, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfWidth-1
+            samplingAllLog10Bscans(
+                m_materialId, m_filterId, m_bscansNamesVectorPairs, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                0, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfWidth-1
             );
     }
     else
     {
-        if  (m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfMinWidth > limitRdgWidth)
-            openScrollHRdgsLengthBar(true);
+        if  (m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfMinWidth > limitBscanWidth)
+            fixScrollHBscansLengthBar();
         else
-            samplingAllLog10Rdgs(
-                m_materialId, m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
-                0, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfMinWidth-1
+            samplingAllLog10Bscans(
+                m_materialId, m_filterId, m_bscansNamesVectorPairs, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                0, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfMinWidth-1
             );
     }
 }
 
-void MainWindow::open2dImageRdgs()
+void MainWindow::open2dImageBscans()
 {
-    if (m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap.size()>1)
+    if (m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap.size()>1)
     {
-        m_stackedWidget->setCurrentWidget(m_rdgs2dWidget);
+        m_stackedWidget->setCurrentWidget(m_bscans2dWidget);
 
-        int absRdgsStructInX {0};
-        int absRdgsStructFnX {0};
+        int absBscansStructInX {0};
+        int absBscansStructFnX {0};
 
-        enabledCutActions(true, false, true);   
-        impulsesRdgControlsVisible(true);
-        rdgsTransitControlsVisible(false);
+        enabledCutActions(true, false, true);
+        impulsesBscanControlsVisible(true);
+        bscansTransitControlsVisible(false);
 
         statusBar()->show();
-        enabledShowRdgActions(false);
+        enabledShowBscanActions(false);
 
-        scrollHRdgsLengthBarResetDataAtRdgsImages();
-        defAbsRdgsStructInXAndFnX(absRdgsStructInX, absRdgsStructFnX);
-        m_rdgs2dWidget->showRdgsSurf(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
-            m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnRdg, m_showFullRdgs, m_resetSectPoints2dRdgs, m_materialId,
-            absRdgsStructInX,  absRdgsStructFnX
-        );
-
-    }
-}
-
-void  MainWindow::defPaletteSurfRdgs()
-{
-    if (m_stackedWidget->currentIndex() == 1 && !m_colorsPaletteDialog->isVisible()) m_colorsPaletteDialog->exec();
-}
-
-void MainWindow::open3dImageRdgs()
-{
-    if (m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap.size()>1)
-    {
-        m_stackedWidget->setCurrentWidget(m_rdgs3dWidget);
-
-        int absRdgsStructInX {0};
-        int absRdgsStructFnX {0};
-
-        enabledCutActions(false, true, true);
-        impulsesRdgControlsVisible(true);
-        rdgsTransitControlsVisible(false);
-
-        statusBar()->hide();
-        enabledShowRdgActions(true);
-
-        scrollHRdgsLengthBarResetDataAtRdgsImages();
-        defAbsRdgsStructInXAndFnX(absRdgsStructInX, absRdgsStructFnX);
-        m_rdgs3dWidget->showRdgsImage(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
-            m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnRdg, m_showFullRdgs, m_resetCutPointsRdgs,
-            m_materialId, absRdgsStructInX,  absRdgsStructFnX
+        scrollHBscansLengthBarResetDataAtBscansImages();
+        defAbsBscansStructInXAndFnX(absBscansStructInX, absBscansStructFnX);
+        m_bscans2dWidget->showBscansSurf(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
+            m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnBscan, m_showFullBscans, m_resetSectPoints2dBscans, m_materialId,
+            absBscansStructInX,  absBscansStructFnX
         );
     }
 }
 
-void  MainWindow::defPaletteTransRdgs()
+void  MainWindow::defPaletteSurfBscans()
 {
     if (m_stackedWidget->currentIndex() == 2 && !m_colorsPaletteDialog->isVisible()) m_colorsPaletteDialog->exec();
 }
 
+void MainWindow::open3dImageBscans()
+{
+    if (m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap.size()>1)
+    {
+        m_stackedWidget->setCurrentWidget(m_bscans3dWidget);
+
+        int absBscansStructInX {0};
+        int absBscansStructFnX {0};
+
+        enabledCutActions(false, true, true);
+        impulsesBscanControlsVisible(true);
+        bscansTransitControlsVisible(false);
+
+        statusBar()->hide();
+        enabledShowBscanActions(true);
+
+        scrollHBscansLengthBarResetDataAtBscansImages();
+        defAbsBscansStructInXAndFnX(absBscansStructInX, absBscansStructFnX);
+        m_bscans3dWidget->showBscansImage(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
+            m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnBscan, m_showFullBscans, m_resetCutPointsBscans,
+            m_materialId, absBscansStructInX,  absBscansStructFnX
+        );
+    }
+}
+
+void  MainWindow::defPaletteTransBscans()
+{
+    if (m_stackedWidget->currentIndex() == 3 && !m_colorsPaletteDialog->isVisible()) m_colorsPaletteDialog->exec();
+}
+
 void MainWindow::receiveColorsPalette(QColor& colorUp, QColor& colorLow)
 {
-    if (m_rdgCurrentName != "")
+    if (m_bscanCurrentName != "")
     {
         switch (m_stackedWidget->currentIndex())
         {
             case 0:
             {
-                m_rdg2dWidget->setupColorsRdgAllProps(colorUp, colorLow);
+                m_bscan2dWidget->setupColorsBscanAllProps(colorUp, colorLow);
                 break;
             }
             case 1:
             {
-                m_rdgs2dWidget->setupColorsRdgsSurfAllProps(colorUp, colorLow);
+                m_bscanDeep2dWidget->setupColorsBscanDeepAllProps(colorUp, colorLow, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName]);
                 break;
             }
             case 2:
             {
-                m_rdgs3dWidget->setupColorsRdgsTransAllProps(colorUp, colorLow);
+                m_bscans2dWidget->setupColorsBscansSurfAllProps(colorUp, colorLow);
+                break;
+            }
+            case 3:
+            {
+                m_bscans3dWidget->setupColorsBscansTransAllProps(colorUp, colorLow);
                 break;
             }
         }
@@ -764,15 +851,15 @@ void MainWindow::openRecentFile()
 {
     if (const QAction *action = qobject_cast<const QAction *>(sender()))
     {
-        m_rdgCurrentName = action->data().toString().toStdString();
-        if (m_stackedWidget->currentIndex() == 0)
+        m_bscanCurrentName = action->data().toString().toStdString();
+        if (m_stackedWidget->currentIndex() <= 1)
         {
             auto vectorPairsIt = std::find_if(
-                m_rdgsNamesVectorPairs.begin(), m_rdgsNamesVectorPairs.end(), [&](const std::pair<std::string, std::string>& stringPair) { return (stringPair.first == m_rdgCurrentName); }
+                m_bscansNamesVectorPairs.begin(), m_bscansNamesVectorPairs.end(), [&](const std::pair<std::string, std::string>& stringPair) { return (stringPair.first == m_bscanCurrentName); }
             );
             
-            setupRdgsSliderSetup(std::distance(m_rdgsNamesVectorPairs.begin(), vectorPairsIt), m_rdgsNamesVectorPairs.size());
-            showRdgImage(true);
+            setupBscansSliderSetup(std::distance(m_bscansNamesVectorPairs.begin(), vectorPairsIt), m_bscansNamesVectorPairs.size());
+            showBscanImage(true);
         }
     }
 }
@@ -784,52 +871,61 @@ void MainWindow::deleteSelectedFile()
 
 void MainWindow::deleteAllFiles()
 {
-    for (int count = 0; count < m_rdgsNamesVectorPairs.size(); count++)
+    for (int count = 0; count < m_bscansNamesVectorPairs.size(); count++)
     {      
-        emit signalEraseRdgsInfoDataMap(m_rdgsNamesVectorPairs[count].first);
-        m_rdg2dWidget->m_rdgGlWidget->clearSelectedData(m_rdgsNamesVectorPairs[count].first);
+        emit signalEraseBscansInfoDataMap(m_bscansNamesVectorPairs[count].first);
+        m_bscan2dWidget->m_bscanGlWidget->clearSelectedData(m_bscansNamesVectorPairs[count].first);
     }
 
-    m_rdgsNamesVectorPairs.clear();
+    m_bscansNamesVectorPairs.clear();
     createActionsFilesMenu();
 
-    emit signalClearRdgsInfoDataMap();
+    emit signalClearBscansInfoDataMap();
 
-    m_stackedWidget->setCurrentWidget(m_rdg2dWidget);
-    m_rdgCurrentName = "";
-    m_rdg2dWidget->m_rdgGlWidget->m_rdgName = "";
-    enabledShowRdgActions(false);
+    if (m_stackedWidget->currentIndex() > 1) m_stackedWidget->setCurrentWidget(m_bscan2dWidget);
 
-    showRdgImage(true);
-    m_rdgQuantImpulsesLabel->setText("Число отсчетов rdg");
+    m_bscanCurrentName = "";
+    m_bscan2dWidget->m_bscanGlWidget->m_bscanName = "";
+    m_bscan2dWidget->m_accomplishment->m_thread->clearWorkData();
+
+    m_bscanDeep2dWidget->m_bscanDeepGlWidget->m_bscanName = "";
+    enabledShowBscanActions(false);
+
+    showBscanImage(true);
+    m_bscanQuantImpulsesLabel->setText("Число отсчетов ");
+    m_materialLabel->setVisible(false);
     m_materialComboBox->setVisible(false);
-    openScrollHRdgsLengthBar(false);
-    impulsesRdgControlsVisible(false);
-    rdgsTransitControlsVisible(false);
-    enabledCutActions(false, false, false);
 
-    m_rdg2dWidget->m_accomplishment->m_thread->clearWorkData();
+    fixScrollHBscansLengthBar();
+    impulsesBscanControlsVisible(false);
+    bscansTransitControlsVisible(false);
+    enabledCutActions(false, false, false);
 }
 
 void MainWindow::save()
 {
-    if (m_rdgCurrentName != "")
+    if (m_bscanCurrentName != "")
     {
         switch (m_stackedWidget->currentIndex())
         {
             case 0:
             {
-                m_rdg2dWidget->saveRdg();
+                m_bscan2dWidget->saveBscan();
                 break;
             }
             case 1:
             {
-                m_rdgs2dWidget->saveRdgsSurf();
+                m_bscanDeep2dWidget->saveBscanDeep();
                 break;
             }
             case 2:
             {
-                m_rdgs3dWidget->saveRdgsStruct();
+                m_bscans2dWidget->saveBscansSurf();
+                break;
+            }
+            case 3:
+            {
+                m_bscans3dWidget->saveBscansStruct();
                 break;
             }
         }
@@ -838,60 +934,62 @@ void MainWindow::save()
 
 void MainWindow::deleteFile(const std::string& fileName)
 {
-    m_recentRdgsFileActsVector.resize(0);
-    m_deleteRdgsFileActsVector.resize(0);
+    m_recentBscansFileActsVector.resize(0);
+    m_deleteBscansFileActsVector.resize(0);
 
-    emit signalEraseRdgsInfoDataMap(fileName);
+    emit signalEraseBscansInfoDataMap(fileName);
 
-    m_rdg2dWidget->m_rdgGlWidget->clearSelectedData(fileName);
+    m_bscan2dWidget->m_bscanGlWidget->clearSelectedData(fileName);
 
     auto vectorPairsIt = std::find_if(
-        m_rdgsNamesVectorPairs.begin(), m_rdgsNamesVectorPairs.end(), [&](const std::pair<std::string, std::string>& stringPair) { return (stringPair.first == fileName); }
+        m_bscansNamesVectorPairs.begin(), m_bscansNamesVectorPairs.end(), [&](const std::pair<std::string, std::string>& stringPair) { return (stringPair.first == fileName); }
     );
     
-    m_rdgsNamesVectorPairs.erase(vectorPairsIt);
+    m_bscansNamesVectorPairs.erase(vectorPairsIt);
 
-    if (m_rdgsNamesVectorPairs.size()>=0)  createActionsFilesMenu();
+    if (m_bscansNamesVectorPairs.size()>=0)  createActionsFilesMenu();
 
-    if (m_rdgsNamesVectorPairs.size()>1)
+    if (m_bscansNamesVectorPairs.size()>1)
     {
-        if (m_rdgCurrentName == fileName) m_rdgCurrentName = m_rdgsNamesVectorPairs[0].first;
-        if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != fileName)
+        if (m_bscanCurrentName == fileName) m_bscanCurrentName = m_bscansNamesVectorPairs[0].first;
+        if (m_stackedWidget->currentIndex() <= 1 && m_bscanCurrentName != fileName)
         {
-            showRdgImage(true);
-            openScrollHRdgsLengthBar(true);   
+            showBscanImage(true);
+            fixScrollHBscansLengthBar();
         }
 
-        setupRdgsSliderSetup(0, m_rdgsNamesVectorPairs.size());
+        setupBscansSliderSetup(0, m_bscansNamesVectorPairs.size());
 
-        m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData = true;
-        m_rdg2dWidget->m_accomplishment->m_thread->m_nameDeleteRdg     = fileName;
-        m_rdg2dWidget->m_accomplishment->m_thread->m_executeDeleteRdg  = true;
-        m_rdg2dWidget->m_accomplishment->m_thread->start();
+        m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData = true;
+        m_bscan2dWidget->m_accomplishment->m_thread->m_nameDeleteBscan     = fileName;
+        m_bscan2dWidget->m_accomplishment->m_thread->m_executeDeleteBscan  = true;
+        m_bscan2dWidget->m_accomplishment->m_thread->start();
     }
     else
     {
-        m_stackedWidget->setCurrentWidget(m_rdg2dWidget);
-        if (m_rdgsNamesVectorPairs.size() == 1)
+        if (m_stackedWidget->currentIndex()>1) m_stackedWidget->setCurrentWidget(m_bscan2dWidget);
+        if (m_bscansNamesVectorPairs.size() == 1)
         {
-            m_rdgCurrentName = m_rdgsNamesVectorPairs[0].first;
+            m_bscanCurrentName = m_bscansNamesVectorPairs[0].first;
             enabledCutActions(false, false, false);
-            enabledShowRdgActions(true);
+            enabledShowBscanActions(true);
         }
         else
         {
-            m_rdgCurrentName = "";
-            m_rdg2dWidget->m_rdgGlWidget->m_rdgName = "";
-            enabledShowRdgActions(false);
+            m_bscanCurrentName = "";
+            m_bscan2dWidget->m_bscanGlWidget->m_bscanName = "";
+            m_bscanDeep2dWidget->m_bscanDeepGlWidget->m_bscanName = "";
+            enabledShowBscanActions(false);
+            m_materialLabel->setVisible(false);
             m_materialComboBox->setVisible(false);
-            m_rdg2dWidget->m_accomplishment->m_thread->clearWorkData();
+            m_bscan2dWidget->m_accomplishment->m_thread->clearWorkData();
         }
 
-        showRdgImage(true);
-        m_rdgQuantImpulsesLabel->setText("Число отсчетов rdg");
-        openScrollHRdgsLengthBar(false);
-        impulsesRdgControlsVisible(false);
-        rdgsTransitControlsVisible(false);
+        showBscanImage(true);
+        m_bscanQuantImpulsesLabel->setText("Число отсчетов ");
+        fixScrollHBscansLengthBar();
+        impulsesBscanControlsVisible(false);
+        bscansTransitControlsVisible(false);
         enabledCutActions(false, false, false);
     }
 }
@@ -901,10 +999,25 @@ void MainWindow::closeEvent(QCloseEvent *event)
     event->accept();
 }
 
-void MainWindow::showRdgImage(bool changeRdg)
+void MainWindow::showBscanImage(bool changeBscan)
 {
-    if (changeRdg == true) resetRdgSelection(false);
-    m_rdg2dWidget->outputNewImage(m_rdgCurrentName, m_materialId, m_filterId, m_selectionId);
+    if (changeBscan == true) resetBscanSelection(false);
+    else
+    {
+        m_bscan2dWidget->outputNewImage(m_bscanCurrentName, m_materialId, m_filterId, m_selectionId);
+        if (m_bscanCurrentName != "")
+        {
+            std::cout<<"m_bscanDeep2dWidget->outputNewImage"<<std::endl;
+            m_bscanDeep2dWidget->outputNewImage(
+                m_bscanCurrentName, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName], m_materialId, m_filterId, m_selectionId
+            );
+        }
+        else
+        {
+            std::cout<<"m_bscanDeep2dWidget->outputEmptyImage();"<<std::endl;
+            m_bscanDeep2dWidget->outputEmptyImage();
+        }
+    }
 }
 
 void MainWindow::setCloseSection2dAction()
@@ -924,8 +1037,8 @@ void MainWindow::saveBoundPointsLineAction()
     QString saveBoundPointsLinePointsFile = QFileDialog::getSaveFileName(this, tr("Save As"), "cutLinePointsFile", tr("CSV File(*.csv);"));
     if (saveBoundPointsLinePointsFile != "")
     {
-        if      (m_stackedWidget->currentIndex() == 1) m_rdgs2dWidget->saveBoundPointsLineAction(saveBoundPointsLinePointsFile);
-        else if (m_stackedWidget->currentIndex() == 2) m_rdgs3dWidget->saveBoundPointsLineAction(saveBoundPointsLinePointsFile);
+        if      (m_stackedWidget->currentIndex() == 2) m_bscans2dWidget->saveBoundPointsLineAction(saveBoundPointsLinePointsFile);
+        else if (m_stackedWidget->currentIndex() == 3) m_bscans3dWidget->saveBoundPointsLineAction(saveBoundPointsLinePointsFile);
     }
 }
 
@@ -934,104 +1047,104 @@ void MainWindow::loadBoundPointsLineAction()
     QString loadBoundPointsLinePointsFile = QFileDialog::getOpenFileName(this, tr("Open csv file"), "cutLinePointsFile", tr("CSV File(*.csv);"));
     if (loadBoundPointsLinePointsFile != "")
     {
-        if      (m_stackedWidget->currentIndex() == 1)  m_rdgs2dWidget->loadBoundPointsLineAction(loadBoundPointsLinePointsFile);
-        else if (m_stackedWidget->currentIndex() == 2)  m_rdgs3dWidget->loadBoundPointsLineAction(loadBoundPointsLinePointsFile);
+        if      (m_stackedWidget->currentIndex() == 2)  m_bscans2dWidget->loadBoundPointsLineAction(loadBoundPointsLinePointsFile);
+        else if (m_stackedWidget->currentIndex() == 3)  m_bscans3dWidget->loadBoundPointsLineAction(loadBoundPointsLinePointsFile);
     }
 }
 
 void MainWindow::createActionsFilesMenu()
 {
-    m_recentFilesRdgMenu->clear();
-    m_deleteFilesRdgMenu->clear();
+    m_recentFilesBscanMenu->clear();
+    m_deleteFilesBscanMenu->clear();
 
-    std::vector<std::string> rdgsNamesVector;
-    rdgsNamesVector.resize(0);
-    for (int count = 0; count < m_rdgsNamesVectorPairs.size(); count++)
+    std::vector<std::string> bscansNamesVector;
+    bscansNamesVector.resize(0);
+    for (int count = 0; count < m_bscansNamesVectorPairs.size(); count++)
     {
-        rdgsNamesVector.push_back(m_rdgsNamesVectorPairs[count].first);
+        bscansNamesVector.push_back(m_bscansNamesVectorPairs[count].first);
     }
-    std::sort(rdgsNamesVector.begin(), rdgsNamesVector.end());
+    std::sort(bscansNamesVector.begin(), bscansNamesVector.end());
 
-    m_recentRdgsFileActsVector.resize(rdgsNamesVector.size());
-    m_deleteRdgsFileActsVector.resize(rdgsNamesVector.size());
+    m_recentBscansFileActsVector.resize(bscansNamesVector.size());
+    m_deleteBscansFileActsVector.resize(bscansNamesVector.size());
 
-    for (int i = 0; i < m_recentRdgsFileActsVector.size(); i++)
+    for (int i = 0; i < m_recentBscansFileActsVector.size(); i++)
     {
-        m_recentRdgsFileActsVector[i] =
-        m_recentFilesRdgMenu         ->addAction(QString::fromStdString(rdgsNamesVector[i]), this, &MainWindow::openRecentFile);
-        m_recentRdgsFileActsVector[i]->  setData(QString::fromStdString(rdgsNamesVector[i]));
-        m_recentRdgsFileActsVector[i]->setVisible(true);
+        m_recentBscansFileActsVector[i] =
+        m_recentFilesBscanMenu         ->addAction(QString::fromStdString(bscansNamesVector[i]), this, &MainWindow::openRecentFile);
+        m_recentBscansFileActsVector[i]->  setData(QString::fromStdString(bscansNamesVector[i]));
+        m_recentBscansFileActsVector[i]->setVisible(true);
 
-        m_deleteRdgsFileActsVector[i] =
-        m_deleteFilesRdgMenu         ->addAction(QString::fromStdString(rdgsNamesVector[i]), this, &MainWindow::deleteSelectedFile);
-        m_deleteRdgsFileActsVector[i]->  setData(QString::fromStdString(rdgsNamesVector[i]));
-        m_deleteRdgsFileActsVector[i]->setVisible(true);
+        m_deleteBscansFileActsVector[i] =
+        m_deleteFilesBscanMenu         ->addAction(QString::fromStdString(bscansNamesVector[i]), this, &MainWindow::deleteSelectedFile);
+        m_deleteBscansFileActsVector[i]->  setData(QString::fromStdString(bscansNamesVector[i]));
+        m_deleteBscansFileActsVector[i]->setVisible(true);
     }
 
-    writeLastNamesRdgsToSettings(m_rdgsNamesVectorPairs);
+    writeLastNamesBscansToSettings(m_bscansNamesVectorPairs);
 }
 
-void MainWindow::receiveRdgsWorkData()
+void MainWindow::receiveBscansWorkData()
 {
-    m_rdg2dWidget->accomplishmentThreadTerminate();
+    m_bscan2dWidget->accomplishmentThreadTerminate();
 
-    if (m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.vectorRdgsInRelief.size() == 0)
+    if (m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.vectorBscansInRelief.size() == 0)
     {
-        rdgImpulsesSliderActivate();
-        m_resetSectPoints2dRdgs = true;
-        m_resetCutPointsRdgs = true;
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+        bscanImpulsesSliderActivate();
+        m_resetSectPoints2dBscans = true;
+        m_resetCutPointsBscans = true;
+        outputBscansData(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
             m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
         );
     }
     else
     {
-        m_rdg2dWidget->m_accomplishment->m_thread->m_defRdgsFnRelief = true;
-        m_rdg2dWidget->m_accomplishment->m_thread->m_executeParserData = true;
-        m_rdg2dWidget->m_accomplishment->m_thread->start();
+        m_bscan2dWidget->m_accomplishment->m_thread->m_defBscansFnRelief = true;
+        m_bscan2dWidget->m_accomplishment->m_thread->m_executeParserData = true;
+        m_bscan2dWidget->m_accomplishment->m_thread->start();
     }
 }
 
-void MainWindow::receiveRdgsZData()
+void MainWindow::receiveBscansZData()
 {
-    m_rdg2dWidget->m_accomplishment->m_thread->m_defRdgsFnRelief = false;
-    m_rdg2dWidget->accomplishmentThreadTerminate();
+    m_bscan2dWidget->m_accomplishment->m_thread->m_defBscansFnRelief = false;
+    m_bscan2dWidget->accomplishmentThreadTerminate();
 
-    rdgImpulsesSliderActivate();
-    m_resetSectPoints2dRdgs = true;
-    m_resetCutPointsRdgs = true;
-    outputRdgsData(
-        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+    bscanImpulsesSliderActivate();
+    m_resetSectPoints2dBscans = true;
+    m_resetCutPointsBscans = true;
+    outputBscansData(
+        m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
         m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
     );
 }
 
-void MainWindow::outputRdgsData(
-    const std::map<std::string, st_rdgInfoData>& rdgsInfoDataMap, const st_rdgsWorkData&  rdgsWorkData,
+void MainWindow::outputBscansData(
+    const std::map<std::string, st_bscanInfoData>& bscansInfoDataMap, const st_bscansWorkData&  bscansWorkData,
     int maxQuantImpulsesOfPacket, int quantImpulsesOfPacket, int filterId, int selectionId
 )
 {
-    int absRdgsStructInX {0};
-    int absRdgsStructFnX {0};
+    int absBscansStructInX {0};
+    int absBscansStructFnX {0};
 
-    if (m_stackedWidget->currentIndex() == 1)
+    if (m_stackedWidget->currentIndex() == 2)
     {
-        defAbsRdgsStructInXAndFnX(absRdgsStructInX, absRdgsStructFnX);
-        m_rdgs2dWidget->showRdgsSurf(
-            rdgsInfoDataMap, rdgsWorkData, quantImpulsesOfPacket, filterId, selectionId,
-            m_highLowOnRdg, m_showFullRdgs, m_resetSectPoints2dRdgs, m_materialId, absRdgsStructInX, absRdgsStructFnX
+        defAbsBscansStructInXAndFnX(absBscansStructInX, absBscansStructFnX);
+        m_bscans2dWidget->showBscansSurf(
+            bscansInfoDataMap, bscansWorkData, quantImpulsesOfPacket, filterId, selectionId,
+            m_highLowOnBscan, m_showFullBscans, m_resetSectPoints2dBscans, m_materialId, absBscansStructInX, absBscansStructFnX
         );
-        if (m_resetSectPoints2dRdgs == true) m_resetSectPoints2dRdgs = false;
+        if (m_resetSectPoints2dBscans == true) m_resetSectPoints2dBscans = false;
     }
-    else if (m_stackedWidget->currentIndex() == 2)
+    else if (m_stackedWidget->currentIndex() == 3)
     {
-        defAbsRdgsStructInXAndFnX(absRdgsStructInX, absRdgsStructFnX);
-        m_rdgs3dWidget->showRdgsImage(
-            rdgsInfoDataMap, rdgsWorkData,  maxQuantImpulsesOfPacket, quantImpulsesOfPacket, filterId, selectionId,
-            m_highLowOnRdg, m_showFullRdgs, m_resetCutPointsRdgs, m_materialId, absRdgsStructInX, absRdgsStructFnX
+        defAbsBscansStructInXAndFnX(absBscansStructInX, absBscansStructFnX);
+        m_bscans3dWidget->showBscansImage(
+            bscansInfoDataMap, bscansWorkData,  maxQuantImpulsesOfPacket, quantImpulsesOfPacket, filterId, selectionId,
+            m_highLowOnBscan, m_showFullBscans, m_resetCutPointsBscans, m_materialId, absBscansStructInX, absBscansStructFnX
         );
-        if (m_resetCutPointsRdgs == true) m_resetCutPointsRdgs = false;
+        if (m_resetCutPointsBscans == true) m_resetCutPointsBscans = false;
     }
 }
 
@@ -1044,244 +1157,285 @@ void MainWindow::enabledCutActions(bool enabled2d, bool enabled3d, bool enabledS
 
     if (enabled2d == true  || enabled3d == true)
     {
-        m_highLowImpulsesRdgsAction->setEnabled(true);
-        m_showFullRdgsAction       ->setEnabled(true);
+        m_highLowImpulsesBscansAction->setEnabled(true);
+        m_showFullBscansAction       ->setEnabled(true);
     }
     else
     {
-        m_highLowImpulsesRdgsAction->setEnabled(false);
-        m_showFullRdgsAction       ->setEnabled(false);
+        m_highLowImpulsesBscansAction->setEnabled(false);
+        m_showFullBscansAction       ->setEnabled(false);
     }
 }
 
-void MainWindow::enabledShowRdgActions(bool enabled)
+void MainWindow::enabledShowBscanActions(bool enabled)
 {
-    m_showInitRdgAct->setEnabled(enabled);
-    m_showLogRdgAct->setEnabled(enabled);
-    if (m_stackedWidget->currentIndex() == 2)
+    m_showInitBscanAct->setEnabled(enabled);
+    m_showLogBscanAct->setEnabled(enabled);
+    if (m_stackedWidget->currentIndex() == 3)
     {
-        m_logRdgMouseSelectionAct->setEnabled(!enabled);
-        m_logRdgAutoSelectionAct->setEnabled(!enabled);
-        m_showInitRdgSelectionAct->setEnabled(!enabled);
-        m_resetRdgSelectionAct->setEnabled(!enabled);
-        m_saveRdgAutoSelectionDataAct->setEnabled(!enabled);
-        m_loadRdgAutoSelectionDataAct->setEnabled(!enabled);
+        m_logBscanMouseSelectionAct->setEnabled(!enabled);
+        m_logBscanAutoSelectionAct->setEnabled(!enabled);
+        m_showInitBscanSelectionAct->setEnabled(!enabled);
+        m_resetBscanSelectionAct->setEnabled(!enabled);
+        m_saveBscanAutoSelectionDataAct->setEnabled(!enabled);
+        m_loadBscanAutoSelectionDataAct->setEnabled(!enabled);
     }
     else
     {
-        m_logRdgMouseSelectionAct->setEnabled(enabled);
-        m_logRdgAutoSelectionAct->setEnabled(enabled);
-        m_showInitRdgSelectionAct->setEnabled(enabled);
-        m_resetRdgSelectionAct->setEnabled(enabled);
-        m_saveRdgAutoSelectionDataAct->setEnabled(enabled);
-        m_loadRdgAutoSelectionDataAct->setEnabled(enabled);
+        m_logBscanMouseSelectionAct->setEnabled(enabled);
+        m_logBscanAutoSelectionAct->setEnabled(enabled);
+        m_showInitBscanSelectionAct->setEnabled(enabled);
+        m_resetBscanSelectionAct->setEnabled(enabled);
+        m_saveBscanAutoSelectionDataAct->setEnabled(enabled);
+        m_loadBscanAutoSelectionDataAct->setEnabled(enabled);
     }
 }
 
-void MainWindow::rdgImpulsesSliderActivate()
+void MainWindow::bscanImpulsesSliderActivate()
 {
-    m_rdgImpulsesSliderActivate = true;
-    defMaxQuantImpulsesOfPacket(m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_maxQuantImpulsesOfPacket);
+    m_bscanImpulsesSliderActivate = true;
+    defMaxQuantImpulsesOfPacket(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap, m_maxQuantImpulsesOfPacket);
     m_quantImpulsesOfPacket = m_maxQuantImpulsesOfPacket-1;
 
-    m_rdgQuantImpulsesSlider->setRange(1, m_maxQuantImpulsesOfPacket-1);
-    m_rdgQuantImpulsesSlider->setValue(m_quantImpulsesOfPacket);
-    m_rdgQuantImpulsesSlider->setSingleStep(1);
-    m_rdgQuantImpulsesSlider->setTickPosition(QSlider::TicksRight);
-    m_rdgQuantImpulsesLabel->setText("Число отсчетов rdg " + QString::number(m_quantImpulsesOfPacket) + " .");
+    m_bscanQuantImpulsesSlider->setRange(1, m_maxQuantImpulsesOfPacket-1);
+    m_bscanQuantImpulsesSlider->setValue(m_quantImpulsesOfPacket);
+    m_bscanQuantImpulsesSlider->setSingleStep(1);
+    m_bscanQuantImpulsesSlider->setTickPosition(QSlider::TicksRight);
+    m_bscanQuantImpulsesLabel->setText("Число отсчетов " + QString::number(m_quantImpulsesOfPacket) + " .");
 }
 
 void MainWindow::setQuantImpulsesOfPacketSlider(int quantImpulsesOfPacket)
 {
-    if (m_rdgImpulsesSliderActivate == false)
+    if (m_bscanImpulsesSliderActivate == false)
     {
         m_quantImpulsesOfPacket = quantImpulsesOfPacket;
-        m_rdgQuantImpulsesLabel->setText("Число отсчетов rdg " + QString::number(m_quantImpulsesOfPacket) + " .");
+        m_bscanQuantImpulsesLabel->setText("Число отсчетов " + QString::number(m_quantImpulsesOfPacket) + " .");
 
-        m_resetSectPoints2dRdgs = false;
-        m_resetCutPointsRdgs = false;
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+        m_resetSectPoints2dBscans = false;
+        m_resetCutPointsBscans = false;
+        outputBscansData(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+            m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
             m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
         );
-        m_resetSectPoints2dRdgs = true;
-        m_resetCutPointsRdgs = true;
+        m_resetSectPoints2dBscans = true;
+        m_resetCutPointsBscans = true;
     }
-    else  m_rdgImpulsesSliderActivate = false;
+    else  m_bscanImpulsesSliderActivate = false;
 }
 
-void MainWindow::changeHighLowOnRdgs()
+void MainWindow::changeHighLowOnBscans()
 {
-    if (m_stackedWidget->currentIndex() > 0)
+    if (m_stackedWidget->currentIndex() > 1)
     {
-        if (m_highLowImpulsesRdgsAction->isChecked() == false) m_highLowOnRdg = false;  else m_highLowOnRdg = true;
-        m_resetSectPoints2dRdgs = false;
-        m_resetCutPointsRdgs = false;
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+        if (m_highLowImpulsesBscansAction->isChecked() == false) m_highLowOnBscan = false;  else m_highLowOnBscan = true;
+        m_resetSectPoints2dBscans = false;
+        m_resetCutPointsBscans = false;
+        outputBscansData(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+            m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
             m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
         );
-        m_resetSectPoints2dRdgs = true;
-        m_resetCutPointsRdgs = true;
+        m_resetSectPoints2dBscans = true;
+        m_resetCutPointsBscans = true;
     }
 }
 
-void MainWindow::showFullRdgsData()
+void MainWindow::showFullBscansData()
 {
-    if (m_stackedWidget->currentIndex() > 0)
+    if (m_stackedWidget->currentIndex() > 1)
     {
-        if (m_showFullRdgsAction->isChecked() == false) m_showFullRdgs = false;  else m_showFullRdgs = true;
+        m_showFullBscans = m_showFullBscansAction->isChecked();
 
-        m_resetSectPoints2dRdgs = false;
-        m_resetCutPointsRdgs = false;
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
-            m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
-        );
+        m_resetSectPoints2dBscans = false;
+        m_resetCutPointsBscans = false;
 
-        openScrollHRdgsLengthBar(true);
-        moveOnAnyRdgsImage(limitRdgWidth-1);
+        int bscansSurfWidth    = m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfWidth   ;
+        int bscansSurfWidthMin = m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfMinWidth;
 
-        m_resetSectPoints2dRdgs = true;
-        m_resetCutPointsRdgs = true;
+        if (m_showFullBscans)
+        {
+            if (bscansSurfWidth > limitBscanWidth)
+            {
+                setupScrollHBscansLengthBarData(limitBscanWidth-1, limitBscanWidth-1, bscansSurfWidth-1);
+            }
+            else
+            {
+                setupScrollHBscansLengthBarData(0,                 0,                 0);
+                outputBscansData(
+                    m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                    m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
+                    m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
+                );
+            }
+        }
+        else if (!m_showFullBscans)
+        {
+            if (bscansSurfWidthMin > limitBscanWidth)
+            {
+                setupScrollHBscansLengthBarData(limitBscanWidth-1, limitBscanWidth-1, bscansSurfWidthMin-1);
+            }
+            else
+            {
+                setupScrollHBscansLengthBarData(0,                 0,                 0);
+                outputBscansData(
+                    m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                    m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
+                    m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
+                );
+            }
+        }
+
+        m_resetSectPoints2dBscans = true;
+        m_resetCutPointsBscans = true;
     }
 }
 
-void MainWindow::setInitRdg()
+void MainWindow::setInitBscan()
 {
-    m_rdg2dWidget->setShowLogRdg(false);
-    m_rdgs3dWidget->setShowLogRdgsTrans(false);
-    if      (m_stackedWidget->currentIndex() == 0) showRdgImage(false);
-    else if (m_stackedWidget->currentIndex() == 2) m_rdgs3dWidget->representRdgsTransGlWidget(
-        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData
+    m_bscan2dWidget->setShowLogBscan(false);
+    m_bscans3dWidget->setShowLogBscansTrans(false);
+    if      (m_stackedWidget->currentIndex() == 0)
+    {
+        showBscanImage(false);
+    }
+    else if (m_stackedWidget->currentIndex() == 3) m_bscans3dWidget->representBscansTransGlWidget(
+        m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+        m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData
     );
 }
 
-void MainWindow::setLogRdg()
+void MainWindow::setLogBscan()
 {
-    m_rdg2dWidget->setShowLogRdg(true);
-    m_rdgs3dWidget->setShowLogRdgsTrans(true);
-    if (m_stackedWidget->currentIndex() == 0) showRdgImage(false);
-    else if (m_stackedWidget->currentIndex() == 2) m_rdgs3dWidget->representRdgsTransGlWidget(
-        m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData
+    m_bscan2dWidget->setShowLogBscan(true);
+    m_bscans3dWidget->setShowLogBscansTrans(true);
+    if (m_stackedWidget->currentIndex() == 0)
+    {
+        showBscanImage(false);
+    }
+    else if (m_stackedWidget->currentIndex() == 3) m_bscans3dWidget->representBscansTransGlWidget(
+        m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+        m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData
     );
 }
 
-void MainWindow::setLogRdgMouseSelection()
+void MainWindow::setLogBscanMouseSelection()
 {
-    m_rdg2dWidget->setLogRdgMouseSelection(m_logRdgMouseSelectionAct->isChecked());
-    if (m_logRdgAutoSelectionAct->isChecked())
+    m_bscan2dWidget->setLogBscanMouseSelection(m_logBscanMouseSelectionAct->isChecked());
+    if (m_logBscanAutoSelectionAct->isChecked())
     {
-        m_rdg2dWidget->settingsRdgSelection(false, false, m_rdgCurrentName);
-        m_logRdgAutoSelectionAct->setChecked(false);
+        m_bscan2dWidget->settingsBscanSelection(false, false, m_bscanCurrentName);
+        m_logBscanAutoSelectionAct->setChecked(false);
     }
-    closeInitRdgSelection();
+    closeInitBscanSelection();
 }
 
-void MainWindow::setLogRdgAutoSelection()
+void MainWindow::setLogBscanAutoSelection()
 {
-    m_rdg2dWidget->settingsRdgSelection(m_logRdgAutoSelectionAct->isChecked(), false, m_rdgCurrentName);
-    if (m_logRdgMouseSelectionAct->isChecked())
+    m_bscan2dWidget->settingsBscanSelection(m_logBscanAutoSelectionAct->isChecked(), false, m_bscanCurrentName);
+    if (m_logBscanMouseSelectionAct->isChecked())
     {
-        m_rdg2dWidget->setLogRdgMouseSelection(false);
-        m_logRdgMouseSelectionAct->setChecked(false);
+        m_bscan2dWidget->setLogBscanMouseSelection(false);
+        m_logBscanMouseSelectionAct->setChecked(false);
     }
-    closeInitRdgSelection();
+    closeInitBscanSelection();
 }
 
-void MainWindow::setShowInitRdgSelection()
+void MainWindow::setShowInitBscanSelection()
 {
-    m_rdg2dWidget->setShowInitRdgSelection(m_showInitRdgSelectionAct->isChecked());
-    showRdgImage(false);
+    m_bscan2dWidget->setShowInitBscanSelection(m_showInitBscanSelectionAct->isChecked());
+    showBscanImage(false);
 }
 
-void MainWindow::slotResetRdgSelection()
+void MainWindow::slotResetBscanSelection()
 {
-    resetRdgSelection(true);
+    resetBscanSelection(true);
 }
 
-void MainWindow::resetRdgSelection(bool clearSelectRdgPoints)
+void MainWindow::resetBscanSelection(bool clearSelectBscanPoints)
 {
-    m_rdg2dWidget->resetRdgSelection(clearSelectRdgPoints, m_rdgCurrentName);
-    if (m_showInitRdgSelectionAct->isChecked())
+    m_bscan2dWidget->resetBscanSelection(clearSelectBscanPoints, m_bscanCurrentName);
+
+    if (m_showInitBscanSelectionAct->isChecked())
     {
-        m_showInitRdgSelectionAct->setChecked(false);
-        m_rdg2dWidget->setShowInitRdgSelection(false);
+        m_showInitBscanSelectionAct->setChecked(false);
+        m_bscan2dWidget->setShowInitBscanSelection(false);
     }
-    if (m_logRdgMouseSelectionAct->isChecked())
+    if (m_logBscanMouseSelectionAct->isChecked())
     {
-        m_logRdgMouseSelectionAct->setChecked(false);
-        m_rdg2dWidget->setLogRdgMouseSelection(false);
+        m_logBscanMouseSelectionAct->setChecked(false);
+        m_bscan2dWidget->setLogBscanMouseSelection(false);
     }
-    if (m_logRdgAutoSelectionAct->isChecked()){  m_logRdgAutoSelectionAct->setChecked(false); }
-    showRdgImage(false);
+    if (m_logBscanAutoSelectionAct->isChecked()){  m_logBscanAutoSelectionAct->setChecked(false); }
+
+    showBscanImage(false);
 }
 
-void MainWindow::closeInitRdgSelection()
+void MainWindow::closeInitBscanSelection()
 {
-    m_showInitRdgSelectionAct->setChecked(false);
-    setShowInitRdgSelection();
+    m_showInitBscanSelectionAct->setChecked(false);
+    setShowInitBscanSelection();
 }
 
-void MainWindow::impulsesRdgControlsVisible(bool visible)
+void MainWindow::impulsesBscanControlsVisible(bool visible)
 {
-    m_rdgQuantImpulsesLabel->setVisible(visible);
-    m_rdgQuantImpulsesSlider->setVisible(visible);
+    m_bscanQuantImpulsesLabel->setVisible(visible);
+    m_bscanQuantImpulsesSlider->setVisible(visible);
 }
 
-void MainWindow::rdgsTransitControlsVisible(bool visible)
+void MainWindow::bscansTransitControlsVisible(bool visible)
 {
-    m_rdgsTransitLabel->setVisible(visible);
-    m_rdgsTransitSlider->setVisible(visible);
-    m_leftRdgsTransitButton->setVisible(visible);
-    m_rightRdgsTransitButton->setVisible(visible);
+    m_bscansTransitLabel->setVisible(visible);
+    m_bscansTransitSlider->setVisible(visible);
+    m_leftBscansTransitButton->setVisible(visible);
+    m_rightBscansTransitButton->setVisible(visible);
 }
 
-void MainWindow::saveRdgAutoSelectionData()
+void MainWindow::saveBscanAutoSelectionData()
 {
-    QString saveRdgAutoSelectionDataFile = QFileDialog::getSaveFileName(this, tr("Save As"), "rdgAutoSelectionData", tr("CSV File(*.csv);"));
-    if (saveRdgAutoSelectionDataFile != "")   m_rdg2dWidget->saveRdgAutoSelectionData(saveRdgAutoSelectionDataFile);
+    QString saveBscanAutoSelectionDataFile = QFileDialog::getSaveFileName(this, tr("Save As"), "bscanAutoSelectionData", tr("CSV File(*.csv);"));
+    if (saveBscanAutoSelectionDataFile != "")   m_bscan2dWidget->saveBscanAutoSelectionData(saveBscanAutoSelectionDataFile);
 }
 
-void MainWindow::loadRdgAutoSelectionData()
+void MainWindow::loadBscanAutoSelectionData()
 {
-    QString loadRdgAutoSelectionDataFile = QFileDialog::getOpenFileName(this, tr("Open csv file"), "", tr("CSV File(*.csv);"));
-    if (loadRdgAutoSelectionDataFile != "" && m_rdgCurrentName != "") m_rdg2dWidget->loadRdgAutoSelectionData(loadRdgAutoSelectionDataFile, m_rdgCurrentName);
+    QString loadBscanAutoSelectionDataFile = QFileDialog::getOpenFileName(this, tr("Open csv file"), "", tr("CSV File(*.csv);"));
+    if (loadBscanAutoSelectionDataFile != "" && m_bscanCurrentName != "") m_bscan2dWidget->loadBscanAutoSelectionData(loadBscanAutoSelectionDataFile, m_bscanCurrentName);
 }
 
 void MainWindow::materialIdChanged(int materialId)
 {
     m_materialId = materialId;
-
-
-    if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != "")  showRdgImage(false);
-    else if (m_stackedWidget->currentIndex() > 0 && m_recentRdgsFileActsVector.size() > 1)
+    if (m_stackedWidget->currentIndex() <= 1 && m_bscanCurrentName != "")  showBscanImage(false);
+    else if (m_stackedWidget->currentIndex() > 1 && m_recentBscansFileActsVector.size() > 1)
     {
-        scrollHRdgsLengthBarResetDataAtRdgsImages();
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+        scrollHBscansLengthBarResetDataAtBscansImages();
+        outputBscansData(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+            m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
             m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
         );
     }
 }
 
-void MainWindow::includeFilterOnRdg()
+void MainWindow::includeFilterOnBscan()
 {
-    if (m_includeFilterOnRdgAction->isChecked()) m_filterId = 1;
-    else                                         m_filterId = 0;
+    if (m_includeFilterOnBscanAction->isChecked()) m_filterId = 1;
+    else                                           m_filterId = 0;
 
-    if (m_stackedWidget->currentIndex() == 0 && m_rdgCurrentName != "")    showRdgImage(false);
-    else if (m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap.size()>1)
+    if      (m_stackedWidget->currentIndex() <=1 && m_bscanCurrentName != "")    showBscanImage(false);
+    else if (m_stackedWidget->currentIndex() > 1 && m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap.size()>1)
     {
-        scrollHRdgsLengthBarResetDataAtRdgsImages();
-        outputRdgsData(
-            m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+        scrollHBscansLengthBarResetDataAtBscansImages();
+        outputBscansData(
+            m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+            m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
             m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
         );
     }
 }
 
-void MainWindow::useSelectionOnRdg()
+void MainWindow::useSelectionOnBscan()
 {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
     {
@@ -1309,12 +1463,19 @@ void MainWindow::useSelectionOnRdg()
             m_useAutoSelectionAct->setChecked(true);
         }
 
-        if (m_stackedWidget->currentIndex() == 0)
-            m_rdg2dWidget->outputNewImage(m_rdgCurrentName, m_materialId, m_filterId, m_selectionId);
+        if (m_stackedWidget->currentIndex() <= 1)
+        {
+            m_bscan2dWidget->outputNewImage(m_bscanCurrentName, m_materialId, m_filterId, m_selectionId);
+            m_bscanDeep2dWidget->outputNewImage(
+                m_bscanCurrentName, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName],
+                m_materialId, m_filterId, m_selectionId
+            );
+        }
         else
         {
-            outputRdgsData(
-                m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
+            outputBscansData(
+                m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
                 m_maxQuantImpulsesOfPacket, m_quantImpulsesOfPacket, m_filterId, m_selectionId
             );
         }
@@ -1323,248 +1484,274 @@ void MainWindow::useSelectionOnRdg()
     }
 }
 
-void MainWindow::setupScalingOnRdg()
+void MainWindow::setupScalingOnBscan()
 {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
     {
-        int   typeRdgScaling {0};
-        if (action->data().toString().toStdString()      == "all rdg scaling")
+        int   typeScaling {0};
+        if (action->data().toString().toStdString()      == "all bscan scaling")
         {
-            typeRdgScaling = 0;
-            m_rdgAllScalingAct->setChecked(true);
-            m_rdgHScalingAct->setChecked(false);
-            m_rdgVScalingAct->setChecked(false);
+            typeScaling = 0;
+            m_bscanAllScalingAct->setChecked(true);
+            m_bscanHScalingAct->setChecked(false);
+            m_bscanVScalingAct->setChecked(false);
         }
-        else if (action->data().toString().toStdString() ==  "h rdg scaling")
+        else if (action->data().toString().toStdString() ==  "h bscan scaling")
         {
-            typeRdgScaling = 1;
-            m_rdgAllScalingAct->setChecked(false);
-            m_rdgHScalingAct->setChecked(true);
-            m_rdgVScalingAct->setChecked(false);
+            typeScaling = 1;
+            m_bscanAllScalingAct->setChecked(false);
+            m_bscanHScalingAct->setChecked(true);
+            m_bscanVScalingAct->setChecked(false);
         }
-        else if(action->data().toString().toStdString()  == "v rdg scaling")
+        else if(action->data().toString().toStdString()  == "v bscan scaling")
         {
-            typeRdgScaling = 2;
-            m_rdgAllScalingAct->setChecked(false);
-            m_rdgHScalingAct->setChecked(false);
-            m_rdgVScalingAct->setChecked(true);
+            typeScaling = 2;
+            m_bscanAllScalingAct->setChecked(false);
+            m_bscanHScalingAct->setChecked(false);
+            m_bscanVScalingAct->setChecked(true);
         }
-        m_rdg2dWidget->setupRdgScaling(typeRdgScaling);
+        m_bscan2dWidget->setupTypeScaling(typeScaling);
     }
 }
 
-void MainWindow::setupScalingOnRdgsSurf()
+void MainWindow::setupScalingOnBscanDeep()
 {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
     {
-        int   typeRdgsSurfScaling {0};
-        if (action->data().toString().toStdString()      == "all rdgs surf scaling")
+        int   typeScaling {0};
+        if (action->data().toString().toStdString()      == "all bscan deep scaling")
         {
-            typeRdgsSurfScaling = 0;
-            m_rdgsSurfAllScalingAct->setChecked(true);
-            m_rdgsSurfHScalingAct->setChecked(false);
-            m_rdgsSurfVScalingAct->setChecked(false);
+            typeScaling = 0;
+            m_bscanDeepAllScalingAct->setChecked(true);
+            m_bscanDeepHScalingAct->setChecked(false);
+            m_bscanDeepVScalingAct->setChecked(false);
         }
-        else if (action->data().toString().toStdString() ==  "h rdgs surf scaling")
+        else if (action->data().toString().toStdString() ==  "h bscan deep scaling")
         {
-            typeRdgsSurfScaling = 1;
-            m_rdgsSurfAllScalingAct->setChecked(false);
-            m_rdgsSurfHScalingAct->setChecked(true);
-            m_rdgsSurfVScalingAct->setChecked(false);
+            typeScaling = 1;
+            m_bscanDeepAllScalingAct->setChecked(false);
+            m_bscanDeepHScalingAct->setChecked(true);
+            m_bscanDeepVScalingAct->setChecked(false);
         }
-        else if(action->data().toString().toStdString()  == "v rdgs surf scaling")
+        else if(action->data().toString().toStdString()  == "v bscan deep scaling")
         {
-            typeRdgsSurfScaling = 2;
-            m_rdgsSurfAllScalingAct->setChecked(false);
-            m_rdgsSurfHScalingAct->setChecked(false);
-            m_rdgsSurfVScalingAct->setChecked(true);
+            typeScaling = 2;
+            m_bscanDeepAllScalingAct->setChecked(false);
+            m_bscanDeepHScalingAct->setChecked(false);
+            m_bscanDeepVScalingAct->setChecked(true);
         }
+        m_bscanDeep2dWidget->setupTypeScaling(typeScaling);
     }
 }
 
-void MainWindow::setupScalingOnRdgsTrans()
+void MainWindow::setupScalingOnBscansSurf()
 {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
     {
-        int   typeRdgsTransScaling {0};
-        if (action->data().toString().toStdString() == "all rdgs trans scaling")
+        int   typeScaling {0};
+        if (action->data().toString().toStdString()      == "all surf scaling")
         {
-            typeRdgsTransScaling = 0;
-            m_rdgsTransAllScalingAct->setChecked(true);
-            m_rdgsTransHScalingAct->setChecked(false);
-            m_rdgsTransVScalingAct->setChecked(false);
+            typeScaling = 0;
+            m_bscansSurfAllScalingAct->setChecked(true);
+            m_bscansSurfHScalingAct->setChecked(false);
+            m_bscansSurfVScalingAct->setChecked(false);
         }
-        else if (action->data().toString().toStdString() ==  "h rdgs trans scaling")
+        else if (action->data().toString().toStdString() ==  "h surf scaling")
         {
-            typeRdgsTransScaling = 1;
-            m_rdgsTransAllScalingAct->setChecked(false);
-            m_rdgsTransHScalingAct->setChecked(true);
-            m_rdgsTransVScalingAct->setChecked(false);
+            typeScaling = 1;
+            m_bscansSurfAllScalingAct->setChecked(false);
+            m_bscansSurfHScalingAct->setChecked(true);
+            m_bscansSurfVScalingAct->setChecked(false);
         }
-        else if(action->data().toString().toStdString() == "v rdgs trans scaling")
+        else if(action->data().toString().toStdString()  == "v surf scaling")
         {
-            typeRdgsTransScaling = 2;
-            m_rdgsTransAllScalingAct->setChecked(false);
-            m_rdgsTransHScalingAct->setChecked(false);
-            m_rdgsTransVScalingAct->setChecked(true);
+            typeScaling = 2;
+            m_bscansSurfAllScalingAct->setChecked(false);
+            m_bscansSurfHScalingAct->setChecked(false);
+            m_bscansSurfVScalingAct->setChecked(true);
         }
-        m_rdgs3dWidget->setupRdgsTransScaling(typeRdgsTransScaling);
+        m_bscans2dWidget->setupTypeScaling(typeScaling);
     }
 }
 
-void MainWindow::setupRdgsSliderSetup(int rdgId, int rdgsCount)
+void MainWindow::setupScalingOnBscansTrans()
 {
-    m_rdgsTransitSlider->setRange(0, rdgsCount-1);
-    m_rdgsTransitSlider->setSingleStep(1);
-    m_rdgsTransitSlider->setValue(rdgId);
-}
-
-void MainWindow::changeRdg(int rdgId)
-{
-    m_rdg2dWidget->m_dataRdgWidget->m_trackRdgSlider->setValue(0);
-    m_rdgCurrentName = m_rdgsNamesVectorPairs[rdgId].first;
-
-    showRdgImage(true);
-    openScrollHRdgsLengthBar(true);
-}
-
-void MainWindow::leftChangeRdg()
-{
-    int rdgId = m_rdgsTransitSlider->value();
-    if (rdgId-1 >=0)
+    if (const QAction* action = qobject_cast<const QAction*>(sender()))
     {
-        m_rdgsTransitSlider->setValue(rdgId-1);
+        int   typeScaling {0};
+        if (action->data().toString().toStdString() == "all trans scaling")
+        {
+            typeScaling = 0;
+            m_bscansTransAllScalingAct->setChecked(true);
+            m_bscansTransHScalingAct->setChecked(false);
+            m_bscansTransVScalingAct->setChecked(false);
+        }
+        else if (action->data().toString().toStdString() ==  "h trans scaling")
+        {
+            typeScaling = 1;
+            m_bscansTransAllScalingAct->setChecked(false);
+            m_bscansTransHScalingAct->setChecked(true);
+            m_bscansTransVScalingAct->setChecked(false);
+        }
+        else if(action->data().toString().toStdString() == "v trans scaling")
+        {
+            typeScaling = 2;
+            m_bscansTransAllScalingAct->setChecked(false);
+            m_bscansTransHScalingAct->setChecked(false);
+            m_bscansTransVScalingAct->setChecked(true);
+        }
+        m_bscans3dWidget->setupTypeScaling(typeScaling);
     }
 }
 
-void MainWindow::rightChangeRdg()
+void MainWindow::setupBscansSliderSetup(int bscanId, int bscansCount)
 {
-    int rdgId = m_rdgsTransitSlider->value();
-    if (rdgId+1 <= m_rdgsTransitSlider->maximum())
+    m_bscansTransitSlider->setRange(0, bscansCount-1);
+    m_bscansTransitSlider->setSingleStep(1);
+    m_bscansTransitSlider->setValue(bscanId);
+}
+
+void MainWindow::changeBscan(int bscanId)
+{
+    m_bscan2dWidget->m_ascanDataWidget->m_trackSlider->setValue(0);
+    m_bscanCurrentName = m_bscansNamesVectorPairs[bscanId].first;
+
+    m_bscan2dWidget->showNewBscan(m_bscanCurrentName);
+    m_bscanDeep2dWidget->showNewBscanDeep(m_bscanCurrentName, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName]);
+    fixScrollHBscansLengthBar();
+}
+
+void MainWindow::leftChangeBscan()
+{
+    int bscanId = m_bscansTransitSlider->value();
+    if (bscanId-1 >=0)
     {
-        m_rdgsTransitSlider->setValue(rdgId+1);
+        m_bscansTransitSlider->setValue(bscanId-1);
     }
 }
 
-void MainWindow::openScrollHRdgsLengthBar(bool visible)
+void MainWindow::rightChangeBscan()
 {
-    if (visible == false)
+    int bscanId = m_bscansTransitSlider->value();
+    if (bscanId+1 <= m_bscansTransitSlider->maximum())
     {
-        m_labelHRdgsLengthBar->setVisible(visible);
-        m_scrollHRdgsLengthBar->setVisible(visible);
+        m_bscansTransitSlider->setValue(bscanId+1);
     }
-    else if (m_rdgCurrentName != "")
+}
+
+void MainWindow::fixScrollHBscansLengthBar()
+{   
+    setupScrollHBscansLengthBarData(0,                 0,                 0);
+
+    if (m_bscanCurrentName != "")
     {
-        bool changeScrollHRdgsLength = false;
         switch (m_stackedWidget->currentIndex())
         {
             case 0:
-            {
-                int rdgWidth = m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap[m_rdgCurrentName].vectorRdgData.size();
-
-                if (rdgWidth > limitRdgWidth)
-                {
-                    changeScrollHRdgsLength = true;
-                    m_labelHRdgsLengthBar->setVisible(visible);
-                    m_scrollHRdgsLengthBar->setVisible(visible);
-                    setupScrollHRdgsLengthBarData(limitRdgWidth-1, limitRdgWidth-1 , rdgWidth-1);
-                }
-                break;
-            }
             case 1:
-            case 2:
             {
-                int rdgsSurfWidth    = m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfWidth   ;
-                int rdgsSurfWidthMin = m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData.rdgsSurfMinWidth;
-
-                if (m_showFullRdgsAction->isChecked() && (rdgsSurfWidth > limitRdgWidth))
-                {
-                    changeScrollHRdgsLength = true;
-                    m_labelHRdgsLengthBar->setVisible(visible);
-                    m_scrollHRdgsLengthBar->setVisible(visible);
-                    setupScrollHRdgsLengthBarData(limitRdgWidth-1,limitRdgWidth-1, rdgsSurfWidth-1);
-                }
-                else if (rdgsSurfWidthMin > limitRdgWidth)
-                {
-                    changeScrollHRdgsLength = true;
-                    m_labelHRdgsLengthBar->setVisible(visible);
-                    m_scrollHRdgsLengthBar->setVisible(visible);
-                    setupScrollHRdgsLengthBarData(limitRdgWidth-1,limitRdgWidth-1, rdgsSurfWidthMin-1);
-                }
+                int bscanWidth = m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName].vectorBscanData.size();
+                if (bscanWidth > limitBscanWidth)   setupScrollHBscansLengthBarData(limitBscanWidth-1, limitBscanWidth-1, bscanWidth-1);
+                break;
+            }
+            case 2:
+            case 3:
+            {
+                int bscansSurfWidth    = m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfWidth   ;
+                int bscansSurfWidthMin = m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData.bscansSurfMinWidth;
+                if (m_showFullBscansAction->isChecked() == true)
+                    if (bscansSurfWidth > limitBscanWidth) setupScrollHBscansLengthBarData(limitBscanWidth-1, limitBscanWidth-1, bscansSurfWidth-1);
+                else if (m_showFullBscansAction->isChecked() == false)
+                    if (bscansSurfWidthMin > limitBscanWidth)    setupScrollHBscansLengthBarData(limitBscanWidth-1, limitBscanWidth-1, bscansSurfWidthMin-1);
                 break;
             }
         }
-
-        if (changeScrollHRdgsLength == false)
-        {
-            m_labelHRdgsLengthBar->setVisible(false);
-            m_scrollHRdgsLengthBar->setVisible(false);
-        }
     }
 }
 
 
-void MainWindow::setupScrollHRdgsLengthBarData(int minScrollHRdgsLengthBarData, int scrollHRdgsLengthBarData, int maxScrollHRdgsLengthBarData)
+void MainWindow::setupScrollHBscansLengthBarData(int minScrollHBscansLengthBarData, int scrollHBscansLengthBarData, int maxScrollHBscansLengthBarData)
 {
-    m_scrollHRdgsLengthBar->setRange(minScrollHRdgsLengthBarData, maxScrollHRdgsLengthBarData);
-    m_scrollHRdgsLengthBar->setValue(scrollHRdgsLengthBarData);
-    moveOnAnyRdgsImage(scrollHRdgsLengthBarData);
+    m_scrollHBscansLengthBar->setRange(minScrollHBscansLengthBarData, maxScrollHBscansLengthBarData);
+    m_scrollHBscansLengthBar->setValue(scrollHBscansLengthBarData);
+    moveOnAnyBscansImage(scrollHBscansLengthBarData);
 }
 
-void MainWindow::scrollHRdgsLengthBarPressed()
+void MainWindow::scrollHBscansLengthBarPressed()
 {
-    m_scrollHRdgsLengthBarAct = true;
+    m_scrollHBscansLengthBarAct = true;
 }
 
-void MainWindow::scrollHRdgsLengthBarMoved(int scrollHRdgsLengthBarPos)
+void MainWindow::scrollHBscansLengthBarMoved(int scrollHBscansLengthBarPos)
 {
-    m_scrollHRdgsLengthBarPos = scrollHRdgsLengthBarPos;
-    m_scrollHRdgsLengthBarAct = true;
+    m_scrollHBscansLengthBarPos = scrollHBscansLengthBarPos;
+    m_scrollHBscansLengthBarAct = true;
 }
 
-void MainWindow::scrollHRdgsLengthBarReleased()
+void MainWindow::scrollHBscansLengthBarReleased()
 {
-    moveOnAnyRdgsImage(m_scrollHRdgsLengthBarPos);
-    m_scrollHRdgsLengthBarAct = false;
+    moveOnAnyBscansImage(m_scrollHBscansLengthBarPos);
+    m_scrollHBscansLengthBarAct = false;
 }
 
-void MainWindow::scrollHRdgsLengthBarChanged(int scrollHRdgsLengthBarPos)
+void MainWindow::scrollHBscansLengthBarChanged(int scrollHBscansLengthBarPos)
 {
-    m_scrollHRdgsLengthBarPos = scrollHRdgsLengthBarPos;
-    if (m_scrollHRdgsLengthBarAct == false) moveOnAnyRdgsImage(m_scrollHRdgsLengthBarPos);
-}
-
-void MainWindow::moveOnAnyRdgsImage(int scrollHRdgsLengthBarPos)
-{
-    switch (m_stackedWidget->currentIndex())
+    if ( m_scrollHBscansLengthBar->maximum() > 0)
     {
-        case 0:
+        m_scrollHBscansLengthBarPos = scrollHBscansLengthBarPos;
+        if (m_scrollHBscansLengthBarAct == false)
         {
-            m_rdg2dWidget->changeRdgImage(scrollHRdgsLengthBarPos-limitRdgWidth+1, scrollHRdgsLengthBarPos);
-            break;
-        }
-        case 1:
-        case 2:
-        {
-            //обработка логарифмического образа по всем радарограммам (она обязательна)
-            samplingAllLog10Rdgs(
-                m_materialId, m_filterId, m_rdgsNamesVectorPairs, m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap,
-                scrollHRdgsLengthBarPos-limitRdgWidth+1, scrollHRdgsLengthBarPos
-            );
-
-            if (m_stackedWidget->currentIndex() == 1)
-                m_rdgs2dWidget->changeRdgsSurf(
-                    m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
-                    m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnRdg, m_showFullRdgs, m_resetSectPoints2dRdgs,
-                    m_materialId, scrollHRdgsLengthBarPos-limitRdgWidth+1, scrollHRdgsLengthBarPos
-                );
-            else
-                m_rdgs3dWidget->changeRdgsImage(
-                    m_rdg2dWidget->m_accomplishment->m_thread->m_rdgsInfoDataMap, m_rdg2dWidget->m_accomplishment->m_thread->m_st_rdgsWorkData,
-                    m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnRdg,  m_showFullRdgs, true,
-                     m_materialId, scrollHRdgsLengthBarPos-limitRdgWidth+1, scrollHRdgsLengthBarPos
-                );
-            break;
+            moveOnAnyBscansImage(m_scrollHBscansLengthBarPos);
         }
     }
+}
+
+void MainWindow::moveOnAnyBscansImage(int scrollHBscansLengthBarPos)
+{
+    if (m_bscanCurrentName != "" && scrollHBscansLengthBarPos >= limitBscanWidth-1)
+    {
+        switch (m_stackedWidget->currentIndex())
+        {
+            case 0:
+            case 1:
+            {
+                m_bscan2dWidget->changeBscanImage(scrollHBscansLengthBarPos-limitBscanWidth+1, scrollHBscansLengthBarPos);
+                m_bscanDeep2dWidget->changeBscanDeepImage(
+                    m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[m_bscanCurrentName],
+                    scrollHBscansLengthBarPos-limitBscanWidth+1, scrollHBscansLengthBarPos
+                );
+                break;
+            }
+            case 2:
+            case 3:
+            {
+                //обработка логарифмического образа по всем радарограммам (она обязательна)
+                samplingAllLog10Bscans(
+                    m_materialId, m_filterId, m_bscansNamesVectorPairs, m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                    scrollHBscansLengthBarPos-limitBscanWidth+1, scrollHBscansLengthBarPos
+                );
+
+                if (m_stackedWidget->currentIndex() == 2)
+                    m_bscans2dWidget->changeBscansSurf(
+                        m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                        m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
+                        m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnBscan, m_showFullBscans, m_resetSectPoints2dBscans,
+                        m_materialId, scrollHBscansLengthBarPos-limitBscanWidth+1, scrollHBscansLengthBarPos
+                    );
+                else if (m_stackedWidget->currentIndex() == 3)
+                    m_bscans3dWidget->changeBscansImage(
+                        m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap,
+                        m_bscan2dWidget->m_accomplishment->m_thread->m_st_bscansWorkData,
+                        m_quantImpulsesOfPacket, m_filterId, m_selectionId, m_highLowOnBscan,  m_showFullBscans, true,
+                        m_materialId, scrollHBscansLengthBarPos-limitBscanWidth+1, scrollHBscansLengthBarPos
+                    );
+                break;
+            }
+        }
+    }
+}
+
+void MainWindow::slotSetupBscanDeepPageData(const std::string bscanName)
+{
+    emit signalSetupBscanDeepPageData(m_bscan2dWidget->m_accomplishment->m_thread->m_bscansInfoDataMap[bscanName]);
 }

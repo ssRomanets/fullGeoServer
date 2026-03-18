@@ -15,17 +15,17 @@
 accomplishmentThread::accomplishmentThread(QObject* parent)
 {
     m_executeParserData = false;
-    m_rdgsInfoDataMap.clear();
+    m_bscansInfoDataMap.clear();
 }
 
 accomplishmentThread::~accomplishmentThread(){}
 
 void accomplishmentThread::run()
 {
-    std::vector<std::string> rdgNamesVector;
-    rdgNamesVector.resize(0);
-    if (m_rdgsInfoDataMap.size() != 0)
-    for (auto mapIter = m_rdgsInfoDataMap.begin(); mapIter != m_rdgsInfoDataMap.end(); mapIter++) { rdgNamesVector.push_back(mapIter->first);}
+    std::vector<std::string> bscanNamesVector;
+    bscanNamesVector.resize(0);
+    if (m_bscansInfoDataMap.size() != 0)
+    for (auto mapIter = m_bscansInfoDataMap.begin(); mapIter != m_bscansInfoDataMap.end(); mapIter++) { bscanNamesVector.push_back(mapIter->first);}
 
     if (m_executeParserData == false)
     {
@@ -34,9 +34,9 @@ void accomplishmentThread::run()
             for (int count = 0; count <= m_dataTrzList.size()-1; count++)
             {
                 int quantImpulsesOfPacket = (m_dataTrzList[count].size() - m_parserDataTrzVectors[count][m_parserDataTrzVectors[count].size()-1].second-9)/8;
-                int fullRdgTrackCounts    = m_parserDataTrzVectors[count].size();
+                int fullBscanTrackCounts    = m_parserDataTrzVectors[count].size();
 
-                for (int i = 0; i < fullRdgTrackCounts; i++)
+                for (int i = 0; i < fullBscanTrackCounts; i++)
                 {
                     std::string TRZ_HEADER_string;
                     TRZ_HEADER_string = std::string(m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first, 3);
@@ -49,88 +49,75 @@ void accomplishmentThread::run()
 
                     if (antennaExist == true)
                     {
-                        std::string rdgInfoDataKey="";
-                        if (antenna_number< 10)   rdgInfoDataKey = m_fileNameTrzVector[count] + "&&" + "0" + std::to_string(antenna_number);
-                        else                      rdgInfoDataKey = m_fileNameTrzVector[count] + "&&" +       std::to_string(antenna_number);
+                        std::string bscanInfoDataKey="";
+                        if (antenna_number< 10)   bscanInfoDataKey = m_fileNameTrzVector[count] + "&&" + "0" + std::to_string(antenna_number);
+                        else                      bscanInfoDataKey = m_fileNameTrzVector[count] + "&&" +       std::to_string(antenna_number);
 
-                        auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), rdgInfoDataKey) };
-                        if (findingRdg == end(rdgNamesVector))
+                        auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), bscanInfoDataKey) };
+                        if (findingBscan == end(bscanNamesVector))
                         {
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.resize(m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()+1);
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.resize(m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()+1);
 
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].header =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].header =
                             TRZ_HEADER_string.data();
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].version_number     =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].version_number     =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 3));
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].block_count        =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].block_count        =
                             correctInt64TValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 4);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].antennas_working   =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].antennas_working   =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 12));
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].block_step_size_m  =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].block_step_size_m  =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 14);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].antennas_step_size =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].antennas_step_size =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 22);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_step_ns       =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_step_ns       =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 30);
 
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].freq_step_GHz      =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].freq_step_GHz      =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 38);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].freq_begin_GHz     =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].freq_begin_GHz     =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 46);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].freq_end_GHz       =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].freq_end_GHz       =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 54);
 
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].latitude_degree    =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].latitude_degree    =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 62);
 
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].longitude_degree   =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].longitude_degree   =
                             correctDoubleValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first, i, 70);
 
-//                            if (m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1 >= 1)
-//                            {
-//                                std::cout<<
-//                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].latitude_degree -
-//                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-2].latitude_degree
-//                                <<" "
-//                                <<
-//                                   m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].longitude_degree -
-//                                   m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-2].longitude_degree
-//                                <<" "
-//                                <<m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-2<<" "<<m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1<< std::endl;
-//                            }
-
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_hours         =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_hours         =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 78));  // время час
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_minutes       =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_minutes       =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 79));  // время минута
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_seconds       =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_seconds       =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 80));
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_milliseconds  =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_milliseconds  =
                             correctInt16TValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first,  i, 81);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].day                =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].day                =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 83));
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].month              =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].month              =
                             *((int8_t*) (m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].first + 84));  // месяц
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].year               =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].year               =
                             correctInt16TValue(m_dataTrzList[count],   m_parserDataTrzVectors[count][i].first,  i, 85);// год
 
                             std::string SGL_HEADER_string;
                             SGL_HEADER_string = std::string(m_dataTrzList[count].data() + m_parserDataTrzVectors[count][i].second, 3);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].signal_character = SGL_HEADER_string.data();
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].signal_character = SGL_HEADER_string.data();
 
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].begin_signal_index =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].begin_signal_index =
                             correctInt16TValue(m_dataTrzList[count], m_parserDataTrzVectors[count][i].second,  i, 3);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].end_signal_index   =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].end_signal_index   =
                             correctInt16TValue(m_dataTrzList[count], m_parserDataTrzVectors[count][i].second,  i, 5);
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].signal_length      =
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].signal_length      =
                             correctInt16TValue(m_dataTrzList[count], m_parserDataTrzVectors[count][i].second,  i, 7);
 
-                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData.resize(countFilters);
+                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].vectorsDoubleData.resize(countFilters);
                             for (int j=0; j < quantImpulsesOfPacket; j++)
                             {
                                 for (int k = 0; k <= countFilters-1; k++)
                                 {
-                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData[k].
+                                    m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].vectorsDoubleData[k].
                                     push_back(correctDoubleValue(m_dataTrzList[count], m_parserDataTrzVectors[count][i].second, i, 9+8*j)/(double)(k+1));
                                 }
                             }
@@ -142,23 +129,23 @@ void accomplishmentThread::run()
                 }
 
                 //Занимаемся фильтрами и веществами
-                tracingOfDefiningRdgFilterData(rdgNamesVector);
+                tracingOfDefiningBscanFilterData(bscanNamesVector);
                 emit sendProgressData(m_dataTrzList.size(), m_dataTrzList.size()+2+countMaterials);
                 
                 for (int count = 0; count <= countMaterials-1; count++)
                 {
-                    tracingOfDefiningRdgMaterialData(rdgNamesVector, count);
+                    tracingOfDefiningBscanMaterialData(bscanNamesVector, count);
                     emit sendProgressData(m_dataTrzList.size() + count + 1, m_dataTrzList.size()+2+countMaterials);
                 }
 
-                defAdditionalRdgMainData(m_rdgsInfoDataMap, quantImpulsesOfPacket);
+                defAdditionalBscanMainData(m_bscansInfoDataMap, quantImpulsesOfPacket);
                 emit sendProgressData(m_dataTrzList.size()+1+countMaterials, m_dataTrzList.size()+2+countMaterials);
 
-                correctRdgData(m_rdgsInfoDataMap, m_st_rdgsWorkData, m_rdgsNamesVectorPairs, m_fullFileNameTrzVector[count]);
+                correctBscanData(m_bscansInfoDataMap, m_st_bscansWorkData, m_bscansNamesVectorPairs, m_fullFileNameTrzVector[count]);
                 emit sendProgressData(m_dataTrzList.size()+2+countMaterials, m_dataTrzList.size()+2+countMaterials);
             }
 
-            emit signalEndAccThread(m_rdgsNamesVectorPairs, RdgFileFormat::Trz);
+            emit signalEndAccThread(m_bscansNamesVectorPairs, BscanFileFormat::Trz);
         }
 
         if (m_csvDataSampling == true)
@@ -169,7 +156,7 @@ void accomplishmentThread::run()
 
                 if (m_dataPropsCsvList[count].split('\n').size() == m_dataCsvList[count].split('\n').size() + 1)
                 {
-                    std::string rdgInfoDataKey="";
+                    std::string bscanInfoDataKey="";
                     emit sendProgressData(0, m_dataPropsCsvList[count].split('\n').size()+4);
 
                     QFile filePropsCsv(m_fullFileNamePropsCsvVector[count].c_str());
@@ -184,45 +171,45 @@ void accomplishmentThread::run()
                             {
                                 if (line.split(";").size() >=16)
                                 {
-                                    if (rdgInfoDataKey == "")  rdgInfoDataKey = m_fileNameDataCsvVector[count];
+                                    if (bscanInfoDataKey == "")  bscanInfoDataKey = m_fileNameDataCsvVector[count];
 
-                                    auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), rdgInfoDataKey) };
-                                    if (findingRdg == end(rdgNamesVector))
+                                    auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), bscanInfoDataKey) };
+                                    if (findingBscan == end(bscanNamesVector))
                                     {
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.resize(m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()+1);
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.resize(m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()+1);
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].block_count        =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].block_count        =
                                         (line.split(";").at(0)).toInt();
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].block_step_size_m  =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].block_step_size_m  =
                                         (line.split(";").at(1)).toDouble();
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].antennas_step_size =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].antennas_step_size =
                                         (line.split(";").at(3)).toDouble();
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_step_ns       =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_step_ns       =
                                         (line.split(";").at(4)).toDouble();
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_hours         =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_hours         =
                                         (line.split(";").at(7)).toInt();  // время час
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_minutes       =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_minutes       =
                                         (line.split(";").at(8)).toInt();  // время минута
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_seconds       =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_seconds       =
                                         (line.split(";").at(9)).toInt();
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_milliseconds  =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_milliseconds  =
                                         (line.split(";").at(10)).toInt();
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].day                =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].day                =
                                         (line.split(";").at(11)).toInt();
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].month              =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].month              =
                                         (line.split(";").at(12)).toInt();  // месяц
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].year               =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].year               =
                                         (line.split(";").at(13)).toInt();// год
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].latitude_degree    =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].latitude_degree    =
                                         (line.split(";").at(14)).toDouble();
 
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].longitude_degree   =
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].longitude_degree   =
                                         (line.split(";").at(15)).toDouble();
                                     }
                                 }
@@ -231,8 +218,8 @@ void accomplishmentThread::run()
                         }
                     }
 
-                    auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), rdgInfoDataKey) };
-                    if (findingRdg == end(rdgNamesVector))
+                    auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), bscanInfoDataKey) };
+                    if (findingBscan == end(bscanNamesVector))
                     {
                         QFile fileDataCsv(m_fullFileNameDataCsvVector[count].c_str());
                         if (fileDataCsv.open(QFile::ReadOnly | QFile::Text))
@@ -249,10 +236,10 @@ void accomplishmentThread::run()
 
                                     for (int count3 = 0; count3 < quantImpulsesOfPacket; count3++)
                                     {
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[count2].vectorsDoubleData.resize(countFilters);
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[count2].vectorsDoubleData.resize(countFilters);
 
                                         for (int k = 0; k <= countFilters-1; k++)
-                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[count2].vectorsDoubleData[k].push_back((line.split(";").at(count3)).toInt()/(double)(k+1));
+                                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[count2].vectorsDoubleData[k].push_back((line.split(";").at(count3)).toInt()/(double)(k+1));
                                     }
 
                                     emit sendProgressData(count2+1, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
@@ -263,41 +250,41 @@ void accomplishmentThread::run()
                     }
 
                     /////////////////////////////
-                    std::string rdgFilesFullData = m_fullFileNameDataCsvVector[count] + "&&&&" + m_fullFileNamePropsCsvVector[count];
+                    std::string bscanFilesFullData = m_fullFileNameDataCsvVector[count] + "&&&&" + m_fullFileNamePropsCsvVector[count];
 
                     //Занимаемся фильтрами и материалами
-                    tracingOfDefiningRdgFilterData(rdgNamesVector);
+                    tracingOfDefiningBscanFilterData(bscanNamesVector);
                     emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+3, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
                     
                     for (int count1 = 0; count1 <= countMaterials-1; count1++)
                     {
-                        tracingOfDefiningRdgMaterialData(rdgNamesVector, count1);
+                        tracingOfDefiningBscanMaterialData(bscanNamesVector, count1);
                         emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+4+count1, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
                     }
 
-                    defAdditionalRdgMainData(m_rdgsInfoDataMap, quantImpulsesOfPacket);
+                    defAdditionalBscanMainData(m_bscansInfoDataMap, quantImpulsesOfPacket);
                     emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+4+countMaterials, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
 
-                    correctRdgData(m_rdgsInfoDataMap, m_st_rdgsWorkData, m_rdgsNamesVectorPairs, rdgFilesFullData);
+                    correctBscanData(m_bscansInfoDataMap, m_st_bscansWorkData, m_bscansNamesVectorPairs, bscanFilesFullData);
                     emit sendProgressData(m_dataPropsCsvList[count].split('\n').size()+5+countMaterials, m_dataPropsCsvList[count].split('\n').size()+5+countMaterials);
                 }
             }
 
-            emit signalEndAccThread(m_rdgsNamesVectorPairs,  RdgFileFormat::Csv);
+            emit signalEndAccThread(m_bscansNamesVectorPairs,  BscanFileFormat::Csv);
         }
 
         if (m_hdf5DataSampling == true)
         {
-            std::string rdgInfoDataKey =  "";
-            for (int count = 0; count < m_filesRdgNamesHdf5Vectors.size(); count++ )
+            std::string bscanInfoDataKey =  "";
+            for (int count = 0; count < m_filesBscanNamesHdf5Vectors.size(); count++ )
             {
                 int quantImpulsesOfPacket = 0;
-                for (int count1 = 0; count1 < m_filesRdgNamesHdf5Vectors[count].size(); count1++)
+                for (int count1 = 0; count1 < m_filesBscanNamesHdf5Vectors[count].size(); count1++)
                 {
                     try
                     {
                         // Открытие файла
-                        H5::H5File file(m_filesRdgNamesHdf5Vectors[count][count1], H5F_ACC_RDONLY);
+                        H5::H5File file(m_filesBscanNamesHdf5Vectors[count][count1], H5F_ACC_RDONLY);
 
                         // Чтение основных данных B-scan
                         std::string ez_path = "/rxs/rx1/Ez";
@@ -312,18 +299,18 @@ void accomplishmentThread::run()
                             if (rank == 1)
                             {
                                 QString rootPath = "";
-                                for (int count2 = 0; count2 <= (QString::fromStdString(m_filesRdgNamesHdf5Vectors[count][count1]).split("/")).size()-2; count2++)
-                                    rootPath +=  (QString::fromStdString(m_filesRdgNamesHdf5Vectors[count][count1]).split("/")).at(count2)+"/";
+                                for (int count2 = 0; count2 <= (QString::fromStdString(m_filesBscanNamesHdf5Vectors[count][count1]).split("/")).size()-2; count2++)
+                                    rootPath +=  (QString::fromStdString(m_filesBscanNamesHdf5Vectors[count][count1]).split("/")).at(count2)+"/";
 
-                                rdgInfoDataKey = rootPath.toStdString();
+                                bscanInfoDataKey = rootPath.toStdString();
 
-                                auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), rdgInfoDataKey) };
-                                if (findingRdg == end(rdgNamesVector))
+                                auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), bscanInfoDataKey) };
+                                if (findingBscan == end(bscanNamesVector))
                                 {
                                     hsize_t dims[1];
                                     dataspace.getSimpleExtentDims(dims, NULL);
 
-                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.resize(m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()+1);
+                                    m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.resize(m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()+1);
 
                                     //Чтение данных
                                     std::vector<double> flat_data(dims[0]);
@@ -333,10 +320,10 @@ void accomplishmentThread::run()
                                     // Преобразование в 2D вектор
                                     for (hsize_t i = 0; i < quantImpulsesOfPacket; i++)
                                     {
-                                        m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData.resize(countFilters);
+                                        m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].vectorsDoubleData.resize(countFilters);
 
                                         for (int k = 0; k <= countFilters-1; k++)
-                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].vectorsDoubleData[k].push_back(flat_data[i]/(double)(k+1));
+                                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].vectorsDoubleData[k].push_back(flat_data[i]/(double)(k+1));
                                     }
 
                                     //Чтение данных и атрибутов
@@ -345,7 +332,7 @@ void accomplishmentThread::run()
                                     if (rx_group.attrExists("dt"))
                                     {
                                         H5::Attribute attr = rx_group.openAttribute("dt");
-                                        attr.read(H5::PredType::NATIVE_DOUBLE, &m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.size()-1].time_step_ns);
+                                        attr.read(H5::PredType::NATIVE_DOUBLE, &m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.size()-1].time_step_ns);
                                     }
                                     rx_group.close();
 
@@ -356,10 +343,10 @@ void accomplishmentThread::run()
 
                             if (rank == 2)
                             {
-                                rdgInfoDataKey = m_filesRdgNamesHdf5Vectors[count][count1];
+                                bscanInfoDataKey = m_filesBscanNamesHdf5Vectors[count][count1];
 
-                                auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), rdgInfoDataKey) };
-                                if (findingRdg == end(rdgNamesVector))
+                                auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), bscanInfoDataKey) };
+                                if (findingBscan == end(bscanNamesVector))
                                 {
                                     hsize_t dims[2];
                                     dataspace.getSimpleExtentDims(dims, NULL);
@@ -369,16 +356,16 @@ void accomplishmentThread::run()
                                     dataset.read(flat_data.data(), H5::PredType::NATIVE_DOUBLE);
 
                                     quantImpulsesOfPacket = dims[0];
-                                    m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData.resize(dims[1]);
+                                    m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData.resize(dims[1]);
 
                                     for (hsize_t i = 0; i < dims[0]; i++)
                                     {
                                         for (hsize_t j = 0; j < dims[1]; j++)
                                         {
-                                            m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[j].vectorsDoubleData.resize(countFilters);
+                                            m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[j].vectorsDoubleData.resize(countFilters);
 
                                             for (int k = 0; k <= countFilters-1; k++)
-                                                m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[j].vectorsDoubleData[k].push_back(flat_data[i * dims[1] + j]/(double)(k+1));
+                                                m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[j].vectorsDoubleData[k].push_back(flat_data[i * dims[1] + j]/(double)(k+1));
                                         }
                                     }
 
@@ -390,7 +377,7 @@ void accomplishmentThread::run()
                                         H5::Attribute attr = rx_group.openAttribute("dt");
                                         for (hsize_t j = 0; j < dims[1]; j++)
                                         {
-                                            attr.read(H5::PredType::NATIVE_DOUBLE, &m_rdgsInfoDataMap[rdgInfoDataKey].vectorRdgData[j].time_step_ns);
+                                            attr.read(H5::PredType::NATIVE_DOUBLE, &m_bscansInfoDataMap[bscanInfoDataKey].vectorBscanData[j].time_step_ns);
                                         }
                                     }
                                     rx_group.close();
@@ -423,123 +410,123 @@ void accomplishmentThread::run()
                         error.printErrorStack();
                     }
                 }
-                emit sendProgressData(0, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+                emit sendProgressData(0, m_filesBscanNamesHdf5Vectors[count].size()+3+countMaterials);
 
-                if (rdgInfoDataKey != "")
+                if (bscanInfoDataKey != "")
                 {
                     //Занимаемся фильтрами
-                    tracingOfDefiningRdgFilterData(rdgNamesVector);
-                    emit sendProgressData( m_filesRdgNamesHdf5Vectors[count].size(), m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+                    tracingOfDefiningBscanFilterData(bscanNamesVector);
+                    emit sendProgressData( m_filesBscanNamesHdf5Vectors[count].size(), m_filesBscanNamesHdf5Vectors[count].size()+3+countMaterials);
 
                     for (int count1 = 0; count1 <= countMaterials-1; count1++)
                     {
-                        tracingOfDefiningRdgMaterialData(rdgNamesVector, count1);
-                        emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+2+count1+1, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+                        tracingOfDefiningBscanMaterialData(bscanNamesVector, count1);
+                        emit sendProgressData(m_filesBscanNamesHdf5Vectors[count].size()+2+count1+1, m_filesBscanNamesHdf5Vectors[count].size()+3+countMaterials);
                     }
 
-                    defAdditionalRdgMainData(m_rdgsInfoDataMap,  quantImpulsesOfPacket);
-                    emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+2+countMaterials, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+                    defAdditionalBscanMainData(m_bscansInfoDataMap,  quantImpulsesOfPacket);
+                    emit sendProgressData(m_filesBscanNamesHdf5Vectors[count].size()+2+countMaterials, m_filesBscanNamesHdf5Vectors[count].size()+3+countMaterials);
 
-                    correctRdgData(m_rdgsInfoDataMap, m_st_rdgsWorkData, m_rdgsNamesVectorPairs, m_fullFileNameHdf5Vector[count]);
-                    emit sendProgressData(m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials, m_filesRdgNamesHdf5Vectors[count].size()+3+countMaterials);
+                    correctBscanData(m_bscansInfoDataMap, m_st_bscansWorkData, m_bscansNamesVectorPairs, m_fullFileNameHdf5Vector[count]);
+                    emit sendProgressData(m_filesBscanNamesHdf5Vectors[count].size()+3+countMaterials, m_filesBscanNamesHdf5Vectors[count].size()+3+countMaterials);
                 }
             }
 
-            emit signalEndAccThread(m_rdgsNamesVectorPairs,  RdgFileFormat::Hdf5);
+            emit signalEndAccThread(m_bscansNamesVectorPairs,  BscanFileFormat::Hdf5);
         }
     }
     else
     {
-        if (m_executeDeleteRdg == false)
+        if (m_executeDeleteBscan == false)
         {
-            if (m_defRdgsFnRelief == false)
+            if (m_defBscansFnRelief == false)
             {
-                m_st_rdgsWorkData.rightLatitude = -1.0;
-                m_st_rdgsWorkData.deltaLatitude  = 0.0;
-                m_st_rdgsWorkData.deltaLongitude = 0.0;
+                m_st_bscansWorkData.rightLatitude = -1.0;
+                m_st_bscansWorkData.deltaLatitude  = 0.0;
+                m_st_bscansWorkData.deltaLongitude = 0.0;
 
                 devMainParameters(
-                    m_rdgsInfoDataMap, m_st_rdgsWorkData.leftLatitude,
-                    m_st_rdgsWorkData.rightLatitude, m_st_rdgsWorkData.lowLongitude, m_st_rdgsWorkData.upLongitude,
-                    m_st_rdgsWorkData.deltaLatitude, m_st_rdgsWorkData.deltaLongitude,
-                    m_st_rdgsWorkData.rdgsSurfWidth, m_st_rdgsWorkData.rdgsSurfHeight
+                    m_bscansInfoDataMap, m_st_bscansWorkData.leftLatitude,
+                    m_st_bscansWorkData.rightLatitude, m_st_bscansWorkData.lowLongitude, m_st_bscansWorkData.upLongitude,
+                    m_st_bscansWorkData.deltaLatitude, m_st_bscansWorkData.deltaLongitude,
+                    m_st_bscansWorkData.bscansSurfWidth, m_st_bscansWorkData.bscansSurfHeight
                 );
 
-                double* rdgsPoints;
-                if (m_st_rdgsWorkData.rdgsSurfWidth > m_st_rdgsWorkData.rdgsSurfHeight) rdgsPoints = new double[m_st_rdgsWorkData.rdgsSurfWidth];
-                else                                                                    rdgsPoints = new double[m_st_rdgsWorkData.rdgsSurfHeight];
+                double* bscansPoints;
+                if (m_st_bscansWorkData.bscansSurfWidth > m_st_bscansWorkData.bscansSurfHeight) bscansPoints = new double[m_st_bscansWorkData.bscansSurfWidth];
+                else                                                                    bscansPoints = new double[m_st_bscansWorkData.bscansSurfHeight];
 
 
-                m_st_rdgsWorkData.vectorRdgsData.resize(m_st_rdgsWorkData.rdgsSurfWidth*m_st_rdgsWorkData.rdgsSurfHeight);
+                m_st_bscansWorkData.vectorBscansData.resize(m_st_bscansWorkData.bscansSurfWidth*m_st_bscansWorkData.bscansSurfHeight);
 
-                m_st_rdgsWorkData.vectorRdgsFnRelief.resize(m_st_rdgsWorkData.rdgsSurfWidth);
-                for (int i = 0; i < m_st_rdgsWorkData.rdgsSurfWidth; i++)
-                m_st_rdgsWorkData.vectorRdgsFnRelief[i].resize(m_st_rdgsWorkData.rdgsSurfHeight);
+                m_st_bscansWorkData.vectorBscansFnRelief.resize(m_st_bscansWorkData.bscansSurfWidth);
+                for (int i = 0; i < m_st_bscansWorkData.bscansSurfWidth; i++)
+                m_st_bscansWorkData.vectorBscansFnRelief[i].resize(m_st_bscansWorkData.bscansSurfHeight);
 
-                for (int i = 0; i < m_st_rdgsWorkData.rdgsSurfWidth; i++)
+                for (int i = 0; i < m_st_bscansWorkData.bscansSurfWidth; i++)
                 {
-                    for (int j = 0; j < m_st_rdgsWorkData.rdgsSurfHeight; j++)
+                    for (int j = 0; j < m_st_bscansWorkData.bscansSurfHeight; j++)
                     {
-                        m_st_rdgsWorkData.vectorRdgsFnRelief[i][j] = 0.0;
+                        m_st_bscansWorkData.vectorBscansFnRelief[i][j] = 0.0;
                     }
                 }
 
-                std::vector<std::string> rdgNamesVector;
-                for (auto mapIter = m_rdgsInfoDataMap.begin(); mapIter != m_rdgsInfoDataMap.end(); mapIter++) { rdgNamesVector.push_back(mapIter->first);}
+                std::vector<std::string> bscanNamesVector;
+                for (auto mapIter = m_bscansInfoDataMap.begin(); mapIter != m_bscansInfoDataMap.end(); mapIter++) { bscanNamesVector.push_back(mapIter->first);}
 
-                for (int i = 0; i < m_st_rdgsWorkData.rdgsSurfWidth; i++)
+                for (int i = 0; i < m_st_bscansWorkData.bscansSurfWidth; i++)
                 {
-                    for (int j = 0; j < m_st_rdgsWorkData.rdgsSurfHeight; j++)
+                    for (int j = 0; j < m_st_bscansWorkData.bscansSurfHeight; j++)
                     {
-                        m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*j + i] = defTupleRdgs(
-                        m_rdgsInfoDataMap, i, j,
-                        m_st_rdgsWorkData.leftLatitude, m_st_rdgsWorkData.rightLatitude,
-                        m_st_rdgsWorkData.lowLongitude, m_st_rdgsWorkData.upLongitude,
-                        m_st_rdgsWorkData.deltaLatitude, m_st_rdgsWorkData.deltaLongitude,
-                        m_st_rdgsWorkData.rdgsSurfWidth, m_st_rdgsWorkData.rdgsSurfHeight,
-                        rdgsPoints);
+                        m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*j + i] = defTupleBscans(
+                        m_bscansInfoDataMap, i, j,
+                        m_st_bscansWorkData.leftLatitude, m_st_bscansWorkData.rightLatitude,
+                        m_st_bscansWorkData.lowLongitude, m_st_bscansWorkData.upLongitude,
+                        m_st_bscansWorkData.deltaLatitude, m_st_bscansWorkData.deltaLongitude,
+                        m_st_bscansWorkData.bscansSurfWidth, m_st_bscansWorkData.bscansSurfHeight,
+                        bscansPoints);
                     }
-                    emit sendProgressData(i, m_st_rdgsWorkData.rdgsSurfWidth + rdgNamesVector.size());
+                    emit sendProgressData(i, m_st_bscansWorkData.bscansSurfWidth + bscanNamesVector.size());
                 }
 
                 //делаем ступеньки
-                std::vector<std::vector<std::pair<int, int>> > rdgsPointsVector;
-                rdgsPointsVector.resize(rdgNamesVector.size());
+                std::vector<std::vector<std::pair<int, int>> > bscansPointsVector;
+                bscansPointsVector.resize(bscanNamesVector.size());
 
-                std::string nameRdg = "";
-                std::pair<int, int> rdgPoint;
+                std::string nameBscan = "";
+                std::pair<int, int> bscanPoint;
 
-                for (int i = 0; i < m_st_rdgsWorkData.rdgsSurfWidth; i++)
+                for (int i = 0; i < m_st_bscansWorkData.bscansSurfWidth; i++)
                 {
-                    for (int j = 0; j < m_st_rdgsWorkData.rdgsSurfHeight; j++)
+                    for (int j = 0; j < m_st_bscansWorkData.bscansSurfHeight; j++)
                     {
-                        nameRdg = std::get<0>(m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*j+i]);
-                        if (nameRdg != "")
+                        nameBscan = std::get<0>(m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*j+i]);
+                        if (nameBscan != "")
                         {
-                            auto rdgFindIter = std::find(rdgNamesVector.begin(), rdgNamesVector.end(), nameRdg);
-                            int rdgPosition = std::distance(rdgNamesVector.begin(), rdgFindIter);
+                            auto bscanFindIter = std::find(bscanNamesVector.begin(), bscanNamesVector.end(), nameBscan);
+                            int bscanPosition = std::distance(bscanNamesVector.begin(), bscanFindIter);
 
-                            rdgPoint.first = i;
-                            rdgPoint.second = j;
-                            rdgsPointsVector[rdgPosition].push_back(rdgPoint);
+                            bscanPoint.first = i;
+                            bscanPoint.second = j;
+                            bscansPointsVector[bscanPosition].push_back(bscanPoint);
                         }
                     }
                 }
 
-                m_st_rdgsWorkData.rdgsSurfMinWidth = 0;
-                for (int i = 0; i <  rdgsPointsVector.size(); i++)
+                m_st_bscansWorkData.bscansSurfMinWidth = 0;
+                for (int i = 0; i <  bscansPointsVector.size(); i++)
                 {
                     int iMin = 0;
                     int iMax = 0;
 
-                    for (int j = 0; j < rdgsPointsVector[i].size(); j++)
+                    for (int j = 0; j < bscansPointsVector[i].size(); j++)
                     {
-                        if (rdgsPointsVector[i][j].first <= iMin) iMin = rdgsPointsVector[i][j].first;
-                        if (rdgsPointsVector[i][j].first >= iMax) iMax = rdgsPointsVector[i][j].first;
+                        if (bscansPointsVector[i][j].first <= iMin) iMin = bscansPointsVector[i][j].first;
+                        if (bscansPointsVector[i][j].first >= iMax) iMax = bscansPointsVector[i][j].first;
                     }
 
-                    if (i == 0)                                                   m_st_rdgsWorkData.rdgsSurfMinWidth = iMax - iMin+1;
-                    else if (iMax - iMin+1 <  m_st_rdgsWorkData.rdgsSurfMinWidth) m_st_rdgsWorkData.rdgsSurfMinWidth = iMax - iMin+1;
+                    if (i == 0)                                                   m_st_bscansWorkData.bscansSurfMinWidth = iMax - iMin+1;
+                    else if (iMax - iMin+1 <  m_st_bscansWorkData.bscansSurfMinWidth) m_st_bscansWorkData.bscansSurfMinWidth = iMax - iMin+1;
                 }
 
                 int inPosX = 0;
@@ -547,77 +534,77 @@ void accomplishmentThread::run()
                 int fnPosX = 0;
                 int fnPosY = 0;
 
-                std::string nameRdgIn = "";
-                int         kRdgIn    = 0;
+                std::string nameBscanIn = "";
+                int         kBscanIn    = 0;
 
-                std::string nameRdgFn = "";
-                int         kRdgFn    = 0;
+                std::string nameBscanFn = "";
+                int         kBscanFn    = 0;
 
-                for (int count = 0; count < rdgsPointsVector[0].size(); count++)
+                for (int count = 0; count < bscansPointsVector[0].size(); count++)
                 {
-                    inPosX = rdgsPointsVector[0][count].first;
-                    inPosY = rdgsPointsVector[0][count].second;
-                    representRdgLine( inPosX, 1, inPosX, inPosY, m_st_rdgsWorkData, true);
+                    inPosX = bscansPointsVector[0][count].first;
+                    inPosY = bscansPointsVector[0][count].second;
+                    representBscanLine( inPosX, 1, inPosX, inPosY, m_st_bscansWorkData, true);
                 }
 
-                std::vector<std::pair<int, int>> vectorRdgsTransLinePoints;
-                for (int count1 = 0; count1 < rdgsPointsVector.size()-1; count1++)
+                std::vector<std::pair<int, int>> vectorBscansTransLinePoints;
+                for (int count1 = 0; count1 < bscansPointsVector.size()-1; count1++)
                 {
-                    int numActRdg   = -1;
-                    int minRdgWidth =  0;
-                    if (rdgsPointsVector[count1].size() <= rdgsPointsVector[count1+1].size())
+                    int numActBscan   = -1;
+                    int minBscanWidth =  0;
+                    if (bscansPointsVector[count1].size() <= bscansPointsVector[count1+1].size())
                     {
-                        numActRdg = 0;
-                        minRdgWidth = rdgsPointsVector[count1].size();
+                        numActBscan = 0;
+                        minBscanWidth = bscansPointsVector[count1].size();
                     }
-                    else if  (rdgsPointsVector[count1].size() > rdgsPointsVector[count1+1].size())
+                    else if  (bscansPointsVector[count1].size() > bscansPointsVector[count1+1].size())
                     {
-                        numActRdg = 1;
-                        minRdgWidth = rdgsPointsVector[count1+1].size();
+                        numActBscan = 1;
+                        minBscanWidth = bscansPointsVector[count1+1].size();
                     }
 
-                    for (int count2 = 0; count2 < minRdgWidth; count2++)
+                    for (int count2 = 0; count2 < minBscanWidth; count2++)
                     {
-                        inPosX = rdgsPointsVector[count1  ][count2].first;
-                        inPosY = rdgsPointsVector[count1  ][count2].second;
-                        fnPosX = rdgsPointsVector[count1+1][count2].first;
-                        fnPosY = rdgsPointsVector[count1+1][count2].second;
-                        defVectorRdgsTransLineSectionPoints(inPosX, inPosY, fnPosX, fnPosY, vectorRdgsTransLinePoints);
-                        if (vectorRdgsTransLinePoints.size() > 0)
+                        inPosX = bscansPointsVector[count1  ][count2].first;
+                        inPosY = bscansPointsVector[count1  ][count2].second;
+                        fnPosX = bscansPointsVector[count1+1][count2].first;
+                        fnPosY = bscansPointsVector[count1+1][count2].second;
+                        defVectorBscansTransLineSectionPoints(inPosX, inPosY, fnPosX, fnPosY, vectorBscansTransLinePoints);
+                        if (vectorBscansTransLinePoints.size() > 0)
                         {
-                            nameRdgIn = std::get<0>(m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*inPosY+inPosX]);
-                            kRdgIn    = std::get<1>(m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*inPosY+inPosX]);
+                            nameBscanIn = std::get<0>(m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*inPosY+inPosX]);
+                            kBscanIn    = std::get<1>(m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*inPosY+inPosX]);
 
-                            nameRdgFn = std::get<0>(m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*fnPosY+fnPosX]);
-                            kRdgFn    = std::get<1>(m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*fnPosY+fnPosX]);
+                            nameBscanFn = std::get<0>(m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*fnPosY+fnPosX]);
+                            kBscanFn    = std::get<1>(m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*fnPosY+fnPosX]);
 
                             int countIn = 0;
-                            int countFn = vectorRdgsTransLinePoints.size()-1;
+                            int countFn = vectorBscansTransLinePoints.size()-1;
 
                             while (countIn < countFn)
                             {
-                                if ((std::get<0>(m_st_rdgsWorkData.vectorRdgsData[
-                                    m_st_rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[countIn].second + vectorRdgsTransLinePoints[countIn].first
+                                if ((std::get<0>(m_st_bscansWorkData.vectorBscansData[
+                                    m_st_bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[countIn].second + vectorBscansTransLinePoints[countIn].first
                                 ]) == "") &&
-                                (std::get<1>(m_st_rdgsWorkData.vectorRdgsData[
-                                    m_st_rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[countIn].second + vectorRdgsTransLinePoints[countIn].first
+                                (std::get<1>(m_st_bscansWorkData.vectorBscansData[
+                                    m_st_bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[countIn].second + vectorBscansTransLinePoints[countIn].first
                                 ]) == -1)
                                 ) {
-                                    m_st_rdgsWorkData.vectorRdgsData[
-                                        m_st_rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[countIn].second + vectorRdgsTransLinePoints[countIn].first
-                                    ] = std::make_tuple(nameRdgIn, kRdgIn);
+                                    m_st_bscansWorkData.vectorBscansData[
+                                        m_st_bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[countIn].second + vectorBscansTransLinePoints[countIn].first
+                                    ] = std::make_tuple(nameBscanIn, kBscanIn);
                                 }
 
-                                if ((std::get<0>(m_st_rdgsWorkData.vectorRdgsData[
-                                    m_st_rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[countFn].second + vectorRdgsTransLinePoints[countFn].first
+                                if ((std::get<0>(m_st_bscansWorkData.vectorBscansData[
+                                    m_st_bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[countFn].second + vectorBscansTransLinePoints[countFn].first
                                 ]) == "") &&
-                                (std::get<1>(m_st_rdgsWorkData.vectorRdgsData[
-                                    m_st_rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[countFn].second + vectorRdgsTransLinePoints[countFn].first
+                                (std::get<1>(m_st_bscansWorkData.vectorBscansData[
+                                    m_st_bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[countFn].second + vectorBscansTransLinePoints[countFn].first
                                 ]) == -1)
                                 ) {
-                                    m_st_rdgsWorkData.vectorRdgsData[
-                                        m_st_rdgsWorkData.rdgsSurfWidth*vectorRdgsTransLinePoints[countFn].second + vectorRdgsTransLinePoints[countFn].first
-                                    ] = std::make_tuple(nameRdgFn, kRdgFn);
+                                    m_st_bscansWorkData.vectorBscansData[
+                                        m_st_bscansWorkData.bscansSurfWidth*vectorBscansTransLinePoints[countFn].second + vectorBscansTransLinePoints[countFn].first
+                                    ] = std::make_tuple(nameBscanFn, kBscanFn);
                                 }
 
                                 countIn++;
@@ -626,65 +613,65 @@ void accomplishmentThread::run()
                         }
                     }
 
-                    if (numActRdg == 0)
+                    if (numActBscan == 0)
                     {
-                        inPosX = rdgsPointsVector[count1  ][minRdgWidth-1].first;
-                        inPosY = rdgsPointsVector[count1  ][minRdgWidth-1].second;
+                        inPosX = bscansPointsVector[count1  ][minBscanWidth-1].first;
+                        inPosY = bscansPointsVector[count1  ][minBscanWidth-1].second;
 
-                        for (int count2 = minRdgWidth; count2 < rdgsPointsVector[count1+1].size(); count2++)
+                        for (int count2 = minBscanWidth; count2 < bscansPointsVector[count1+1].size(); count2++)
                         {
-                            int deltaPosX = rdgsPointsVector[count1+1][count2].first  - fnPosX;
-                            int deltaPosY = rdgsPointsVector[count1+1][count2].second - fnPosY;
+                            int deltaPosX = bscansPointsVector[count1+1][count2].first  - fnPosX;
+                            int deltaPosY = bscansPointsVector[count1+1][count2].second - fnPosY;
 
                             inPosX = inPosX + deltaPosX;
                             inPosY = inPosY + deltaPosY;
 
-                            fnPosX = rdgsPointsVector[count1+1][count2].first;
-                            fnPosY = rdgsPointsVector[count1+1][count2].second;
+                            fnPosX = bscansPointsVector[count1+1][count2].first;
+                            fnPosY = bscansPointsVector[count1+1][count2].second;
 
-                            representRdgLine((inPosX+fnPosX)/2, (inPosY+ fnPosY)/2, fnPosX, fnPosY,  m_st_rdgsWorkData, true);
+                            representBscanLine((inPosX+fnPosX)/2, (inPosY+ fnPosY)/2, fnPosX, fnPosY,  m_st_bscansWorkData, true);
                         }
                     }
                     else
                     {
-                        fnPosX = rdgsPointsVector[count1+1  ][minRdgWidth-1].first;
-                        fnPosY = rdgsPointsVector[count1+1  ][minRdgWidth-1].second;
+                        fnPosX = bscansPointsVector[count1+1  ][minBscanWidth-1].first;
+                        fnPosY = bscansPointsVector[count1+1  ][minBscanWidth-1].second;
 
-                        for (int count2 = minRdgWidth; count2 < rdgsPointsVector[count1].size(); count2++)
+                        for (int count2 = minBscanWidth; count2 < bscansPointsVector[count1].size(); count2++)
                         {
-                            int deltaPosX = rdgsPointsVector[count1][count2].first  - inPosX;
-                            int deltaPosY = rdgsPointsVector[count1][count2].second - inPosY;
+                            int deltaPosX = bscansPointsVector[count1][count2].first  - inPosX;
+                            int deltaPosY = bscansPointsVector[count1][count2].second - inPosY;
 
                             fnPosX = fnPosX + deltaPosX;
                             fnPosY = fnPosY + deltaPosY;
 
-                            inPosX = rdgsPointsVector[count1][count2].first;
-                            inPosY = rdgsPointsVector[count1][count2].second;
+                            inPosX = bscansPointsVector[count1][count2].first;
+                            inPosY = bscansPointsVector[count1][count2].second;
 
-                            representRdgLine(inPosX, inPosY, (inPosX + fnPosX)/2, (inPosY + fnPosY)/2,  m_st_rdgsWorkData, false);
+                            representBscanLine(inPosX, inPosY, (inPosX + fnPosX)/2, (inPosY + fnPosY)/2,  m_st_bscansWorkData, false);
                         }
                     }
 
-                    emit sendProgressData(m_st_rdgsWorkData.rdgsSurfWidth + count1, m_st_rdgsWorkData.rdgsSurfWidth + rdgNamesVector.size() - 1);
+                    emit sendProgressData(m_st_bscansWorkData.bscansSurfWidth + count1, m_st_bscansWorkData.bscansSurfWidth + bscanNamesVector.size() - 1);
                 }
 
-                for (int count = 0; count < rdgsPointsVector[rdgsPointsVector.size()-1].size(); count++)
+                for (int count = 0; count < bscansPointsVector[bscansPointsVector.size()-1].size(); count++)
                 {
-                    fnPosX = rdgsPointsVector[rdgsPointsVector.size()-1][count].first;
-                    fnPosY = rdgsPointsVector[rdgsPointsVector.size()-1][count].second;
-                    representRdgLine( fnPosX, fnPosY, fnPosX, m_st_rdgsWorkData.rdgsSurfHeight-2,  m_st_rdgsWorkData, false);
+                    fnPosX = bscansPointsVector[bscansPointsVector.size()-1][count].first;
+                    fnPosY = bscansPointsVector[bscansPointsVector.size()-1][count].second;
+                    representBscanLine( fnPosX, fnPosY, fnPosX, m_st_bscansWorkData.bscansSurfHeight-2,  m_st_bscansWorkData, false);
                 }
 
-                defMinMaxRdgsRelief(m_st_rdgsWorkData.vectorRdgsFnRelief, m_st_rdgsWorkData.maxRelief, m_st_rdgsWorkData.minRelief);
-                emit sendProgressData(m_st_rdgsWorkData.rdgsSurfWidth + rdgNamesVector.size() -1, m_st_rdgsWorkData.rdgsSurfWidth + rdgNamesVector.size() - 1);
+                defMinMaxBscansRelief(m_st_bscansWorkData.vectorBscansFnRelief, m_st_bscansWorkData.maxRelief, m_st_bscansWorkData.minRelief);
+                emit sendProgressData(m_st_bscansWorkData.bscansSurfWidth + bscanNamesVector.size() -1, m_st_bscansWorkData.bscansSurfWidth + bscanNamesVector.size() - 1);
 
-                delete rdgsPoints;
-                emit sendSurfRdgsWorkData();
+                delete bscansPoints;
+                emit sendSurfBscansWorkData();
             }
             else
             {
-                int width  = m_st_rdgsWorkData.vectorRdgsInRelief.size();
-                int height = m_st_rdgsWorkData.vectorRdgsInRelief[0].size();
+                int width  = m_st_bscansWorkData.vectorBscansInRelief.size();
+                int height = m_st_bscansWorkData.vectorBscansInRelief[0].size();
 
                 double latitude = 0.0;
                 double longitude = 0.0;
@@ -698,12 +685,12 @@ void accomplishmentThread::run()
                 double latitude4  = 0.0;
                 double longitude4 = 0.0;
 
-                for (int count1 = 0; count1 < m_st_rdgsWorkData.rdgsSurfWidth; count1++)
+                for (int count1 = 0; count1 < m_st_bscansWorkData.bscansSurfWidth; count1++)
                 {
-                    for (int count2 = 0; count2 < m_st_rdgsWorkData.rdgsSurfHeight; count2++)
+                    for (int count2 = 0; count2 < m_st_bscansWorkData.bscansSurfHeight; count2++)
                     {
-                        latitude  = m_st_rdgsWorkData.leftLatitude + count1*m_st_rdgsWorkData.deltaLatitude;
-                        longitude = m_st_rdgsWorkData.lowLongitude + count2*m_st_rdgsWorkData.deltaLongitude;
+                        latitude  = m_st_bscansWorkData.leftLatitude + count1*m_st_bscansWorkData.deltaLatitude;
+                        longitude = m_st_bscansWorkData.lowLongitude + count2*m_st_bscansWorkData.deltaLongitude;
                         double z = 0.0;
 
                         bool defZ = false;
@@ -713,105 +700,105 @@ void accomplishmentThread::run()
                             {
                                 if (defZ == false)
                                 {
-                                    latitude1  = m_st_rdgsWorkData.vectorRdgsInRelief[count3][count4].x();
-                                    longitude1 = m_st_rdgsWorkData.vectorRdgsInRelief[count3][count4].y();
+                                    latitude1  = m_st_bscansWorkData.vectorBscansInRelief[count3][count4].x();
+                                    longitude1 = m_st_bscansWorkData.vectorBscansInRelief[count3][count4].y();
 
-                                    latitude2  = m_st_rdgsWorkData.vectorRdgsInRelief[count3][count4+1].x();
-                                    longitude2 = m_st_rdgsWorkData.vectorRdgsInRelief[count3][count4+1].y();
+                                    latitude2  = m_st_bscansWorkData.vectorBscansInRelief[count3][count4+1].x();
+                                    longitude2 = m_st_bscansWorkData.vectorBscansInRelief[count3][count4+1].y();
 
-                                    latitude3  = m_st_rdgsWorkData.vectorRdgsInRelief[count3+1][count4+1].x();
-                                    longitude3 = m_st_rdgsWorkData.vectorRdgsInRelief[count3+1][count4+1].y();
+                                    latitude3  = m_st_bscansWorkData.vectorBscansInRelief[count3+1][count4+1].x();
+                                    longitude3 = m_st_bscansWorkData.vectorBscansInRelief[count3+1][count4+1].y();
 
-                                    latitude4  = m_st_rdgsWorkData.vectorRdgsInRelief[count3+1][count4].x();
-                                    longitude4 = m_st_rdgsWorkData.vectorRdgsInRelief[count3+1][count4].y();
+                                    latitude4  = m_st_bscansWorkData.vectorBscansInRelief[count3+1][count4].x();
+                                    longitude4 = m_st_bscansWorkData.vectorBscansInRelief[count3+1][count4].y();
 
                                     if ((latitude  >= latitude1  && latitude  <= latitude3) && (longitude >= longitude1 && longitude <= longitude3))
                                     {
                                         z = (
-                                            fabs((latitude3-latitude)*(longitude3-longitude))*(m_st_rdgsWorkData.vectorRdgsInRelief[count3][count4].z())     +
-                                            fabs((latitude1-latitude)*(longitude1-longitude))*(m_st_rdgsWorkData.vectorRdgsInRelief[count3+1][count4+1].z()) +
-                                            fabs((latitude2-latitude)*(longitude2-longitude))*(m_st_rdgsWorkData.vectorRdgsInRelief[count3+1][count4].z())   +
-                                            fabs((latitude4-latitude)*(longitude4-longitude))*(m_st_rdgsWorkData.vectorRdgsInRelief[count3][count4+1].z())
+                                            fabs((latitude3-latitude)*(longitude3-longitude))*(m_st_bscansWorkData.vectorBscansInRelief[count3][count4].z())     +
+                                            fabs((latitude1-latitude)*(longitude1-longitude))*(m_st_bscansWorkData.vectorBscansInRelief[count3+1][count4+1].z()) +
+                                            fabs((latitude2-latitude)*(longitude2-longitude))*(m_st_bscansWorkData.vectorBscansInRelief[count3+1][count4].z())   +
+                                            fabs((latitude4-latitude)*(longitude4-longitude))*(m_st_bscansWorkData.vectorBscansInRelief[count3][count4+1].z())
                                         )/fabs((latitude3-latitude1)*(longitude3-longitude1));
                                         defZ = true;
-                                        m_st_rdgsWorkData.vectorRdgsFnRelief[count1][count2] = z;
+                                        m_st_bscansWorkData.vectorBscansFnRelief[count1][count2] = z;
                                     }
                                 }
                             }
                         }
                     }
-                    emit sendProgressData(count1, m_st_rdgsWorkData.rdgsSurfWidth-1);
+                    emit sendProgressData(count1, m_st_bscansWorkData.bscansSurfWidth-1);
                 }
-                defMinMaxRdgsRelief(m_st_rdgsWorkData.vectorRdgsFnRelief, m_st_rdgsWorkData.maxRelief, m_st_rdgsWorkData.minRelief);
-                emit sendRdgsZData();
+                defMinMaxBscansRelief(m_st_bscansWorkData.vectorBscansFnRelief, m_st_bscansWorkData.maxRelief, m_st_bscansWorkData.minRelief);
+                emit sendBscansZData();
             }
         }
         else
         {
-            for (int i = 0; i < m_st_rdgsWorkData.rdgsSurfWidth; i++)
+            for (int i = 0; i < m_st_bscansWorkData.bscansSurfWidth; i++)
             {
-                for (int j = 0; j < m_st_rdgsWorkData.rdgsSurfHeight; j++)
+                for (int j = 0; j < m_st_bscansWorkData.bscansSurfHeight; j++)
                 {
-                    if (std::get<0>(m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*j+i]) == m_nameDeleteRdg)
-                    m_st_rdgsWorkData.vectorRdgsData[m_st_rdgsWorkData.rdgsSurfWidth*j + i] = std::make_tuple("", -1);
+                    if (std::get<0>(m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*j+i]) == m_nameDeleteBscan)
+                    m_st_bscansWorkData.vectorBscansData[m_st_bscansWorkData.bscansSurfWidth*j + i] = std::make_tuple("", -1);
                 }
             }
-            emit sendSurfRdgsWorkData();
-            m_nameDeleteRdg    = "";
-            m_executeDeleteRdg = false;
+            emit sendSurfBscansWorkData();
+            m_nameDeleteBscan    = "";
+            m_executeDeleteBscan = false;
         }
     }
 }
 
 void accomplishmentThread::clearWorkData()
 {
-    m_st_rdgsWorkData.rdgsSurfWidth  = 0;
-    m_st_rdgsWorkData.rdgsSurfHeight = 0;
+    m_st_bscansWorkData.bscansSurfWidth  = 0;
+    m_st_bscansWorkData.bscansSurfHeight = 0;
 
-    m_st_rdgsWorkData.leftLatitude  = -1.0;
-    m_st_rdgsWorkData.rightLatitude = -1.0;
-    m_st_rdgsWorkData.lowLongitude  = -1.0;
-    m_st_rdgsWorkData.upLongitude   = -1.0;
+    m_st_bscansWorkData.leftLatitude  = -1.0;
+    m_st_bscansWorkData.rightLatitude = -1.0;
+    m_st_bscansWorkData.lowLongitude  = -1.0;
+    m_st_bscansWorkData.upLongitude   = -1.0;
 
-    m_st_rdgsWorkData.deltaLatitude  = 0.0;
-    m_st_rdgsWorkData.deltaLongitude = 0.0;
+    m_st_bscansWorkData.deltaLatitude  = 0.0;
+    m_st_bscansWorkData.deltaLongitude = 0.0;
 
-    m_rdgsInfoDataMap.clear();
-    m_st_rdgsWorkData.vectorRdgsFnRelief.clear();
-    m_st_rdgsWorkData.vectorRdgsData.clear();
-    m_st_rdgsWorkData.vectorRdgsInRelief.clear();
+    m_bscansInfoDataMap.clear();
+    m_st_bscansWorkData.vectorBscansFnRelief.clear();
+    m_st_bscansWorkData.vectorBscansData.clear();
+    m_st_bscansWorkData.vectorBscansInRelief.clear();
 }
 
-void accomplishmentThread::tracingOfDefiningRdgFilterData(const std::vector<std::string>& rdgNamesVector)
+void accomplishmentThread::tracingOfDefiningBscanFilterData(const std::vector<std::string>& bscanNamesVector)
 {
-    for (auto iter = m_rdgsInfoDataMap.begin(); iter != m_rdgsInfoDataMap.end(); iter++)
+    for (auto iter = m_bscansInfoDataMap.begin(); iter != m_bscansInfoDataMap.end(); iter++)
     {
-        auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), iter->first) };
-        if (findingRdg == end(rdgNamesVector))
+        auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), iter->first) };
+        if (findingBscan == end(bscanNamesVector))
         {
-            definingRdgFilterData(m_rdgsInfoDataMap[iter->first], 1);
+            definingBscanFilterData(m_bscansInfoDataMap[iter->first], 1);
 
-            for (int count = 0; count <= m_rdgsInfoDataMap[iter->first].vectorRdgData.size()-1; count++)
+            for (int count = 0; count <= m_bscansInfoDataMap[iter->first].vectorBscanData.size()-1; count++)
             {
-                allocateMainRdgContainers(m_rdgsInfoDataMap[iter->first], count);
+                allocateMainBscanContainers(m_bscansInfoDataMap[iter->first], count);
                 for (int k = 0; k <= countFilters-1; k++)
-                    createRdgDataMinMaxImpulses(m_rdgsInfoDataMap[iter->first], count, m_rdgsInfoDataMap[iter->first].vectorRdgData[count].vectorsDoubleData[k].size(), k);
+                    createBscanDataMinMaxImpulses(m_bscansInfoDataMap[iter->first], count, m_bscansInfoDataMap[iter->first].vectorBscanData[count].vectorsDoubleData[k].size(), k);
             }
         }
     }
 }
 
-void accomplishmentThread::tracingOfDefiningRdgMaterialData(const std::vector<std::string>& rdgNamesVector, int materialId)
+void accomplishmentThread::tracingOfDefiningBscanMaterialData(const std::vector<std::string>& bscanNamesVector, int materialId)
 {
-    for (auto iter = m_rdgsInfoDataMap.begin(); iter != m_rdgsInfoDataMap.end(); iter++)
+    for (auto iter = m_bscansInfoDataMap.begin(); iter != m_bscansInfoDataMap.end(); iter++)
     {
-        auto findingRdg{ std::find(begin(rdgNamesVector), end(rdgNamesVector), iter->first) };
-        if (findingRdg == end(rdgNamesVector))
+        auto findingBscan{ std::find(begin(bscanNamesVector), end(bscanNamesVector), iter->first) };
+        if (findingBscan == end(bscanNamesVector))
         {
-            for (int count = 0; count <= m_rdgsInfoDataMap[iter->first].vectorRdgData.size()-1; count++)
+            for (int count = 0; count <= m_bscansInfoDataMap[iter->first].vectorBscanData.size()-1; count++)
             {
                 for (int k = 0; k <= countFilters-1; k++)
-                    createRdgDataDeeps(m_rdgsInfoDataMap[iter->first], count, m_rdgsInfoDataMap[iter->first].vectorRdgData[count].vectorsDoubleData[k].size(), k, materialId);
+                    createBscanDataDeeps(m_bscansInfoDataMap[iter->first], count, m_bscansInfoDataMap[iter->first].vectorBscanData[count].vectorsDoubleData[k].size(), k, materialId);
             }
         }
     }

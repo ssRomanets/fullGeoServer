@@ -21,8 +21,8 @@ QT_BEGIN_MOC_NAMESPACE
 QT_WARNING_PUSH
 QT_WARNING_DISABLE_DEPRECATED
 struct qt_meta_stringdata_MainWindow_t {
-    QByteArrayData data[85];
-    char stringdata0[1540];
+    QByteArrayData data[99];
+    char stringdata0[1964];
 };
 #define QT_MOC_LITERAL(idx, ofs, len) \
     Q_STATIC_BYTE_ARRAY_DATA_HEADER_INITIALIZER_WITH_OFFSET(len, \
@@ -32,134 +32,162 @@ struct qt_meta_stringdata_MainWindow_t {
 static const qt_meta_stringdata_MainWindow_t qt_meta_stringdata_MainWindow = {
     {
 QT_MOC_LITERAL(0, 0, 10), // "MainWindow"
-QT_MOC_LITERAL(1, 11, 26), // "signalClearRdgsInfoDataMap"
+QT_MOC_LITERAL(1, 11, 26), // "signalSetupBscanDeepPixels"
 QT_MOC_LITERAL(2, 38, 0), // ""
-QT_MOC_LITERAL(3, 39, 26), // "signalEraseRdgsInfoDataMap"
-QT_MOC_LITERAL(4, 66, 11), // "std::string"
-QT_MOC_LITERAL(5, 78, 8), // "fileName"
-QT_MOC_LITERAL(6, 87, 20), // "closeSection2dAction"
-QT_MOC_LITERAL(7, 108, 16), // "section2dVisible"
-QT_MOC_LITERAL(8, 125, 16), // "closeCut3dAction"
-QT_MOC_LITERAL(9, 142, 12), // "cut3dVisible"
-QT_MOC_LITERAL(10, 155, 25), // "signalSetupRdgsSurfPixels"
-QT_MOC_LITERAL(11, 181, 36), // "std::map<std::string,st_rdgIn..."
-QT_MOC_LITERAL(12, 218, 15), // "rdgsInfoDataMap"
-QT_MOC_LITERAL(13, 234, 15), // "st_rdgsWorkData"
-QT_MOC_LITERAL(14, 250, 12), // "rdgsWorkData"
-QT_MOC_LITERAL(15, 263, 27), // "signalOutputRdgsSurfSection"
-QT_MOC_LITERAL(16, 291, 22), // "signalDefDeleteRdgName"
-QT_MOC_LITERAL(17, 314, 11), // "fixLatitude"
-QT_MOC_LITERAL(18, 326, 12), // "fixLongitude"
-QT_MOC_LITERAL(19, 339, 21), // "signalFillRdgsExecute"
-QT_MOC_LITERAL(20, 361, 18), // "resetCutPointsRdgs"
-QT_MOC_LITERAL(21, 380, 20), // "receiveDeleteRdgName"
-QT_MOC_LITERAL(22, 401, 13), // "deleteRdgName"
-QT_MOC_LITERAL(23, 415, 19), // "receiveProgressData"
-QT_MOC_LITERAL(24, 435, 11), // "progressPos"
-QT_MOC_LITERAL(25, 447, 11), // "progressMax"
-QT_MOC_LITERAL(26, 459, 19), // "receiveRdgsWorkData"
-QT_MOC_LITERAL(27, 479, 16), // "receiveRdgsZData"
-QT_MOC_LITERAL(28, 496, 21), // "slotFixRdgsSurfPixels"
-QT_MOC_LITERAL(29, 518, 20), // "slotFixDeleteRdgName"
-QT_MOC_LITERAL(30, 539, 15), // "slotFixFillRdgs"
-QT_MOC_LITERAL(31, 555, 22), // "slotFixRdgsSurfSection"
-QT_MOC_LITERAL(32, 578, 24), // "slotActivateAccompThread"
-QT_MOC_LITERAL(33, 603, 48), // "std::vector<std::pair<std::st..."
-QT_MOC_LITERAL(34, 652, 20), // "rdgsNamesVectorPairs"
-QT_MOC_LITERAL(35, 673, 13), // "RdgFileFormat"
-QT_MOC_LITERAL(36, 687, 13), // "rdgFileFormat"
-QT_MOC_LITERAL(37, 701, 20), // "receiveColorsPalette"
-QT_MOC_LITERAL(38, 722, 7), // "QColor&"
-QT_MOC_LITERAL(39, 730, 7), // "colorUp"
-QT_MOC_LITERAL(40, 738, 8), // "colorLow"
-QT_MOC_LITERAL(41, 747, 7), // "openTrz"
-QT_MOC_LITERAL(42, 755, 7), // "openCsv"
-QT_MOC_LITERAL(43, 763, 8), // "openHdf5"
-QT_MOC_LITERAL(44, 772, 7), // "openKml"
-QT_MOC_LITERAL(45, 780, 12), // "openImageRdg"
-QT_MOC_LITERAL(46, 793, 13), // "defPaletteRdg"
-QT_MOC_LITERAL(47, 807, 15), // "open2dImageRdgs"
-QT_MOC_LITERAL(48, 823, 18), // "defPaletteSurfRdgs"
-QT_MOC_LITERAL(49, 842, 15), // "open3dImageRdgs"
-QT_MOC_LITERAL(50, 858, 19), // "defPaletteTransRdgs"
-QT_MOC_LITERAL(51, 878, 18), // "includeFilterOnRdg"
-QT_MOC_LITERAL(52, 897, 14), // "openRecentFile"
-QT_MOC_LITERAL(53, 912, 18), // "deleteSelectedFile"
-QT_MOC_LITERAL(54, 931, 14), // "deleteAllFiles"
-QT_MOC_LITERAL(55, 946, 4), // "save"
-QT_MOC_LITERAL(56, 951, 23), // "setCloseSection2dAction"
-QT_MOC_LITERAL(57, 975, 19), // "setCloseCut3dAction"
-QT_MOC_LITERAL(58, 995, 25), // "saveBoundPointsLineAction"
-QT_MOC_LITERAL(59, 1021, 25), // "loadBoundPointsLineAction"
-QT_MOC_LITERAL(60, 1047, 10), // "setInitRdg"
-QT_MOC_LITERAL(61, 1058, 9), // "setLogRdg"
-QT_MOC_LITERAL(62, 1068, 23), // "setLogRdgMouseSelection"
-QT_MOC_LITERAL(63, 1092, 22), // "setLogRdgAutoSelection"
-QT_MOC_LITERAL(64, 1115, 23), // "setShowInitRdgSelection"
-QT_MOC_LITERAL(65, 1139, 21), // "slotResetRdgSelection"
-QT_MOC_LITERAL(66, 1161, 24), // "saveRdgAutoSelectionData"
-QT_MOC_LITERAL(67, 1186, 24), // "loadRdgAutoSelectionData"
-QT_MOC_LITERAL(68, 1211, 19), // "changeHighLowOnRdgs"
-QT_MOC_LITERAL(69, 1231, 16), // "showFullRdgsData"
-QT_MOC_LITERAL(70, 1248, 17), // "materialIdChanged"
-QT_MOC_LITERAL(71, 1266, 10), // "materialId"
-QT_MOC_LITERAL(72, 1277, 17), // "useSelectionOnRdg"
-QT_MOC_LITERAL(73, 1295, 17), // "setupScalingOnRdg"
-QT_MOC_LITERAL(74, 1313, 22), // "setupScalingOnRdgsSurf"
-QT_MOC_LITERAL(75, 1336, 23), // "setupScalingOnRdgsTrans"
-QT_MOC_LITERAL(76, 1360, 9), // "changeRdg"
-QT_MOC_LITERAL(77, 1370, 5), // "rdgId"
-QT_MOC_LITERAL(78, 1376, 13), // "leftChangeRdg"
-QT_MOC_LITERAL(79, 1390, 14), // "rightChangeRdg"
-QT_MOC_LITERAL(80, 1405, 27), // "scrollHRdgsLengthBarPressed"
-QT_MOC_LITERAL(81, 1433, 25), // "scrollHRdgsLengthBarMoved"
-QT_MOC_LITERAL(82, 1459, 23), // "scrollHRdgsLengthBarPos"
-QT_MOC_LITERAL(83, 1483, 28), // "scrollHRdgsLengthBarReleased"
-QT_MOC_LITERAL(84, 1512, 27) // "scrollHRdgsLengthBarChanged"
+QT_MOC_LITERAL(3, 39, 16), // "st_bscanInfoData"
+QT_MOC_LITERAL(4, 56, 13), // "bscanInfoData"
+QT_MOC_LITERAL(5, 70, 34), // "signalSetupFixDataBscanDeepWi..."
+QT_MOC_LITERAL(6, 105, 28), // "signalClearBscansInfoDataMap"
+QT_MOC_LITERAL(7, 134, 28), // "signalEraseBscansInfoDataMap"
+QT_MOC_LITERAL(8, 163, 11), // "std::string"
+QT_MOC_LITERAL(9, 175, 8), // "fileName"
+QT_MOC_LITERAL(10, 184, 20), // "closeSection2dAction"
+QT_MOC_LITERAL(11, 205, 16), // "section2dVisible"
+QT_MOC_LITERAL(12, 222, 16), // "closeCut3dAction"
+QT_MOC_LITERAL(13, 239, 12), // "cut3dVisible"
+QT_MOC_LITERAL(14, 252, 27), // "signalSetupBscansSurfPixels"
+QT_MOC_LITERAL(15, 280, 38), // "std::map<std::string,st_bscan..."
+QT_MOC_LITERAL(16, 319, 17), // "bscansInfoDataMap"
+QT_MOC_LITERAL(17, 337, 17), // "st_bscansWorkData"
+QT_MOC_LITERAL(18, 355, 14), // "bscansWorkData"
+QT_MOC_LITERAL(19, 370, 29), // "signalOutputBscansSurfSection"
+QT_MOC_LITERAL(20, 400, 24), // "signalDefDeleteBscanName"
+QT_MOC_LITERAL(21, 425, 11), // "fixLatitude"
+QT_MOC_LITERAL(22, 437, 12), // "fixLongitude"
+QT_MOC_LITERAL(23, 450, 23), // "signalFillBscansExecute"
+QT_MOC_LITERAL(24, 474, 20), // "resetCutPointsBscans"
+QT_MOC_LITERAL(25, 495, 28), // "signalSetupBscanDeepPageData"
+QT_MOC_LITERAL(26, 524, 14), // "bscansInfoData"
+QT_MOC_LITERAL(27, 539, 29), // "signalFixDataBscanDeepWidgets"
+QT_MOC_LITERAL(28, 569, 22), // "receiveDeleteBscanName"
+QT_MOC_LITERAL(29, 592, 15), // "deleteBscanName"
+QT_MOC_LITERAL(30, 608, 19), // "receiveProgressData"
+QT_MOC_LITERAL(31, 628, 11), // "progressPos"
+QT_MOC_LITERAL(32, 640, 11), // "progressMax"
+QT_MOC_LITERAL(33, 652, 21), // "receiveBscansWorkData"
+QT_MOC_LITERAL(34, 674, 18), // "receiveBscansZData"
+QT_MOC_LITERAL(35, 693, 23), // "slotFixBscansSurfPixels"
+QT_MOC_LITERAL(36, 717, 22), // "slotFixDeleteBscanName"
+QT_MOC_LITERAL(37, 740, 17), // "slotFixFillBscans"
+QT_MOC_LITERAL(38, 758, 24), // "slotFixBscansSurfSection"
+QT_MOC_LITERAL(39, 783, 24), // "slotActivateAccompThread"
+QT_MOC_LITERAL(40, 808, 48), // "std::vector<std::pair<std::st..."
+QT_MOC_LITERAL(41, 857, 22), // "BscansNamesVectorPairs"
+QT_MOC_LITERAL(42, 880, 15), // "BscanFileFormat"
+QT_MOC_LITERAL(43, 896, 15), // "bscanFileFormat"
+QT_MOC_LITERAL(44, 912, 20), // "receiveColorsPalette"
+QT_MOC_LITERAL(45, 933, 7), // "QColor&"
+QT_MOC_LITERAL(46, 941, 7), // "colorUp"
+QT_MOC_LITERAL(47, 949, 8), // "colorLow"
+QT_MOC_LITERAL(48, 958, 24), // "slotSetupBscanDeepPixels"
+QT_MOC_LITERAL(49, 983, 27), // "slotFixDataBscanDeepWidgets"
+QT_MOC_LITERAL(50, 1011, 7), // "openTrz"
+QT_MOC_LITERAL(51, 1019, 7), // "openCsv"
+QT_MOC_LITERAL(52, 1027, 8), // "openHdf5"
+QT_MOC_LITERAL(53, 1036, 7), // "openKml"
+QT_MOC_LITERAL(54, 1044, 14), // "openImageBscan"
+QT_MOC_LITERAL(55, 1059, 15), // "defPaletteBscan"
+QT_MOC_LITERAL(56, 1075, 19), // "defPaletteBscanDeep"
+QT_MOC_LITERAL(57, 1095, 18), // "openImageDeepBscan"
+QT_MOC_LITERAL(58, 1114, 17), // "open2dImageBscans"
+QT_MOC_LITERAL(59, 1132, 20), // "defPaletteSurfBscans"
+QT_MOC_LITERAL(60, 1153, 17), // "open3dImageBscans"
+QT_MOC_LITERAL(61, 1171, 21), // "defPaletteTransBscans"
+QT_MOC_LITERAL(62, 1193, 20), // "includeFilterOnBscan"
+QT_MOC_LITERAL(63, 1214, 14), // "openRecentFile"
+QT_MOC_LITERAL(64, 1229, 18), // "deleteSelectedFile"
+QT_MOC_LITERAL(65, 1248, 14), // "deleteAllFiles"
+QT_MOC_LITERAL(66, 1263, 4), // "save"
+QT_MOC_LITERAL(67, 1268, 23), // "setCloseSection2dAction"
+QT_MOC_LITERAL(68, 1292, 19), // "setCloseCut3dAction"
+QT_MOC_LITERAL(69, 1312, 25), // "saveBoundPointsLineAction"
+QT_MOC_LITERAL(70, 1338, 25), // "loadBoundPointsLineAction"
+QT_MOC_LITERAL(71, 1364, 12), // "setInitBscan"
+QT_MOC_LITERAL(72, 1377, 11), // "setLogBscan"
+QT_MOC_LITERAL(73, 1389, 25), // "setLogBscanMouseSelection"
+QT_MOC_LITERAL(74, 1415, 24), // "setLogBscanAutoSelection"
+QT_MOC_LITERAL(75, 1440, 25), // "setShowInitBscanSelection"
+QT_MOC_LITERAL(76, 1466, 23), // "slotResetBscanSelection"
+QT_MOC_LITERAL(77, 1490, 26), // "saveBscanAutoSelectionData"
+QT_MOC_LITERAL(78, 1517, 26), // "loadBscanAutoSelectionData"
+QT_MOC_LITERAL(79, 1544, 21), // "changeHighLowOnBscans"
+QT_MOC_LITERAL(80, 1566, 18), // "showFullBscansData"
+QT_MOC_LITERAL(81, 1585, 17), // "materialIdChanged"
+QT_MOC_LITERAL(82, 1603, 10), // "materialId"
+QT_MOC_LITERAL(83, 1614, 19), // "useSelectionOnBscan"
+QT_MOC_LITERAL(84, 1634, 19), // "setupScalingOnBscan"
+QT_MOC_LITERAL(85, 1654, 23), // "setupScalingOnBscanDeep"
+QT_MOC_LITERAL(86, 1678, 24), // "setupScalingOnBscansSurf"
+QT_MOC_LITERAL(87, 1703, 25), // "setupScalingOnBscansTrans"
+QT_MOC_LITERAL(88, 1729, 11), // "changeBscan"
+QT_MOC_LITERAL(89, 1741, 7), // "BscanId"
+QT_MOC_LITERAL(90, 1749, 15), // "leftChangeBscan"
+QT_MOC_LITERAL(91, 1765, 16), // "rightChangeBscan"
+QT_MOC_LITERAL(92, 1782, 29), // "scrollHBscansLengthBarPressed"
+QT_MOC_LITERAL(93, 1812, 27), // "scrollHBscansLengthBarMoved"
+QT_MOC_LITERAL(94, 1840, 25), // "scrollHBscansLengthBarPos"
+QT_MOC_LITERAL(95, 1866, 30), // "scrollHBscansLengthBarReleased"
+QT_MOC_LITERAL(96, 1897, 29), // "scrollHBscansLengthBarChanged"
+QT_MOC_LITERAL(97, 1927, 26), // "slotSetupBscanDeepPageData"
+QT_MOC_LITERAL(98, 1954, 9) // "bscanName"
 
     },
-    "MainWindow\0signalClearRdgsInfoDataMap\0"
-    "\0signalEraseRdgsInfoDataMap\0std::string\0"
+    "MainWindow\0signalSetupBscanDeepPixels\0"
+    "\0st_bscanInfoData\0bscanInfoData\0"
+    "signalSetupFixDataBscanDeepWidgets\0"
+    "signalClearBscansInfoDataMap\0"
+    "signalEraseBscansInfoDataMap\0std::string\0"
     "fileName\0closeSection2dAction\0"
     "section2dVisible\0closeCut3dAction\0"
-    "cut3dVisible\0signalSetupRdgsSurfPixels\0"
-    "std::map<std::string,st_rdgInfoData>\0"
-    "rdgsInfoDataMap\0st_rdgsWorkData\0"
-    "rdgsWorkData\0signalOutputRdgsSurfSection\0"
-    "signalDefDeleteRdgName\0fixLatitude\0"
-    "fixLongitude\0signalFillRdgsExecute\0"
-    "resetCutPointsRdgs\0receiveDeleteRdgName\0"
-    "deleteRdgName\0receiveProgressData\0"
-    "progressPos\0progressMax\0receiveRdgsWorkData\0"
-    "receiveRdgsZData\0slotFixRdgsSurfPixels\0"
-    "slotFixDeleteRdgName\0slotFixFillRdgs\0"
-    "slotFixRdgsSurfSection\0slotActivateAccompThread\0"
+    "cut3dVisible\0signalSetupBscansSurfPixels\0"
+    "std::map<std::string,st_bscanInfoData>\0"
+    "bscansInfoDataMap\0st_bscansWorkData\0"
+    "bscansWorkData\0signalOutputBscansSurfSection\0"
+    "signalDefDeleteBscanName\0fixLatitude\0"
+    "fixLongitude\0signalFillBscansExecute\0"
+    "resetCutPointsBscans\0signalSetupBscanDeepPageData\0"
+    "bscansInfoData\0signalFixDataBscanDeepWidgets\0"
+    "receiveDeleteBscanName\0deleteBscanName\0"
+    "receiveProgressData\0progressPos\0"
+    "progressMax\0receiveBscansWorkData\0"
+    "receiveBscansZData\0slotFixBscansSurfPixels\0"
+    "slotFixDeleteBscanName\0slotFixFillBscans\0"
+    "slotFixBscansSurfSection\0"
+    "slotActivateAccompThread\0"
     "std::vector<std::pair<std::string,std::string> >\0"
-    "rdgsNamesVectorPairs\0RdgFileFormat\0"
-    "rdgFileFormat\0receiveColorsPalette\0"
-    "QColor&\0colorUp\0colorLow\0openTrz\0"
-    "openCsv\0openHdf5\0openKml\0openImageRdg\0"
-    "defPaletteRdg\0open2dImageRdgs\0"
-    "defPaletteSurfRdgs\0open3dImageRdgs\0"
-    "defPaletteTransRdgs\0includeFilterOnRdg\0"
+    "BscansNamesVectorPairs\0BscanFileFormat\0"
+    "bscanFileFormat\0receiveColorsPalette\0"
+    "QColor&\0colorUp\0colorLow\0"
+    "slotSetupBscanDeepPixels\0"
+    "slotFixDataBscanDeepWidgets\0openTrz\0"
+    "openCsv\0openHdf5\0openKml\0openImageBscan\0"
+    "defPaletteBscan\0defPaletteBscanDeep\0"
+    "openImageDeepBscan\0open2dImageBscans\0"
+    "defPaletteSurfBscans\0open3dImageBscans\0"
+    "defPaletteTransBscans\0includeFilterOnBscan\0"
     "openRecentFile\0deleteSelectedFile\0"
     "deleteAllFiles\0save\0setCloseSection2dAction\0"
     "setCloseCut3dAction\0saveBoundPointsLineAction\0"
-    "loadBoundPointsLineAction\0setInitRdg\0"
-    "setLogRdg\0setLogRdgMouseSelection\0"
-    "setLogRdgAutoSelection\0setShowInitRdgSelection\0"
-    "slotResetRdgSelection\0saveRdgAutoSelectionData\0"
-    "loadRdgAutoSelectionData\0changeHighLowOnRdgs\0"
-    "showFullRdgsData\0materialIdChanged\0"
-    "materialId\0useSelectionOnRdg\0"
-    "setupScalingOnRdg\0setupScalingOnRdgsSurf\0"
-    "setupScalingOnRdgsTrans\0changeRdg\0"
-    "rdgId\0leftChangeRdg\0rightChangeRdg\0"
-    "scrollHRdgsLengthBarPressed\0"
-    "scrollHRdgsLengthBarMoved\0"
-    "scrollHRdgsLengthBarPos\0"
-    "scrollHRdgsLengthBarReleased\0"
-    "scrollHRdgsLengthBarChanged"
+    "loadBoundPointsLineAction\0setInitBscan\0"
+    "setLogBscan\0setLogBscanMouseSelection\0"
+    "setLogBscanAutoSelection\0"
+    "setShowInitBscanSelection\0"
+    "slotResetBscanSelection\0"
+    "saveBscanAutoSelectionData\0"
+    "loadBscanAutoSelectionData\0"
+    "changeHighLowOnBscans\0showFullBscansData\0"
+    "materialIdChanged\0materialId\0"
+    "useSelectionOnBscan\0setupScalingOnBscan\0"
+    "setupScalingOnBscanDeep\0"
+    "setupScalingOnBscansSurf\0"
+    "setupScalingOnBscansTrans\0changeBscan\0"
+    "BscanId\0leftChangeBscan\0rightChangeBscan\0"
+    "scrollHBscansLengthBarPressed\0"
+    "scrollHBscansLengthBarMoved\0"
+    "scrollHBscansLengthBarPos\0"
+    "scrollHBscansLengthBarReleased\0"
+    "scrollHBscansLengthBarChanged\0"
+    "slotSetupBscanDeepPageData\0bscanName"
 };
 #undef QT_MOC_LITERAL
 
@@ -169,101 +197,111 @@ static const uint qt_meta_data_MainWindow[] = {
        7,       // revision
        0,       // classname
        0,    0, // classinfo
-      59,   14, // methods
+      69,   14, // methods
        0,    0, // properties
        0,    0, // enums/sets
        0,    0, // constructors
        0,       // flags
-       8,       // signalCount
+      12,       // signalCount
 
  // signals: name, argc, parameters, tag, flags
-       1,    0,  309,    2, 0x06 /* Public */,
-       3,    1,  310,    2, 0x06 /* Public */,
-       6,    1,  313,    2, 0x06 /* Public */,
-       8,    1,  316,    2, 0x06 /* Public */,
-      10,    2,  319,    2, 0x06 /* Public */,
-      15,    2,  324,    2, 0x06 /* Public */,
-      16,    3,  329,    2, 0x06 /* Public */,
-      19,    3,  336,    2, 0x06 /* Public */,
+       1,    1,  359,    2, 0x06 /* Public */,
+       5,    1,  362,    2, 0x06 /* Public */,
+       6,    0,  365,    2, 0x06 /* Public */,
+       7,    1,  366,    2, 0x06 /* Public */,
+      10,    1,  369,    2, 0x06 /* Public */,
+      12,    1,  372,    2, 0x06 /* Public */,
+      14,    2,  375,    2, 0x06 /* Public */,
+      19,    2,  380,    2, 0x06 /* Public */,
+      20,    3,  385,    2, 0x06 /* Public */,
+      23,    3,  392,    2, 0x06 /* Public */,
+      25,    1,  399,    2, 0x06 /* Public */,
+      27,    1,  402,    2, 0x06 /* Public */,
 
  // slots: name, argc, parameters, tag, flags
-      21,    1,  343,    2, 0x0a /* Public */,
-      23,    2,  346,    2, 0x0a /* Public */,
-      26,    0,  351,    2, 0x0a /* Public */,
-      27,    0,  352,    2, 0x0a /* Public */,
-      28,    0,  353,    2, 0x0a /* Public */,
-      29,    2,  354,    2, 0x0a /* Public */,
-      30,    1,  359,    2, 0x0a /* Public */,
-      31,    0,  362,    2, 0x0a /* Public */,
-      32,    2,  363,    2, 0x0a /* Public */,
-      37,    2,  368,    2, 0x0a /* Public */,
-      41,    0,  373,    2, 0x08 /* Private */,
-      42,    0,  374,    2, 0x08 /* Private */,
-      43,    0,  375,    2, 0x08 /* Private */,
-      44,    0,  376,    2, 0x08 /* Private */,
-      45,    0,  377,    2, 0x08 /* Private */,
-      46,    0,  378,    2, 0x08 /* Private */,
-      47,    0,  379,    2, 0x08 /* Private */,
-      48,    0,  380,    2, 0x08 /* Private */,
-      49,    0,  381,    2, 0x08 /* Private */,
-      50,    0,  382,    2, 0x08 /* Private */,
-      51,    0,  383,    2, 0x08 /* Private */,
-      52,    0,  384,    2, 0x08 /* Private */,
-      53,    0,  385,    2, 0x08 /* Private */,
-      54,    0,  386,    2, 0x08 /* Private */,
-      55,    0,  387,    2, 0x08 /* Private */,
-      56,    0,  388,    2, 0x08 /* Private */,
-      57,    0,  389,    2, 0x08 /* Private */,
-      58,    0,  390,    2, 0x08 /* Private */,
-      59,    0,  391,    2, 0x08 /* Private */,
-      60,    0,  392,    2, 0x08 /* Private */,
-      61,    0,  393,    2, 0x08 /* Private */,
-      62,    0,  394,    2, 0x08 /* Private */,
-      63,    0,  395,    2, 0x08 /* Private */,
-      64,    0,  396,    2, 0x08 /* Private */,
-      65,    0,  397,    2, 0x08 /* Private */,
-      66,    0,  398,    2, 0x08 /* Private */,
-      67,    0,  399,    2, 0x08 /* Private */,
-      68,    0,  400,    2, 0x08 /* Private */,
-      69,    0,  401,    2, 0x08 /* Private */,
-      70,    1,  402,    2, 0x08 /* Private */,
-      72,    0,  405,    2, 0x08 /* Private */,
-      73,    0,  406,    2, 0x08 /* Private */,
-      74,    0,  407,    2, 0x08 /* Private */,
-      75,    0,  408,    2, 0x08 /* Private */,
-      76,    1,  409,    2, 0x08 /* Private */,
-      78,    0,  412,    2, 0x08 /* Private */,
-      79,    0,  413,    2, 0x08 /* Private */,
-      80,    0,  414,    2, 0x08 /* Private */,
-      81,    1,  415,    2, 0x08 /* Private */,
-      83,    0,  418,    2, 0x08 /* Private */,
-      84,    1,  419,    2, 0x08 /* Private */,
+      28,    1,  405,    2, 0x0a /* Public */,
+      30,    2,  408,    2, 0x0a /* Public */,
+      33,    0,  413,    2, 0x0a /* Public */,
+      34,    0,  414,    2, 0x0a /* Public */,
+      35,    0,  415,    2, 0x0a /* Public */,
+      36,    2,  416,    2, 0x0a /* Public */,
+      37,    1,  421,    2, 0x0a /* Public */,
+      38,    0,  424,    2, 0x0a /* Public */,
+      39,    2,  425,    2, 0x0a /* Public */,
+      44,    2,  430,    2, 0x0a /* Public */,
+      48,    0,  435,    2, 0x0a /* Public */,
+      49,    0,  436,    2, 0x0a /* Public */,
+      50,    0,  437,    2, 0x08 /* Private */,
+      51,    0,  438,    2, 0x08 /* Private */,
+      52,    0,  439,    2, 0x08 /* Private */,
+      53,    0,  440,    2, 0x08 /* Private */,
+      54,    0,  441,    2, 0x08 /* Private */,
+      55,    0,  442,    2, 0x08 /* Private */,
+      56,    0,  443,    2, 0x08 /* Private */,
+      57,    0,  444,    2, 0x08 /* Private */,
+      58,    0,  445,    2, 0x08 /* Private */,
+      59,    0,  446,    2, 0x08 /* Private */,
+      60,    0,  447,    2, 0x08 /* Private */,
+      61,    0,  448,    2, 0x08 /* Private */,
+      62,    0,  449,    2, 0x08 /* Private */,
+      63,    0,  450,    2, 0x08 /* Private */,
+      64,    0,  451,    2, 0x08 /* Private */,
+      65,    0,  452,    2, 0x08 /* Private */,
+      66,    0,  453,    2, 0x08 /* Private */,
+      67,    0,  454,    2, 0x08 /* Private */,
+      68,    0,  455,    2, 0x08 /* Private */,
+      69,    0,  456,    2, 0x08 /* Private */,
+      70,    0,  457,    2, 0x08 /* Private */,
+      71,    0,  458,    2, 0x08 /* Private */,
+      72,    0,  459,    2, 0x08 /* Private */,
+      73,    0,  460,    2, 0x08 /* Private */,
+      74,    0,  461,    2, 0x08 /* Private */,
+      75,    0,  462,    2, 0x08 /* Private */,
+      76,    0,  463,    2, 0x08 /* Private */,
+      77,    0,  464,    2, 0x08 /* Private */,
+      78,    0,  465,    2, 0x08 /* Private */,
+      79,    0,  466,    2, 0x08 /* Private */,
+      80,    0,  467,    2, 0x08 /* Private */,
+      81,    1,  468,    2, 0x08 /* Private */,
+      83,    0,  471,    2, 0x08 /* Private */,
+      84,    0,  472,    2, 0x08 /* Private */,
+      85,    0,  473,    2, 0x08 /* Private */,
+      86,    0,  474,    2, 0x08 /* Private */,
+      87,    0,  475,    2, 0x08 /* Private */,
+      88,    1,  476,    2, 0x08 /* Private */,
+      90,    0,  479,    2, 0x08 /* Private */,
+      91,    0,  480,    2, 0x08 /* Private */,
+      92,    0,  481,    2, 0x08 /* Private */,
+      93,    1,  482,    2, 0x08 /* Private */,
+      95,    0,  485,    2, 0x08 /* Private */,
+      96,    1,  486,    2, 0x08 /* Private */,
+      97,    1,  489,    2, 0x08 /* Private */,
 
  // signals: parameters
+    QMetaType::Void, 0x80000000 | 3,    4,
+    QMetaType::Void, 0x80000000 | 3,    4,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 4,    5,
-    QMetaType::Void, QMetaType::Bool,    7,
-    QMetaType::Void, QMetaType::Bool,    9,
-    QMetaType::Void, 0x80000000 | 11, 0x80000000 | 13,   12,   14,
-    QMetaType::Void, 0x80000000 | 11, 0x80000000 | 13,   12,   14,
-    QMetaType::Void, 0x80000000 | 11, QMetaType::Double, QMetaType::Double,   12,   17,   18,
-    QMetaType::Void, 0x80000000 | 11, 0x80000000 | 13, QMetaType::Bool,   12,   14,   20,
+    QMetaType::Void, 0x80000000 | 8,    9,
+    QMetaType::Void, QMetaType::Bool,   11,
+    QMetaType::Void, QMetaType::Bool,   13,
+    QMetaType::Void, 0x80000000 | 15, 0x80000000 | 17,   16,   18,
+    QMetaType::Void, 0x80000000 | 15, 0x80000000 | 17,   16,   18,
+    QMetaType::Void, 0x80000000 | 15, QMetaType::Double, QMetaType::Double,   16,   21,   22,
+    QMetaType::Void, 0x80000000 | 15, 0x80000000 | 17, QMetaType::Bool,   16,   18,   24,
+    QMetaType::Void, 0x80000000 | 3,   26,
+    QMetaType::Void, 0x80000000 | 3,   26,
 
  // slots: parameters
-    QMetaType::Void, 0x80000000 | 4,   22,
-    QMetaType::Void, QMetaType::Int, QMetaType::Int,   24,   25,
+    QMetaType::Void, 0x80000000 | 8,   29,
+    QMetaType::Void, QMetaType::Int, QMetaType::Int,   31,   32,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Double, QMetaType::Double,   17,   18,
-    QMetaType::Void, QMetaType::Bool,   20,
+    QMetaType::Void, QMetaType::Double, QMetaType::Double,   21,   22,
+    QMetaType::Void, QMetaType::Bool,   24,
     QMetaType::Void,
-    QMetaType::Void, 0x80000000 | 33, 0x80000000 | 35,   34,   36,
-    QMetaType::Void, 0x80000000 | 38, 0x80000000 | 38,   39,   40,
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
-    QMetaType::Void,
+    QMetaType::Void, 0x80000000 | 40, 0x80000000 | 42,   41,   43,
+    QMetaType::Void, 0x80000000 | 45, 0x80000000 | 45,   46,   47,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
@@ -289,18 +327,28 @@ static const uint qt_meta_data_MainWindow[] = {
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   71,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   77,
+    QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void,
     QMetaType::Void, QMetaType::Int,   82,
     QMetaType::Void,
-    QMetaType::Void, QMetaType::Int,   82,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   89,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   94,
+    QMetaType::Void,
+    QMetaType::Void, QMetaType::Int,   94,
+    QMetaType::Void, 0x80000000 | 8,   98,
 
        0        // eod
 };
@@ -311,123 +359,161 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
         MainWindow *_t = static_cast<MainWindow *>(_o);
         Q_UNUSED(_t)
         switch (_id) {
-        case 0: _t->signalClearRdgsInfoDataMap(); break;
-        case 1: _t->signalEraseRdgsInfoDataMap((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
-        case 2: _t->closeSection2dAction((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 3: _t->closeCut3dAction((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 4: _t->signalSetupRdgsSurfPixels((*reinterpret_cast< const std::map<std::string,st_rdgInfoData>(*)>(_a[1])),(*reinterpret_cast< const st_rdgsWorkData(*)>(_a[2]))); break;
-        case 5: _t->signalOutputRdgsSurfSection((*reinterpret_cast< const std::map<std::string,st_rdgInfoData>(*)>(_a[1])),(*reinterpret_cast< const st_rdgsWorkData(*)>(_a[2]))); break;
-        case 6: _t->signalDefDeleteRdgName((*reinterpret_cast< const std::map<std::string,st_rdgInfoData>(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3]))); break;
-        case 7: _t->signalFillRdgsExecute((*reinterpret_cast< const std::map<std::string,st_rdgInfoData>(*)>(_a[1])),(*reinterpret_cast< const st_rdgsWorkData(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3]))); break;
-        case 8: _t->receiveDeleteRdgName((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
-        case 9: _t->receiveProgressData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
-        case 10: _t->receiveRdgsWorkData(); break;
-        case 11: _t->receiveRdgsZData(); break;
-        case 12: _t->slotFixRdgsSurfPixels(); break;
-        case 13: _t->slotFixDeleteRdgName((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2]))); break;
-        case 14: _t->slotFixFillRdgs((*reinterpret_cast< bool(*)>(_a[1]))); break;
-        case 15: _t->slotFixRdgsSurfSection(); break;
-        case 16: _t->slotActivateAccompThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< RdgFileFormat(*)>(_a[2]))); break;
-        case 17: _t->receiveColorsPalette((*reinterpret_cast< QColor(*)>(_a[1])),(*reinterpret_cast< QColor(*)>(_a[2]))); break;
-        case 18: _t->openTrz(); break;
-        case 19: _t->openCsv(); break;
-        case 20: _t->openHdf5(); break;
-        case 21: _t->openKml(); break;
-        case 22: _t->openImageRdg(); break;
-        case 23: _t->defPaletteRdg(); break;
-        case 24: _t->open2dImageRdgs(); break;
-        case 25: _t->defPaletteSurfRdgs(); break;
-        case 26: _t->open3dImageRdgs(); break;
-        case 27: _t->defPaletteTransRdgs(); break;
-        case 28: _t->includeFilterOnRdg(); break;
-        case 29: _t->openRecentFile(); break;
-        case 30: _t->deleteSelectedFile(); break;
-        case 31: _t->deleteAllFiles(); break;
-        case 32: _t->save(); break;
-        case 33: _t->setCloseSection2dAction(); break;
-        case 34: _t->setCloseCut3dAction(); break;
-        case 35: _t->saveBoundPointsLineAction(); break;
-        case 36: _t->loadBoundPointsLineAction(); break;
-        case 37: _t->setInitRdg(); break;
-        case 38: _t->setLogRdg(); break;
-        case 39: _t->setLogRdgMouseSelection(); break;
-        case 40: _t->setLogRdgAutoSelection(); break;
-        case 41: _t->setShowInitRdgSelection(); break;
-        case 42: _t->slotResetRdgSelection(); break;
-        case 43: _t->saveRdgAutoSelectionData(); break;
-        case 44: _t->loadRdgAutoSelectionData(); break;
-        case 45: _t->changeHighLowOnRdgs(); break;
-        case 46: _t->showFullRdgsData(); break;
-        case 47: _t->materialIdChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 48: _t->useSelectionOnRdg(); break;
-        case 49: _t->setupScalingOnRdg(); break;
-        case 50: _t->setupScalingOnRdgsSurf(); break;
-        case 51: _t->setupScalingOnRdgsTrans(); break;
-        case 52: _t->changeRdg((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 53: _t->leftChangeRdg(); break;
-        case 54: _t->rightChangeRdg(); break;
-        case 55: _t->scrollHRdgsLengthBarPressed(); break;
-        case 56: _t->scrollHRdgsLengthBarMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
-        case 57: _t->scrollHRdgsLengthBarReleased(); break;
-        case 58: _t->scrollHRdgsLengthBarChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 0: _t->signalSetupBscanDeepPixels((*reinterpret_cast< const st_bscanInfoData(*)>(_a[1]))); break;
+        case 1: _t->signalSetupFixDataBscanDeepWidgets((*reinterpret_cast< const st_bscanInfoData(*)>(_a[1]))); break;
+        case 2: _t->signalClearBscansInfoDataMap(); break;
+        case 3: _t->signalEraseBscansInfoDataMap((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
+        case 4: _t->closeSection2dAction((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 5: _t->closeCut3dAction((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 6: _t->signalSetupBscansSurfPixels((*reinterpret_cast< const std::map<std::string,st_bscanInfoData>(*)>(_a[1])),(*reinterpret_cast< const st_bscansWorkData(*)>(_a[2]))); break;
+        case 7: _t->signalOutputBscansSurfSection((*reinterpret_cast< const std::map<std::string,st_bscanInfoData>(*)>(_a[1])),(*reinterpret_cast< const st_bscansWorkData(*)>(_a[2]))); break;
+        case 8: _t->signalDefDeleteBscanName((*reinterpret_cast< const std::map<std::string,st_bscanInfoData>(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2])),(*reinterpret_cast< double(*)>(_a[3]))); break;
+        case 9: _t->signalFillBscansExecute((*reinterpret_cast< const std::map<std::string,st_bscanInfoData>(*)>(_a[1])),(*reinterpret_cast< const st_bscansWorkData(*)>(_a[2])),(*reinterpret_cast< bool(*)>(_a[3]))); break;
+        case 10: _t->signalSetupBscanDeepPageData((*reinterpret_cast< const st_bscanInfoData(*)>(_a[1]))); break;
+        case 11: _t->signalFixDataBscanDeepWidgets((*reinterpret_cast< const st_bscanInfoData(*)>(_a[1]))); break;
+        case 12: _t->receiveDeleteBscanName((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
+        case 13: _t->receiveProgressData((*reinterpret_cast< int(*)>(_a[1])),(*reinterpret_cast< int(*)>(_a[2]))); break;
+        case 14: _t->receiveBscansWorkData(); break;
+        case 15: _t->receiveBscansZData(); break;
+        case 16: _t->slotFixBscansSurfPixels(); break;
+        case 17: _t->slotFixDeleteBscanName((*reinterpret_cast< double(*)>(_a[1])),(*reinterpret_cast< double(*)>(_a[2]))); break;
+        case 18: _t->slotFixFillBscans((*reinterpret_cast< bool(*)>(_a[1]))); break;
+        case 19: _t->slotFixBscansSurfSection(); break;
+        case 20: _t->slotActivateAccompThread((*reinterpret_cast< std::vector<std::pair<std::string,std::string> >(*)>(_a[1])),(*reinterpret_cast< BscanFileFormat(*)>(_a[2]))); break;
+        case 21: _t->receiveColorsPalette((*reinterpret_cast< QColor(*)>(_a[1])),(*reinterpret_cast< QColor(*)>(_a[2]))); break;
+        case 22: _t->slotSetupBscanDeepPixels(); break;
+        case 23: _t->slotFixDataBscanDeepWidgets(); break;
+        case 24: _t->openTrz(); break;
+        case 25: _t->openCsv(); break;
+        case 26: _t->openHdf5(); break;
+        case 27: _t->openKml(); break;
+        case 28: _t->openImageBscan(); break;
+        case 29: _t->defPaletteBscan(); break;
+        case 30: _t->defPaletteBscanDeep(); break;
+        case 31: _t->openImageDeepBscan(); break;
+        case 32: _t->open2dImageBscans(); break;
+        case 33: _t->defPaletteSurfBscans(); break;
+        case 34: _t->open3dImageBscans(); break;
+        case 35: _t->defPaletteTransBscans(); break;
+        case 36: _t->includeFilterOnBscan(); break;
+        case 37: _t->openRecentFile(); break;
+        case 38: _t->deleteSelectedFile(); break;
+        case 39: _t->deleteAllFiles(); break;
+        case 40: _t->save(); break;
+        case 41: _t->setCloseSection2dAction(); break;
+        case 42: _t->setCloseCut3dAction(); break;
+        case 43: _t->saveBoundPointsLineAction(); break;
+        case 44: _t->loadBoundPointsLineAction(); break;
+        case 45: _t->setInitBscan(); break;
+        case 46: _t->setLogBscan(); break;
+        case 47: _t->setLogBscanMouseSelection(); break;
+        case 48: _t->setLogBscanAutoSelection(); break;
+        case 49: _t->setShowInitBscanSelection(); break;
+        case 50: _t->slotResetBscanSelection(); break;
+        case 51: _t->saveBscanAutoSelectionData(); break;
+        case 52: _t->loadBscanAutoSelectionData(); break;
+        case 53: _t->changeHighLowOnBscans(); break;
+        case 54: _t->showFullBscansData(); break;
+        case 55: _t->materialIdChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 56: _t->useSelectionOnBscan(); break;
+        case 57: _t->setupScalingOnBscan(); break;
+        case 58: _t->setupScalingOnBscanDeep(); break;
+        case 59: _t->setupScalingOnBscansSurf(); break;
+        case 60: _t->setupScalingOnBscansTrans(); break;
+        case 61: _t->changeBscan((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 62: _t->leftChangeBscan(); break;
+        case 63: _t->rightChangeBscan(); break;
+        case 64: _t->scrollHBscansLengthBarPressed(); break;
+        case 65: _t->scrollHBscansLengthBarMoved((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 66: _t->scrollHBscansLengthBarReleased(); break;
+        case 67: _t->scrollHBscansLengthBarChanged((*reinterpret_cast< int(*)>(_a[1]))); break;
+        case 68: _t->slotSetupBscanDeepPageData((*reinterpret_cast< const std::string(*)>(_a[1]))); break;
         default: ;
         }
     } else if (_c == QMetaObject::IndexOfMethod) {
         int *result = reinterpret_cast<int *>(_a[0]);
         void **func = reinterpret_cast<void **>(_a[1]);
         {
-            typedef void (MainWindow::*_t)();
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalClearRdgsInfoDataMap)) {
+            typedef void (MainWindow::*_t)(const st_bscanInfoData & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalSetupBscanDeepPixels)) {
                 *result = 0;
                 return;
             }
         }
         {
-            typedef void (MainWindow::*_t)(const std::string & );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalEraseRdgsInfoDataMap)) {
+            typedef void (MainWindow::*_t)(const st_bscanInfoData & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalSetupFixDataBscanDeepWidgets)) {
                 *result = 1;
+                return;
+            }
+        }
+        {
+            typedef void (MainWindow::*_t)();
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalClearBscansInfoDataMap)) {
+                *result = 2;
+                return;
+            }
+        }
+        {
+            typedef void (MainWindow::*_t)(const std::string & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalEraseBscansInfoDataMap)) {
+                *result = 3;
                 return;
             }
         }
         {
             typedef void (MainWindow::*_t)(bool );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::closeSection2dAction)) {
-                *result = 2;
+                *result = 4;
                 return;
             }
         }
         {
             typedef void (MainWindow::*_t)(bool );
             if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::closeCut3dAction)) {
-                *result = 3;
-                return;
-            }
-        }
-        {
-            typedef void (MainWindow::*_t)(const std::map<std::string,st_rdgInfoData> & , const st_rdgsWorkData & );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalSetupRdgsSurfPixels)) {
-                *result = 4;
-                return;
-            }
-        }
-        {
-            typedef void (MainWindow::*_t)(const std::map<std::string,st_rdgInfoData> & , const st_rdgsWorkData & );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalOutputRdgsSurfSection)) {
                 *result = 5;
                 return;
             }
         }
         {
-            typedef void (MainWindow::*_t)(const std::map<std::string,st_rdgInfoData> & , double , double );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalDefDeleteRdgName)) {
+            typedef void (MainWindow::*_t)(const std::map<std::string,st_bscanInfoData> & , const st_bscansWorkData & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalSetupBscansSurfPixels)) {
                 *result = 6;
                 return;
             }
         }
         {
-            typedef void (MainWindow::*_t)(const std::map<std::string,st_rdgInfoData> & , const st_rdgsWorkData & , bool );
-            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalFillRdgsExecute)) {
+            typedef void (MainWindow::*_t)(const std::map<std::string,st_bscanInfoData> & , const st_bscansWorkData & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalOutputBscansSurfSection)) {
                 *result = 7;
+                return;
+            }
+        }
+        {
+            typedef void (MainWindow::*_t)(const std::map<std::string,st_bscanInfoData> & , double , double );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalDefDeleteBscanName)) {
+                *result = 8;
+                return;
+            }
+        }
+        {
+            typedef void (MainWindow::*_t)(const std::map<std::string,st_bscanInfoData> & , const st_bscansWorkData & , bool );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalFillBscansExecute)) {
+                *result = 9;
+                return;
+            }
+        }
+        {
+            typedef void (MainWindow::*_t)(const st_bscanInfoData & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalSetupBscanDeepPageData)) {
+                *result = 10;
+                return;
+            }
+        }
+        {
+            typedef void (MainWindow::*_t)(const st_bscanInfoData & );
+            if (*reinterpret_cast<_t *>(func) == static_cast<_t>(&MainWindow::signalFixDataBscanDeepWidgets)) {
+                *result = 11;
                 return;
             }
         }
@@ -459,70 +545,98 @@ int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
     if (_id < 0)
         return _id;
     if (_c == QMetaObject::InvokeMetaMethod) {
-        if (_id < 59)
+        if (_id < 69)
             qt_static_metacall(this, _c, _id, _a);
-        _id -= 59;
+        _id -= 69;
     } else if (_c == QMetaObject::RegisterMethodArgumentMetaType) {
-        if (_id < 59)
+        if (_id < 69)
             *reinterpret_cast<int*>(_a[0]) = -1;
-        _id -= 59;
+        _id -= 69;
     }
     return _id;
 }
 
 // SIGNAL 0
-void MainWindow::signalClearRdgsInfoDataMap()
+void MainWindow::signalSetupBscanDeepPixels(const st_bscanInfoData & _t1)
 {
-    QMetaObject::activate(this, &staticMetaObject, 0, nullptr);
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 0, _a);
 }
 
 // SIGNAL 1
-void MainWindow::signalEraseRdgsInfoDataMap(const std::string & _t1)
+void MainWindow::signalSetupFixDataBscanDeepWidgets(const st_bscanInfoData & _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 1, _a);
 }
 
 // SIGNAL 2
-void MainWindow::closeSection2dAction(bool _t1)
+void MainWindow::signalClearBscansInfoDataMap()
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
-    QMetaObject::activate(this, &staticMetaObject, 2, _a);
+    QMetaObject::activate(this, &staticMetaObject, 2, nullptr);
 }
 
 // SIGNAL 3
-void MainWindow::closeCut3dAction(bool _t1)
+void MainWindow::signalEraseBscansInfoDataMap(const std::string & _t1)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 3, _a);
 }
 
 // SIGNAL 4
-void MainWindow::signalSetupRdgsSurfPixels(const std::map<std::string,st_rdgInfoData> & _t1, const st_rdgsWorkData & _t2)
+void MainWindow::closeSection2dAction(bool _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 4, _a);
 }
 
 // SIGNAL 5
-void MainWindow::signalOutputRdgsSurfSection(const std::map<std::string,st_rdgInfoData> & _t1, const st_rdgsWorkData & _t2)
+void MainWindow::closeCut3dAction(bool _t1)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
     QMetaObject::activate(this, &staticMetaObject, 5, _a);
 }
 
 // SIGNAL 6
-void MainWindow::signalDefDeleteRdgName(const std::map<std::string,st_rdgInfoData> & _t1, double _t2, double _t3)
+void MainWindow::signalSetupBscansSurfPixels(const std::map<std::string,st_bscanInfoData> & _t1, const st_bscansWorkData & _t2)
 {
-    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
     QMetaObject::activate(this, &staticMetaObject, 6, _a);
 }
 
 // SIGNAL 7
-void MainWindow::signalFillRdgsExecute(const std::map<std::string,st_rdgInfoData> & _t1, const st_rdgsWorkData & _t2, bool _t3)
+void MainWindow::signalOutputBscansSurfSection(const std::map<std::string,st_bscanInfoData> & _t1, const st_bscansWorkData & _t2)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)) };
+    QMetaObject::activate(this, &staticMetaObject, 7, _a);
+}
+
+// SIGNAL 8
+void MainWindow::signalDefDeleteBscanName(const std::map<std::string,st_bscanInfoData> & _t1, double _t2, double _t3)
 {
     void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
-    QMetaObject::activate(this, &staticMetaObject, 7, _a);
+    QMetaObject::activate(this, &staticMetaObject, 8, _a);
+}
+
+// SIGNAL 9
+void MainWindow::signalFillBscansExecute(const std::map<std::string,st_bscanInfoData> & _t1, const st_bscansWorkData & _t2, bool _t3)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)), const_cast<void*>(reinterpret_cast<const void*>(&_t2)), const_cast<void*>(reinterpret_cast<const void*>(&_t3)) };
+    QMetaObject::activate(this, &staticMetaObject, 9, _a);
+}
+
+// SIGNAL 10
+void MainWindow::signalSetupBscanDeepPageData(const st_bscanInfoData & _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 10, _a);
+}
+
+// SIGNAL 11
+void MainWindow::signalFixDataBscanDeepWidgets(const st_bscanInfoData & _t1)
+{
+    void *_a[] = { nullptr, const_cast<void*>(reinterpret_cast<const void*>(&_t1)) };
+    QMetaObject::activate(this, &staticMetaObject, 11, _a);
 }
 QT_WARNING_POP
 QT_END_MOC_NAMESPACE

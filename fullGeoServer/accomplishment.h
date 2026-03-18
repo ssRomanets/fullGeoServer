@@ -8,7 +8,7 @@
 #include <QPointer>
 
 #include "accomplishmentThread.h"
-#include <rdgsData.h>
+#include <bscansData.h>
 
 class Accomplishment : public QObject
 {
@@ -18,17 +18,17 @@ public:
     ~Accomplishment();
 
 public:
-    void createRdgsDataTrz(
-        std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,
+    void createBscansDataTrz(
+        std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs,
         std::vector<std::string> fileNameTrzVector, std::vector<std::string> fullFileNameTrzVector
     );
 
-    void createRdgsDataCsv( std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,  std::vector<std::string> fileNameDataCsvVector);
+    void createBscansDataCsv( std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs,  std::vector<std::string> fileNameDataCsvVector);
 
-    void createRdgsDataHdf5(
-        std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs,
+    void createBscansDataHdf5(
+        std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs,
         std::vector<std::string> fullFileNameHdf5Vector,
-        std::vector<std::vector<std::string>> filesRdgNamesHdf5Vector
+        std::vector<std::vector<std::string>> filesBscanNamesHdf5Vector
     );
 
     //открываем бинарный файл trz
@@ -40,10 +40,10 @@ public:
     QPointer<accomplishmentThread>  m_thread;
 
 public slots:
-    void slotEndAccThread( std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs, RdgFileFormat  rdgFileFormat);
+    void slotEndAccThread( std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs, BscanFileFormat  bscanFileFormat);
 
 signals:
-    void signalActivateAccompThread(std::vector<std::pair<std::string, std::string>> rdgsNamesVectorPairs, RdgFileFormat  rdgFileFormat);
+    void signalActivateAccompThread(std::vector<std::pair<std::string, std::string>> bscansNamesVectorPairs, BscanFileFormat  bscanFileFormat);
 
 private:
     //в этой функции парсим бинарный файл trz
